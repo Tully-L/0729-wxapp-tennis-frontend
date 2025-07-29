@@ -342,10 +342,14 @@ app.post('/dev/create-matches', async (req, res) => {
 
       // 为每个赛事创建3场比赛
       for (let j = 0; j < 3; j++) {
+        const statusList = ['报名中', '比赛中', '已结束'];
+        const currentStatus = statusList[j];
+
         const match = {
+          matchName: `${event.name} - ${event.eventType} - ${currentStatus}`,
           eventId: new mongoose.Types.ObjectId(event._id),
           eventType: event.eventType,
-          status: ['报名中', '比赛中', '已结束'][j],
+          status: currentStatus,
           stage: '第一轮',
           venue: event.venue,
           region: event.region,
