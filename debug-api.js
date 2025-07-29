@@ -49,16 +49,50 @@ async function debugAPI() {
     console.log('\n3️⃣ 检查比赛数据（无参数）...');
     const allMatches = await makeRequest('/api/matches');
     console.log(`比赛API返回: ${allMatches.data?.length || 0} 个比赛`);
-    console.log('完整响应:', JSON.stringify(allMatches, null, 2));
 
-    // 4. 检查前端实际请求
-    console.log('\n4️⃣ 检查前端实际请求...');
-    const frontendMatches = await makeRequest('/api/matches?page=1&limit=10&status=报名中');
-    console.log(`前端请求返回: ${frontendMatches.data?.length || 0} 个比赛`);
+    // 4. 测试创建比赛端点
+    console.log('\n4️⃣ 测试创建比赛端点...');
+    const createResponse = await makeRequest('/dev/create-matches', 'POST');
+    console.log('创建比赛响应:', JSON.stringify(createResponse, null, 2));
+
+    // 5. 再次检查比赛数据
+    console.log('\n5️⃣ 创建后再次检查比赛数据...');
+    const newMatches = await makeRequest('/api/matches');
+    console.log(`比赛API返回: ${newMatches.data?.length || 0} 个比赛`);
 
   } catch (error) {
     console.error('❌ 调试失败:', error.message);
   }
+}
+
+function makeRequest(path, method = 'GET') {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'zero729-wxapp-tennis.onrender.com',
+      port: 443,
+      path: path,
+      method: method,
+      headers: { 'Content-Type': 'application/json' }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          resolve(JSON.parse(data));
+        } catch (e) {
+          resolve({ error: 'Invalid JSON', raw: data, status: res.statusCode });
+        }
+      });
+    });
+
+    req.on('error', reject);
+    if (method === 'POST') {
+      req.write('{}');
+    }
+    req.end();
+  });
 }
 
 debugAPI();

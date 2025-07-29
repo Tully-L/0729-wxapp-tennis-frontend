@@ -313,7 +313,7 @@ matchSchema.methods.checkMatchWinner = function() {
   const setsToWin = Math.ceil(this.bestOf / 2); // 3盘制需要赢2盘，5盘制需要赢3盘
   let team1Sets = 0;
   let team2Sets = 0;
-  
+
   this.score.sets.forEach(set => {
     if (set.team1Score > set.team2Score) {
       team1Sets++;
@@ -321,7 +321,7 @@ matchSchema.methods.checkMatchWinner = function() {
       team2Sets++;
     }
   });
-  
+
   // 检查是否有队伍达到获胜条件
   if (team1Sets >= setsToWin) {
     this.score.winner = 'team1';
@@ -334,6 +334,56 @@ matchSchema.methods.checkMatchWinner = function() {
     this.isLive = false;
     this.endTime = new Date();
   }
+};
+
+// 方法：根据时间和数据智能更新状态
+matchSchema.methods.updateStatusBasedOnTime = function() {
+  const now = new Date();
+  const scheduledTime = new Date(this.scheduledTime);
+  const timeDiff = now - scheduledTime;
+
+  // 如果比赛已经手动结束，不再更改状态
+  if (this.status === '已结束' && this.endTime) {
+    return this;
+  }
+
+  // 如果比赛已经开始且正在进行
+  if (this.status === '比赛中' && this.isLive) {
+    return this;
+  }
+
+  // 根据时间判断状态
+  if (timeDiff > 0) {
+    // 比赛时间已过
+    if (this.status === '报名中') {
+      // 如果有足够的选手，自动开始比赛
+      if (this.players.team1.length > 0 && this.players.team2.length > 0) {
+        this.status = '比赛中';
+        this.isLive = true;
+        if (!this.startTime) {
+          this.startTime = scheduledTime;
+        }
+      }
+    }
+
+    // 如果比赛开始超过3小时且没有比分更新，可能已结束
+    if (this.status === '比赛中' && timeDiff > 3 * 60 * 60 * 1000) {
+      const hasRecentScoreUpdate = this.score.sets && this.score.sets.length > 0;
+      if (!hasRecentScoreUpdate && !this.lastScoreUpdate) {
+        // 可以考虑标记为异常结束，但保持比赛中状态等待手动处理
+      }
+    }
+  } else {
+    // 比赛时间未到
+    if (this.status === '比赛中') {
+      // 如果状态错误地设为比赛中，但时间未到，重置为报名中
+      this.status = '报名中';
+      this.isLive = false;
+      this.startTime = null;
+    }
+  }
+
+  return this;
 };
 
 // 方法：获取当前比分摘要

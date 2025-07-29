@@ -86,7 +86,6 @@ Page({
 
     // Load initial data
     this.loadMatches();
-    this.loadLiveMatches();
     this.loadMatchStats();
   },
   

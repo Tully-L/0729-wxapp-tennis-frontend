@@ -1,5 +1,171 @@
 /* event.wxss */
 
+/* 赛事概览样式 */
+.events-overview {
+  background: white;
+  margin: 20rpx 30rpx;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.1);
+}
+
+.overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.overview-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #1a1a1a;
+}
+
+.overview-count {
+  font-size: 24rpx;
+  color: #666;
+  background: #f8f9fa;
+  padding: 8rpx 16rpx;
+  border-radius: 15rpx;
+}
+
+.overview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15rpx;
+}
+
+.overview-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  background: #f8f9fa;
+  border-radius: 15rpx;
+  transition: all 0.3s ease;
+}
+
+.overview-item:active {
+  transform: scale(0.98);
+  background: #f0f0f0;
+}
+
+.overview-info {
+  flex: 1;
+}
+
+.overview-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #1a1a1a;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.overview-type {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.overview-status {
+  padding: 8rpx 16rpx;
+  border-radius: 15rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.status-ongoing {
+  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+  color: #0A4A39;
+}
+
+.status-registration {
+  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+  color: #0A4A39;
+}
+
+.status-upcoming {
+  background: linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%);
+  color: #2e7d32;
+}
+
+.status-completed {
+  background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
+  color: #616161;
+}
+
+.no-events {
+  text-align: center;
+  padding: 60rpx 20rpx;
+}
+
+.no-events-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 页面状态指示器 */
+.page-status {
+  margin: 20rpx 30rpx;
+  padding: 30rpx;
+  border-radius: 15rpx;
+  text-align: center;
+}
+
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20rpx;
+  background: white;
+  padding: 40rpx;
+  border-radius: 15rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #f0f0f0;
+  border-top: 4rpx solid #0A4A39;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.error-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15rpx;
+  background: #fff5f5;
+  padding: 40rpx;
+  border-radius: 15rpx;
+  border: 2rpx solid #ffebee;
+}
+
+.error-icon {
+  font-size: 48rpx;
+}
+
+.error-text {
+  font-size: 28rpx;
+  color: #d32f2f;
+  text-align: center;
+}
+
 /* Tab Content Container */
 .tab-content-container {
   margin-top: 100rpx; /* Account for fixed tab bar */
@@ -223,20 +389,20 @@
 }
 
 .event-details {
-  margin-bottom: 20rpx;
+  margin-bottom: 15rpx;
 }
 
 .event-detail {
   display: flex;
   align-items: center;
-  margin-bottom: 10rpx;
-  font-size: 26rpx;
+  margin-bottom: 6rpx;
+  font-size: 22rpx;
   color: var(--text-secondary);
 }
 
 .detail-icon {
-  font-size: 28rpx;
-  margin-right: 10rpx;
+  font-size: 20rpx;
+  margin-right: 6rpx;
 }
 
 .event-footer {

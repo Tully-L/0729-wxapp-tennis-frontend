@@ -38,6 +38,111 @@ const testEvents = [
     isPublic: true
   },
   {
+    name: '北京网球公开赛',
+    eventType: '女子单打',
+    status: 'registration',
+    venue: '国家网球中心',
+    region: '中国北京',
+    eventDate: new Date('2024-09-20'),
+    registrationDeadline: new Date('2024-09-05'),
+    organizer: {
+      name: '中国网球协会',
+      id: new mongoose.Types.ObjectId()
+    },
+    description: '亚洲地区重要的女子网球赛事，吸引世界各地的顶级女选手参与。',
+    maxParticipants: 64,
+    currentParticipants: 32,
+    registrationFee: 300,
+    participants: [],
+    matches: [],
+    tags: ['WTA', '硬地', '亚洲'],
+    isPublic: true
+  },
+  {
+    name: '上海大师赛',
+    eventType: '男子单打',
+    status: 'upcoming',
+    venue: '旗忠网球中心',
+    region: '中国上海',
+    eventDate: new Date('2024-10-10'),
+    registrationDeadline: new Date('2024-09-25'),
+    organizer: {
+      name: '上海网球协会',
+      id: new mongoose.Types.ObjectId()
+    },
+    description: 'ATP大师赛系列赛事，世界顶级男子网球选手的年度盛会。',
+    maxParticipants: 96,
+    currentParticipants: 48,
+    registrationFee: 800,
+    participants: [],
+    matches: [],
+    tags: ['ATP', '大师赛', '硬地'],
+    isPublic: true
+  },
+  {
+    name: '深圳网球公开赛',
+    eventType: '男子双打',
+    status: 'registration',
+    venue: '深圳湾体育中心',
+    region: '中国深圳',
+    eventDate: new Date('2024-09-15'),
+    registrationDeadline: new Date('2024-08-30'),
+    organizer: {
+      name: '深圳市网球协会',
+      id: new mongoose.Types.ObjectId()
+    },
+    description: '华南地区重要的双打赛事，注重团队配合与战术运用。',
+    maxParticipants: 32,
+    currentParticipants: 20,
+    registrationFee: 400,
+    participants: [],
+    matches: [],
+    tags: ['双打', '硬地', '华南'],
+    isPublic: true
+  },
+  {
+    name: '广州网球锦标赛',
+    eventType: '女子双打',
+    status: 'ongoing',
+    venue: '天河体育中心',
+    region: '中国广州',
+    eventDate: new Date('2024-08-25'),
+    registrationDeadline: new Date('2024-08-10'),
+    organizer: {
+      name: '广州市体育局',
+      id: new mongoose.Types.ObjectId()
+    },
+    description: '华南地区顶级女子双打赛事，展现女选手的精湛技艺。',
+    maxParticipants: 24,
+    currentParticipants: 24,
+    registrationFee: 350,
+    participants: [],
+    matches: [],
+    tags: ['女子', '双打', '锦标赛'],
+    isPublic: true
+  },
+  {
+    name: '成都网球挑战赛',
+    eventType: '混合双打',
+    status: 'registration',
+    venue: '成都市网球中心',
+    region: '中国成都',
+    eventDate: new Date('2024-09-30'),
+    registrationDeadline: new Date('2024-09-15'),
+    organizer: {
+      name: '四川省网球协会',
+      id: new mongoose.Types.ObjectId()
+    },
+    description: '西南地区独特的混合双打赛事，男女搭配展现网球魅力。',
+    maxParticipants: 16,
+    currentParticipants: 12,
+    registrationFee: 250,
+    participants: [],
+    matches: [],
+    tags: ['混双', '挑战赛', '西南'],
+    isPublic: true
+  },
+  {
     name: '法国网球公开赛',
     eventType: '女子单打',
     status: 'registration',
@@ -101,24 +206,87 @@ const testEvents = [
     isPublic: true
   },
   {
-    name: '中国网球公开赛',
-    eventType: '混合双打',
-    status: 'registration',
-    venue: '国家网球中心',
-    region: '中国北京',
-    eventDate: new Date('2024-10-01'),
-    registrationDeadline: new Date('2024-09-15'),
+    name: '杭州网球精英赛',
+    eventType: '男子单打',
+    status: 'completed',
+    venue: '杭州奥体中心',
+    region: '中国杭州',
+    eventDate: new Date('2024-07-20'),
+    registrationDeadline: new Date('2024-07-05'),
     organizer: {
-      name: '中国网球协会',
+      name: '浙江省网球协会',
       id: new mongoose.Types.ObjectId()
     },
-    description: '亚洲地区重要的网球赛事，吸引世界各地选手参与。',
+    description: '江南地区高水平网球赛事，已圆满结束。',
     maxParticipants: 32,
-    currentParticipants: 16,
-    registrationFee: 300,
+    currentParticipants: 32,
+    registrationFee: 200,
     participants: [],
     matches: [],
-    tags: ['ATP', '硬地', '中国'],
+    tags: ['精英赛', '硬地', '江南'],
+    isPublic: true
+  },
+  {
+    name: '青岛海滨网球公开赛',
+    eventType: '女子单打',
+    status: 'registration',
+    venue: '青岛国际网球中心',
+    region: '中国青岛',
+    eventDate: new Date('2024-10-05'),
+    registrationDeadline: new Date('2024-09-20'),
+    organizer: {
+      name: '山东省网球协会',
+      id: new mongoose.Types.ObjectId()
+    },
+    description: '海滨城市举办的女子网球赛事，环境优美，竞争激烈。',
+    maxParticipants: 48,
+    currentParticipants: 24,
+    registrationFee: 280,
+    participants: [],
+    matches: [],
+    tags: ['女子', '海滨', '公开赛'],
+    isPublic: true
+  },
+  {
+    name: '西安古城网球锦标赛',
+    eventType: '混合双打',
+    status: 'upcoming',
+    venue: '西安体育学院',
+    region: '中国西安',
+    eventDate: new Date('2024-10-15'),
+    registrationDeadline: new Date('2024-09-30'),
+    organizer: {
+      name: '陕西省网球协会',
+      id: new mongoose.Types.ObjectId()
+    },
+    description: '古都西安举办的混合双打赛事，传统与现代的完美结合。',
+    maxParticipants: 20,
+    currentParticipants: 14,
+    registrationFee: 320,
+    participants: [],
+    matches: [],
+    tags: ['混双', '古城', '传统'],
+    isPublic: true
+  },
+  {
+    name: '大连滨海网球挑战赛',
+    eventType: '男子双打',
+    status: 'registration',
+    venue: '大连网球公园',
+    region: '中国大连',
+    eventDate: new Date('2024-09-25'),
+    registrationDeadline: new Date('2024-09-10'),
+    organizer: {
+      name: '辽宁省网球协会',
+      id: new mongoose.Types.ObjectId()
+    },
+    description: '东北地区重要的男子双打赛事，技术与配合并重。',
+    maxParticipants: 28,
+    currentParticipants: 18,
+    registrationFee: 360,
+    participants: [],
+    matches: [],
+    tags: ['男双', '滨海', '东北'],
     isPublic: true
   }
 ];

@@ -228,13 +228,21 @@ const getMatches = async (req, res, next) => {
       .populate('organizer.id', 'nickname avatar');
 
     const total = await Match.countDocuments(query);
-    
-    // 为每个比赛添加统计信息
-    const enhancedMatches = matches.map(match => ({
-      ...match.toObject(),
-      scoreSummary: match.getScoreSummary(),
-      matchStats: match.getMatchStats()
-    }));
+
+    // 更新每个比赛的状态（基于时间）并添加统计信息
+    const enhancedMatches = [];
+    for (let match of matches) {
+      // 更新状态
+      match.updateStatusBasedOnTime();
+      await match.save();
+
+      // 添加统计信息
+      enhancedMatches.push({
+        ...match.toObject(),
+        scoreSummary: match.getScoreSummary(),
+        matchStats: match.getMatchStats()
+      });
+    }
 
     res.json({
       success: true,
@@ -295,6 +303,9 @@ const getMatchDetail = async (req, res, next) => {
     if (!match) {
       throw new BusinessError('比赛不存在', 'MATCH_NOT_FOUND');
     }
+
+    // 更新状态（基于时间）
+    match.updateStatusBasedOnTime();
 
     // 增加浏览量
     match.viewCount += 1;
@@ -480,7 +491,7 @@ const startMatch = async (req, res) => {
 
     // 发送WebSocket更新
     if (req.app.locals.socketService) {
-      req.app.locals.socketService.sendMatchStatusUpdate(matchId, 'ongoing');
+      req.app.locals.socketService.sendMatchStatusUpdate(matchId, '比赛中');
     }
 
     res.json({
@@ -524,7 +535,7 @@ const endMatch = async (req, res) => {
 
     // 发送WebSocket更新
     if (req.app.locals.socketService) {
-      req.app.locals.socketService.sendMatchStatusUpdate(matchId, 'completed');
+      req.app.locals.socketService.sendMatchStatusUpdate(matchId, '已结束');
     }
 
     res.json({

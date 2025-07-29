@@ -131,19 +131,28 @@ Page({
   
   // Get match status text
   getMatchStatusText: function(status) {
+    // 后端返回的是中文状态，直接返回
     const statusMap = {
-      'ongoing': '比赛中',
+      '报名中': '报名中',
+      '比赛中': '进行中',
+      '已结束': '已结束',
+      // 兼容英文状态（如果有的话）
+      'ongoing': '进行中',
       'completed': '已结束',
       'upcoming': '即将开始',
       'registration': '报名中'
     };
     return statusMap[status] || status;
   },
-  
+
   // Get match status class
   getMatchStatusClass: function(status) {
     const classMap = {
-      'ongoing': 'status-live',
+      '报名中': 'status-registration',
+      '比赛中': 'status-ongoing',
+      '已结束': 'status-completed',
+      // 兼容英文状态
+      'ongoing': 'status-ongoing',
       'completed': 'status-completed',
       'upcoming': 'status-upcoming',
       'registration': 'status-registration'

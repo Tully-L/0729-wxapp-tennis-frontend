@@ -271,3 +271,81 @@
   justify-content: center;
   border: none;
 }
+
+/* Spectator Section */
+.spectator-section {
+  background-color: var(--card-background);
+  margin-top: 20rpx;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.spectator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 20rpx;
+  border-bottom: 1rpx solid var(--border-color);
+  background-color: #f8f9fa;
+}
+
+.spectator-title {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.btn-spectator {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 16rpx;
+  font-size: 24rpx;
+  border: 1rpx solid var(--border-color);
+  border-radius: 20rpx;
+  background-color: var(--background-color);
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.btn-spectator.active {
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+  border-color: var(--primary-color);
+}
+
+.spectator-icon {
+  font-size: 20rpx;
+  margin-right: 6rpx;
+}
+
+.spectator-text {
+  font-size: 22rpx;
+}
+
+.spectator-list {
+  padding: 12rpx 20rpx;
+  max-height: 200rpx;
+  overflow-y: auto;
+}
+
+.spectator-item {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 0;
+  border-bottom: 1rpx solid rgba(238, 238, 238, 0.5);
+}
+
+.spectator-item:last-child {
+  border-bottom: none;
+}
+
+.spectator-avatar {
+  font-size: 24rpx;
+  margin-right: 12rpx;
+  color: var(--text-tertiary);
+}
+
+.spectator-name {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+}
