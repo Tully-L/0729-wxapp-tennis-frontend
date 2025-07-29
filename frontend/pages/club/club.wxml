@@ -1,0 +1,183 @@
+<!-- club.wxml -->
+<view class="container">
+  <!-- 返回按钮 -->
+  <view class="back-btn" bindtap="goBack">
+    <image class="back-icon" src="../../images/icon/订单.png" mode="aspectFit"/>
+    <text>返回</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-state">
+    <view class="loading-spinner"></view>
+    <view class="loading-text">加载俱乐部信息中...</view>
+  </view>
+
+  <!-- 错误状态 -->
+  <view wx:elif="{{error}}" class="error-state">
+    <image class="error-icon" src="../../images/icon/赛事icon.png" mode="aspectFit"/>
+    <view class="error-text">加载失败</view>
+    <button class="btn-retry" bindtap="loadClubDetail">重试</button>
+  </view>
+
+  <!-- 俱乐部内容 -->
+  <block wx:else>
+    <!-- 俱乐部头部 -->
+    <view class="club-header">
+      <view class="club-header-content">
+        <image class="club-logo" src="../../images/icon/场馆icon.png" mode="aspectFit"/>
+        <view class="club-info">
+          <view class="club-name">{{club.name}}</view>
+          <view class="club-stats">
+            <text>{{club.memberCount}} 名成员</text>
+            <text>{{club.location}}</text>
+          </view>
+        </view>
+        <view class="club-actions">
+          <button 
+            wx:if="{{!isMember}}" 
+            class="btn-join" 
+            bindtap="joinClub"
+          >
+            加入
+          </button>
+          <button 
+            wx:else 
+            class="btn-leave" 
+            bindtap="leaveClub"
+          >
+            退出
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 标签导航 -->
+    <view class="tab-nav">
+      <view 
+        wx:for="{{tabs}}" 
+        wx:key="index" 
+        class="tab-item {{activeTab === index ? 'active' : ''}}"
+        bindtap="switchTab"
+        data-index="{{index}}"
+      >
+        {{item}}
+      </view>
+    </view>
+
+    <!-- 俱乐部信息 -->
+    <view wx:if="{{activeTab === 0}}" class="tab-content">
+      <view class="info-section">
+        <view class="section-title">俱乐部简介</view>
+        <view class="club-description">{{club.description}}</view>
+      </view>
+
+      <view class="info-section">
+        <view class="section-title">基本信息</view>
+        <view class="info-item">
+          <view class="info-label">成立时间</view>
+          <view class="info-value">{{club.foundedDate}}</view>
+        </view>
+        <view class="info-item">
+          <view class="info-label">所在地区</view>
+          <view class="info-value">{{club.location}}</view>
+        </view>
+        <view class="info-item">
+          <view class="info-label">成员数量</view>
+          <view class="info-value">{{club.memberCount}} 人</view>
+        </view>
+      </view>
+
+      <view class="info-section">
+        <view class="section-title">设施介绍</view>
+        <view class="facilities-list">
+          <view 
+            wx:for="{{club.facilities}}" 
+            wx:key="index" 
+            class="facility-item"
+          >
+            {{item}}
+          </view>
+        </view>
+      </view>
+
+      <view class="info-section">
+        <view class="section-title">荣誉成就</view>
+        <view class="achievements-list">
+          <view 
+            wx:for="{{club.achievements}}" 
+            wx:key="index" 
+            class="achievement-item"
+          >
+            {{item}}
+          </view>
+        </view>
+      </view>
+
+      <view class="info-section">
+        <view class="section-title">联系方式</view>
+        <view class="contact-info">
+          <view class="contact-item" bindtap="contactClub">
+            <view class="contact-label">电话</view>
+            <view class="contact-value">{{club.contactInfo.phone}}</view>
+          </view>
+          <view class="contact-item">
+            <view class="contact-label">邮箱</view>
+            <view class="contact-value">{{club.contactInfo.email}}</view>
+          </view>
+          <view class="contact-item">
+            <view class="contact-label">地址</view>
+            <view class="contact-value">{{club.contactInfo.address}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 成员列表 -->
+    <view wx:elif="{{activeTab === 1}}" class="tab-content">
+      <view wx:if="{{membersLoading}}" class="loading-mini">加载成员中...</view>
+      <view wx:elif="{{members.length === 0}}" class="empty-text">暂无成员信息</view>
+      <view wx:else class="members-list">
+        <view 
+          wx:for="{{members}}" 
+          wx:key="id" 
+          class="member-item"
+        >
+          <image class="member-avatar" src="../../images/icon/我的icon.png" mode="aspectFit"/>
+          <view class="member-info">
+            <view class="member-name">{{item.nickname}}</view>
+            <view class="member-details">
+              <text>{{item.level}}</text>
+              <text>{{item.points}} 积分</text>
+            </view>
+            <view class="member-join-date">加入时间：{{item.joinDate}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 积分排行 -->
+    <view wx:elif="{{activeTab === 2}}" class="tab-content">
+      <view wx:if="{{leaderboardLoading}}" class="loading-mini">加载排行榜中...</view>
+      <view wx:elif="{{leaderboard.length === 0}}" class="empty-text">暂无排行榜数据</view>
+      <view wx:else class="leaderboard-list">
+        <view 
+          wx:for="{{leaderboard}}" 
+          wx:key="id" 
+          class="leaderboard-item"
+        >
+          <view class="rank-badge rank-{{item.rank <= 3 ? item.rank : 'other'}}">
+            {{item.rank}}
+          </view>
+          <image class="player-avatar" src="../../images/icon/我的icon.png" mode="aspectFit"/>
+          <view class="player-info">
+            <view class="player-name">{{item.nickname}}</view>
+            <view class="player-stats">
+              <text>{{item.points}} 积分</text>
+              <text>{{item.wins}}/{{item.matches}} 胜场</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

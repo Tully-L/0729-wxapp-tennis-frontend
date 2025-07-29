@@ -1,0 +1,44 @@
+<view class="match-card" bindtap="onTap">
+  <view class="match-header">
+    <view class="match-type">{{match.eventType}}</view>
+    <view class="match-stage">{{match.stage}}</view>
+  </view>
+  
+  <view class="match-content">
+    <view class="match-info">
+      <view class="match-venue">{{match.venue}}</view>
+      <view class="match-duration" wx:if="{{match.duration}}">{{match.duration}}</view>
+    </view>
+    
+    <view class="players-section">
+      <view class="player-item">
+        <text class="player-avatar">👤</text>
+        <view class="player-details">
+          <view class="player-name">{{match.players[0].name}}</view>
+          <view class="player-ranking">排名: {{match.players[0].ranking || 'N/A'}}</view>
+        </view>
+      </view>
+      
+      <view class="vs-divider">VS</view>
+      
+      <view class="player-item">
+        <text class="player-avatar">👤</text>
+        <view class="player-details">
+          <view class="player-name">{{match.players[1].name}}</view>
+          <view class="player-ranking">排名: {{match.players[1].ranking || 'N/A'}}</view>
+        </view>
+      </view>
+    </view>
+    
+    <view class="score-section" wx:if="{{match.sets && match.sets.length > 0}}">
+      <view class="score-item" wx:for="{{match.sets}}" wx:key="setNumber">
+        <text class="set-number">第{{item.setNumber}}盘</text>
+        <text class="set-score">{{item.score.team1}}:{{item.score.team2}}</text>
+      </view>
+    </view>
+  </view>
+  
+  <view class="match-footer" wx:if="{{showEntry && match.status === 'upcoming'}}">
+    <button class="btn-primary" catchtap="onRegister">报名</button>
+  </view>
+</view> 

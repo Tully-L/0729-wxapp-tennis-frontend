@@ -1,0 +1,155 @@
+/**app.wxss**/
+page {
+  --primary-color: #0A4A39;
+  --primary-color-dark: #083A2F;
+  --text-on-primary: #FFFFFF;
+  --background-color: #F8F8F8;
+  --card-background: #FFFFFF;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+  --border-color: #EEEEEE;
+  
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--background-color);
+}
+
+/* Common styles */
+.container {
+  padding: 20rpx;
+  box-sizing: border-box;
+}
+
+.card {
+  background-color: var(--card-background);
+  border-radius: 8rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  margin-bottom: 20rpx;
+  overflow: hidden;
+}
+
+.card-header {
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+  padding: 16rpx 20rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.card-content {
+  padding: 20rpx;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+  border: none;
+  border-radius: 4rpx;
+  padding: 16rpx 32rpx;
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+
+.btn-primary:active {
+  background-color: var(--primary-color-dark);
+}
+
+/* Status labels */
+.status-label {
+  display: inline-block;
+  padding: 6rpx 12rpx;
+  font-size: 24rpx;
+  border-radius: 4rpx;
+  margin-right: 10rpx;
+}
+
+.status-completed {
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+}
+
+.status-ongoing {
+  background-color: #FF9500;
+  color: #FFFFFF;
+}
+
+.status-upcoming {
+  background-color: #007AFF;
+  color: #FFFFFF;
+}
+
+.status-registration {
+  background-color: #34C759;
+  color: #FFFFFF;
+}
+
+/* Flex utilities */
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+/* Text utilities */
+.text-center {
+  text-align: center;
+}
+
+.text-bold {
+  font-weight: 500;
+}
+
+.text-small {
+  font-size: 24rpx;
+}
+
+.text-large {
+  font-size: 32rpx;
+}
+
+/* Margin utilities */
+.mt-10 {
+  margin-top: 10rpx;
+}
+
+.mb-10 {
+  margin-bottom: 10rpx;
+}
+
+.ml-10 {
+  margin-left: 10rpx;
+}
+
+.mr-10 {
+  margin-right: 10rpx;
+}
+
+/* Divider */
+.divider {
+  height: 1rpx;
+  background-color: var(--border-color);
+  margin: 10rpx 0;
+} 

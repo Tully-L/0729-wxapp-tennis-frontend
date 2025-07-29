@@ -1,0 +1,140 @@
+<!-- detail.wxml -->
+<view class="container">
+  <!-- Back Button -->
+  <view class="back-btn" bindtap="goBack">
+    <text class="back-icon">⬅️</text>
+    <text>返回</text>
+  </view>
+  
+  <!-- Loading State -->
+  <view wx:if="{{loading}}" class="loading-state">
+    <view class="loading-spinner"></view>
+    <view class="loading-text">加载比赛详情中...</view>
+  </view>
+  
+  <!-- Error State -->
+  <view wx:elif="{{error}}" class="error-state">
+    <text class="error-icon">❌</text>
+    <view class="error-text">加载比赛数据失败</view>
+    <button class="btn-retry" bindtap="loadMatchDetail">重试</button>
+  </view>
+  
+  <!-- Match Detail -->
+  <block wx:elif="{{match}}">
+    <!-- Match Header -->
+    <view class="match-header">
+      <view class="match-title">
+        <text>{{match.eventType}}</text>
+        <text class="status-label {{match.statusClass}}">{{match.statusText}}</text>
+      </view>
+      <view class="match-subtitle">
+        <text>{{match.stage || 'Match'}}</text>
+        <text wx:if="{{match.venue}}"> • {{match.venue}}</text>
+        <text wx:if="{{match.region}}"> • {{match.region}}</text>
+      </view>
+    </view>
+    
+    <!-- Match Info -->
+    <view class="match-info">
+      <view class="match-format">Format: {{match.format || '3 Sets'}}</view>
+      <view class="match-duration" wx:if="{{match.formattedDuration}}">
+        Duration: {{match.formattedDuration}}
+      </view>
+    </view>
+    
+    <!-- Players & Score -->
+    <view class="match-content">
+      <!-- Player 1 -->
+      <view class="player-section">
+        <view class="player-info">
+          <text class="player-avatar">👤</text>
+          <view class="player-details">
+            <view class="player-name">{{match.players[0].name}}</view>
+                              <view class="player-ranking">排名: {{match.players[0].ranking || 'N/A'}}</view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- Score Section -->
+      <view class="score-section">
+        <view class="vs-text">VS</view>
+        
+        <!-- Set Scores -->
+        <view class="sets-container">
+          <view class="set-header">
+            <view class="set-label" wx:for="{{match.sets}}" wx:key="setNumber">
+              Set {{item.setNumber}}
+            </view>
+          </view>
+          
+          <!-- Player 1 Scores -->
+          <view class="set-row">
+            <block wx:for="{{match.sets}}" wx:key="setNumber">
+              <view class="set-score {{item.score.team1 > item.score.team2 ? 'winner' : ''}}">
+                {{item.score.team1}}
+                <view wx:if="{{item.tiebreak && item.tiebreak.played && item.setNumber === match.sets.length}}" class="tiebreak-score">
+                  ({{item.tiebreak.team1}})
+                </view>
+              </view>
+            </block>
+          </view>
+          
+          <!-- Player 2 Scores -->
+          <view class="set-row">
+            <block wx:for="{{match.sets}}" wx:key="setNumber">
+              <view class="set-score {{item.score.team2 > item.score.team1 ? 'winner' : ''}}">
+                {{item.score.team2}}
+                <view wx:if="{{item.tiebreak && item.tiebreak.played && item.setNumber === match.sets.length}}" class="tiebreak-score">
+                  ({{item.tiebreak.team2}})
+                </view>
+              </view>
+            </block>
+          </view>
+        </view>
+      </view>
+      
+      <!-- Player 2 -->
+      <view class="player-section">
+        <view class="player-info">
+          <text class="player-avatar">👤</text>
+          <view class="player-details">
+            <view class="player-name">{{match.players[1].name}}</view>
+                              <view class="player-ranking">排名: {{match.players[1].ranking || 'N/A'}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- Match Details -->
+    <view class="match-details">
+      <view class="detail-section">
+        <view class="detail-title">比赛详情</view>
+        <view class="detail-item">
+          <text class="detail-label">赛事:</text>
+          <text class="detail-value">{{match.eventName || match.eventType}}</text>
+        </view>
+        <view class="detail-item">
+          <text class="detail-label">主办方:</text>
+          <text class="detail-value">{{match.organizer.name || '网球热'}}</text>
+        </view>
+        <view class="detail-item" wx:if="{{match.venue}}">
+          <text class="detail-label">场地:</text>
+          <text class="detail-value">{{match.venue}}</text>
+        </view>
+        <view class="detail-item" wx:if="{{match.court}}">
+          <text class="detail-label">球场:</text>
+          <text class="detail-value">{{match.court}}</text>
+        </view>
+        <view class="detail-item" wx:if="{{match.region}}">
+          <text class="detail-label">地区:</text>
+          <text class="detail-value">{{match.region}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- Registration Section -->
+    <view class="registration-section" wx:if="{{match.status === 'registration'}}">
+      <button class="btn-register" bindtap="registerMatch">报名参加此比赛</button>
+    </view>
+  </block>
+</view> 

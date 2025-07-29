@@ -1,0 +1,340 @@
+<!-- detail.wxml -->
+<view class="container">
+  <!-- Header -->
+  <view class="header">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-icon">⬅️</text>
+      <text>返回</text>
+    </view>
+    <view class="header-actions">
+      <view class="share-btn" bindtap="shareMatch">
+        <text class="share-icon">📤</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- Loading State -->
+  <view wx:if="{{loading}}" class="loading-state">
+    <view class="loading-spinner"></view>
+    <view class="loading-text">加载比赛详情中...</view>
+  </view>
+  
+  <!-- Error State -->
+  <view wx:elif="{{error}}" class="error-state">
+    <text class="error-icon">❌</text>
+    <view class="error-text">加载比赛数据失败</view>
+    <button class="btn-retry" bindtap="loadMatchDetail">重试</button>
+  </view>
+  
+  <!-- Match Detail -->
+  <block wx:elif="{{match}}">
+    <!-- Match Header -->
+    <view class="match-header">
+      <view class="match-title">
+        <text class="event-type">{{match.eventType}}</text>
+        <text class="status-label {{match.statusClass}}">
+          <text wx:if="{{match.isLive}}" class="live-dot">●</text>
+          {{match.statusText}}
+        </text>
+      </view>
+      <view class="match-subtitle">
+        <text class="stage">{{match.stage || 'Match'}}</text>
+        <text wx:if="{{match.venue}}" class="venue"> • {{match.venue}}</text>
+        <text wx:if="{{match.region}}" class="region"> • {{match.region}}</text>
+      </view>
+      <view class="match-time" wx:if="{{match.scheduledTime}}">
+        <text class="time-icon">🕐</text>
+        <text class="time-text">{{formatMatchTime(match.scheduledTime)}}</text>
+      </view>
+    </view>
+    
+    <!-- Real-time Connection Status -->
+    <view class="connection-status" wx:if="{{match.isLive}}">
+      <text class="connection-icon {{isConnected ? 'connected' : 'disconnected'}}">●</text>
+      <text class="connection-text">{{isConnected ? '实时连接' : '连接中断'}}</text>
+      <text class="last-update" wx:if="{{lastUpdate}}">最后更新: {{lastUpdate}}</text>
+    </view>
+    
+    <!-- Match Info -->
+    <view class="match-info">
+      <view class="match-format">Format: {{match.format || '3 Sets'}}</view>
+      <view class="match-duration" wx:if="{{match.formattedDuration}}">
+        Duration: {{match.formattedDuration}}
+      </view>
+    </view>
+
+    <!-- Subscribe to notifications (Example) -->
+    <button wx:if="{{match.status === 'upcoming'}}" class="btn-subscribe" bindtap="subscribeToMatchNotifications">
+      订阅比赛通知
+    </button>
+    
+    <!-- Enhanced Players & Score Section -->
+    <view class="match-content">
+      <!-- Team 1 -->
+      <view class="team-section {{scoreSummary && scoreSummary.winner === 'team1' ? 'winner' : ''}}">
+        <view class="team-info">
+          <view wx:for="{{match.players.team1}}" wx:key="name" class="player-info">
+            <text class="player-avatar">👤</text>
+            <view class="player-details">
+              <view class="player-name">{{item.name}}</view>
+              <view class="player-ranking">排名: {{item.ranking || 'N/A'}}</view>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- Enhanced Score Section -->
+      <view class="score-section">
+        <view class="vs-text">VS</view>
+        
+        <!-- Set Scores Display -->
+        <view class="sets-container" wx:if="{{scoreSummary && scoreSummary.sets.length > 0}}">
+          <view class="set-header">
+            <view class="set-label" wx:for="{{scoreSummary.sets}}" wx:key="setNumber">
+              Set {{item.setNumber}}
+            </view>
+          </view>
+          
+          <!-- Team 1 Scores -->
+          <view class="set-row team1-row">
+            <block wx:for="{{scoreSummary.sets}}" wx:key="setNumber">
+              <view class="set-score {{item.team1Score > item.team2Score ? 'winner' : ''}}">
+                {{item.team1Score}}
+                <view wx:if="{{item.tiebreak && item.tiebreak.team1Score}}" class="tiebreak-score">
+                  ({{item.tiebreak.team1Score}})
+                </view>
+              </view>
+            </block>
+          </view>
+          
+          <!-- Team 2 Scores -->
+          <view class="set-row team2-row">
+            <block wx:for="{{scoreSummary.sets}}" wx:key="setNumber">
+              <view class="set-score {{item.team2Score > item.team1Score ? 'winner' : ''}}">
+                {{item.team2Score}}
+                <view wx:if="{{item.tiebreak && item.tiebreak.team2Score}}" class="tiebreak-score">
+                  ({{item.tiebreak.team2Score}})
+                </view>
+              </view>
+            </block>
+          </view>
+        </view>
+        
+        <!-- No Score Display -->
+        <view wx:else class="no-score">
+          <text class="no-score-text">比赛尚未开始</text>
+        </view>
+        
+        <!-- Score Update Button -->
+        <view class="score-actions" wx:if="{{canUpdateScore && match.isLive}}">
+          <button class="btn-update-score" bindtap="showScoreUpdateDialog">
+            更新比分
+          </button>
+        </view>
+      </view>
+      
+      <!-- Team 2 -->
+      <view class="team-section {{scoreSummary && scoreSummary.winner === 'team2' ? 'winner' : ''}}">
+        <view class="team-info">
+          <view wx:for="{{match.players.team2}}" wx:key="name" class="player-info">
+            <text class="player-avatar">👤</text>
+            <view class="player-details">
+              <view class="player-name">{{item.name}}</view>
+              <view class="player-ranking">排名: {{item.ranking || 'N/A'}}</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- Match Statistics -->
+    <view class="match-statistics" wx:if="{{matchStats}}">
+      <view class="stats-title">比赛统计</view>
+      <view class="stats-grid">
+        <view class="stat-item">
+          <text class="stat-icon">👥</text>
+          <text class="stat-label">观众</text>
+          <text class="stat-value">{{matchStats.spectatorCount || 0}}</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-icon">👁</text>
+          <text class="stat-label">观看</text>
+          <text class="stat-value">{{matchStats.viewCount || 0}}</text>
+        </view>
+        <view class="stat-item" wx:if="{{matchStats.duration}}">
+          <text class="stat-icon">⏱</text>
+          <text class="stat-label">时长</text>
+          <text class="stat-value">{{matchStats.duration}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- Spectator Section -->
+    <view class="spectator-section" wx:if="{{match.isLive || match.status === 'upcoming'}}">
+      <view class="spectator-header">
+        <text class="spectator-title">观众 ({{spectators.length}})</text>
+        <button class="btn-spectator {{isSpectator ? 'active' : ''}}" bindtap="joinAsSpectator">
+          <text class="spectator-icon">{{isSpectator ? '👁' : '👁‍🗨'}}</text>
+          <text class="spectator-text">{{isSpectator ? '退出观看' : '加入观看'}}</text>
+        </button>
+      </view>
+      
+      <!-- Spectator List -->
+      <view class="spectator-list" wx:if="{{spectators.length > 0}}">
+        <view wx:for="{{spectators}}" wx:key="_id" class="spectator-item">
+          <text class="spectator-avatar">👤</text>
+          <text class="spectator-name">{{item.nickName || item.name}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- Match Details -->
+    <view class="match-details">
+      <view class="detail-section">
+        <view class="detail-title">比赛详情</view>
+        <view class="detail-item">
+          <text class="detail-label">赛事:</text>
+          <text class="detail-value">{{match.eventName || match.eventType}}</text>
+        </view>
+        <view class="detail-item">
+          <text class="detail-label">主办方:</text>
+          <text class="detail-value">{{match.organizer.name || '网球热'}}</text>
+        </view>
+        <view class="detail-item" wx:if="{{match.venue}}">
+          <text class="detail-label">场地:</text>
+          <text class="detail-value">{{match.venue}}</text>
+        </view>
+        <view class="detail-item" wx:if="{{match.court}}">
+          <text class="detail-label">球场:</text>
+          <text class="detail-value">{{match.court}}</text>
+        </view>
+        <view class="detail-item" wx:if="{{match.region}}">
+          <text class="detail-label">地区:</text>
+          <text class="detail-value">{{match.region}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- Real-time Chat Section -->
+    <view class="chat-section" wx:if="{{match.isLive && isConnected}}">
+      <view class="chat-header" bindtap="toggleChat">
+        <text class="chat-title">实时聊天 ({{messages.length}})</text>
+        <text class="chat-toggle">{{showChat ? '▼' : '▶'}}</text>
+      </view>
+      
+      <view class="chat-content {{showChat ? 'show' : ''}}" wx:if="{{showChat}}">
+        <!-- Chat Messages -->
+        <scroll-view class="chat-messages" scroll-y="true" scroll-top="{{999999}}">
+          <view wx:for="{{messages}}" wx:key="id" class="chat-message {{item.isOwn ? 'own' : ''}}">
+            <view class="message-header">
+              <text class="message-avatar">👤</text>
+              <text class="message-user">{{item.userName}}</text>
+              <text class="message-time">{{item.timestamp}}</text>
+            </view>
+            <view class="message-content">{{item.message}}</view>
+          </view>
+          
+          <view wx:if="{{messages.length === 0}}" class="no-messages">
+            <text>暂无聊天消息</text>
+          </view>
+        </scroll-view>
+        
+        <!-- Chat Input -->
+        <view class="chat-input-section">
+          <input 
+            class="chat-input" 
+            placeholder="输入消息..." 
+            value="{{newMessage}}"
+            bindinput="onMessageInput"
+            confirm-type="send"
+            bindconfirm="sendChatMessage"
+          />
+          <button class="btn-send" bindtap="sendChatMessage">发送</button>
+        </view>
+      </view>
+    </view>
+    
+    <!-- Registration Section -->
+    <view class="registration-section" wx:if="{{match.status === 'registration'}}">
+      <button class="btn-register" bindtap="registerMatch">报名参加此比赛</button>
+    </view>
+  </block>
+  
+  <!-- Score Update Dialog -->
+  <view class="score-update-modal {{showScoreUpdate ? 'show' : ''}}" wx:if="{{showScoreUpdate}}">
+    <view class="modal-overlay" bindtap="hideScoreUpdateDialog"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">更新比分 - 第{{currentSet}}盘</text>
+        <view class="modal-close" bindtap="hideScoreUpdateDialog">✕</view>
+      </view>
+      
+      <view class="modal-body">
+        <view class="score-input-section">
+          <view class="team-score-input">
+            <text class="team-label">队伍1</text>
+            <input 
+              class="score-input" 
+              type="number" 
+              value="{{team1Score}}" 
+              bindinput="onTeam1ScoreChange"
+              placeholder="0"
+            />
+          </view>
+          
+          <view class="vs-separator">VS</view>
+          
+          <view class="team-score-input">
+            <text class="team-label">队伍2</text>
+            <input 
+              class="score-input" 
+              type="number" 
+              value="{{team2Score}}" 
+              bindinput="onTeam2ScoreChange"
+              placeholder="0"
+            />
+          </view>
+        </view>
+        
+        <!-- Tiebreak Toggle -->
+        <view class="tiebreak-section">
+          <view class="tiebreak-toggle" bindtap="toggleTiebreak">
+            <text class="toggle-label">抢七局</text>
+            <view class="toggle-switch {{tiebreakMode ? 'active' : ''}}">
+              <view class="toggle-handle"></view>
+            </view>
+          </view>
+          
+          <!-- Tiebreak Scores -->
+          <view class="tiebreak-inputs" wx:if="{{tiebreakMode}}">
+            <view class="tiebreak-input-group">
+              <text class="tiebreak-label">队伍1抢七</text>
+              <input 
+                class="tiebreak-input" 
+                type="number" 
+                value="{{tiebreakTeam1}}" 
+                bindinput="onTiebreakTeam1Change"
+                placeholder="0"
+              />
+            </view>
+            <view class="tiebreak-input-group">
+              <text class="tiebreak-label">队伍2抢七</text>
+              <input 
+                class="tiebreak-input" 
+                type="number" 
+                value="{{tiebreakTeam2}}" 
+                bindinput="onTiebreakTeam2Change"
+                placeholder="0"
+              />
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <view class="modal-footer">
+        <button class="btn-cancel" bindtap="hideScoreUpdateDialog">取消</button>
+        <button class="btn-submit" bindtap="submitScoreUpdate">提交</button>
+      </view>
+    </view>
+  </view>
+</view> 

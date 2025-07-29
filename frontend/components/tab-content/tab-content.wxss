@@ -1,0 +1,293 @@
+/* TabContent Component Styles - 标签内容组件样式 */
+
+.tab-content {
+  position: relative;
+  width: 100%;
+  min-height: 400rpx;
+  background-color: transparent;
+}
+
+/* Content Wrapper */
+.tab-content-wrapper {
+  width: 100%;
+  min-height: inherit;
+}
+
+/* Tab Panels */
+.tab-panel {
+  width: 100%;
+  min-height: inherit;
+  opacity: 1;
+  transform: translateX(0);
+  transition: all 0.3s ease;
+}
+
+.tab-panel.entering {
+  opacity: 0;
+  transform: translateX(100rpx);
+}
+
+.tab-panel.exiting {
+  opacity: 0;
+  transform: translateX(-100rpx);
+}
+
+/* Specific Panel Styles */
+.all-events-panel {
+  /* Styles specific to all events content */
+}
+
+.search-panel {
+  /* Styles specific to search content */
+}
+
+.create-panel {
+  /* Styles specific to create content */
+}
+
+.my-events-panel {
+  /* Styles specific to my events content */
+}
+
+.popular-panel {
+  /* Styles specific to popular events content */
+}
+
+/* Loading State */
+.tab-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 20rpx;
+  min-height: 400rpx;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20rpx;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error State */
+.tab-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 20rpx;
+  min-height: 400rpx;
+}
+
+.error-icon {
+  font-size: 120rpx;
+  margin-bottom: 20rpx;
+}
+
+.error-message {
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: 30rpx;
+  line-height: 1.5;
+}
+
+.retry-btn {
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+  border: none;
+  border-radius: 8rpx;
+  padding: 20rpx 40rpx;
+  font-size: 28rpx;
+  line-height: 1;
+}
+
+.retry-btn:active {
+  background-color: var(--primary-color-dark);
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 20rpx;
+  min-height: 400rpx;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.6;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+/* Transition Overlay */
+.transition-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.transition-spinner {
+  width: 40rpx;
+  height: 40rpx;
+  border: 3rpx solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 480px) {
+  .tab-loading,
+  .tab-error,
+  .empty-state {
+    padding: 60rpx 20rpx;
+    min-height: 300rpx;
+  }
+  
+  .loading-spinner {
+    width: 50rpx;
+    height: 50rpx;
+  }
+  
+  .error-icon,
+  .empty-icon {
+    font-size: 100rpx;
+  }
+  
+  .loading-text,
+  .error-message,
+  .empty-text {
+    font-size: 26rpx;
+  }
+}
+
+/* Tablet Support */
+@media screen and (min-width: 768px) {
+  .tab-content {
+    min-height: 500rpx;
+  }
+  
+  .tab-loading,
+  .tab-error,
+  .empty-state {
+    padding: 100rpx 40rpx;
+    min-height: 500rpx;
+  }
+  
+  .loading-spinner {
+    width: 80rpx;
+    height: 80rpx;
+  }
+  
+  .error-icon,
+  .empty-icon {
+    font-size: 140rpx;
+  }
+  
+  .loading-text,
+  .error-message,
+  .empty-text {
+    font-size: 32rpx;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .transition-overlay {
+    background-color: rgba(28, 28, 30, 0.8);
+  }
+  
+  .loading-text,
+  .error-message {
+    color: #8E8E93;
+  }
+  
+  .empty-text {
+    color: #636366;
+  }
+}
+
+/* Animation Classes for Smooth Transitions */
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.slide-enter {
+  transform: translateX(100%);
+}
+
+.slide-enter-active {
+  transform: translateX(0);
+  transition: transform 0.3s ease;
+}
+
+.slide-exit {
+  transform: translateX(0);
+}
+
+.slide-exit-active {
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+/* Performance Optimizations */
+.tab-panel {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Accessibility */
+.tab-panel.hidden {
+  display: none;
+}
+
+.tab-panel.visible {
+  display: block;
+}

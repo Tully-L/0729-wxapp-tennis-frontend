@@ -1,0 +1,166 @@
+<!-- index.wxml -->
+<view class="container">
+  <!-- Top Tab Navigation -->
+  <view class="tab-nav">
+    <view 
+      wx:for="{{tabs}}" 
+      wx:key="index" 
+      class="tab-item {{activeTab === index ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-index="{{index}}"
+    >
+      {{item}}
+    </view>
+  </view>
+  
+    <!-- Filter Bar -->
+  <view class="filter-bar">
+    <view class="filter-title">比赛</view>
+    <view class="filter-btn" bindtap="toggleFilter">
+      <text>筛选</text>
+      <text class="filter-icon">🔍</text>
+    </view>
+  </view>
+  
+  <!-- Filter Panel (Hidden by default) -->
+  <view class="filter-panel {{showFilter ? 'show' : ''}}">
+    <view class="filter-section">
+      <view class="filter-section-title">赛事类型</view>
+      <view class="filter-options">
+        <view 
+          wx:for="{{eventTypes}}" 
+          wx:key="id" 
+          class="filter-option {{filters.eventType === item.id ? 'active' : ''}}"
+          bindtap="applyFilter"
+          data-field="eventType"
+          data-value="{{item.id}}"
+        >
+          {{item.name}}
+        </view>
+      </view>
+    </view>
+    
+    <view class="filter-section">
+      <view class="filter-section-title">选手搜索</view>
+      <input 
+        class="filter-input" 
+        placeholder="按选手姓名搜索" 
+        value="{{filters.player}}"
+        bindinput="inputPlayer"
+      />
+    </view>
+    
+    <view class="filter-section">
+      <view class="filter-section-title">地区</view>
+      <input 
+        class="filter-input" 
+        placeholder="按地区搜索" 
+        value="{{filters.region}}"
+        bindinput="inputRegion"
+      />
+    </view>
+    
+    <view class="filter-actions">
+      <button class="btn-reset" bindtap="resetFilter">重置</button>
+      <button class="btn-apply" bindtap="toggleFilter">应用</button>
+    </view>
+  </view>
+  
+  <!-- Match List -->
+  <view class="match-list">
+    <block wx:if="{{matches.length > 0}}">
+      <view 
+        wx:for="{{matches}}" 
+        wx:key="id" 
+        class="match-card"
+        bindtap="goToDetail"
+        data-id="{{item._id}}"
+      >
+        <!-- Match Card Header -->
+        <view class="card-header">
+          <text>{{item.eventType}}</text>
+          <text class="status-label {{item.status ? 'status-' + item.status : ''}}">
+            {{item.stage || 'Match'}}
+          </text>
+        </view>
+        
+        <!-- Match Card Content -->
+        <view class="card-content">
+          <!-- Left: Match Data -->
+          <view class="match-data">
+            <!-- Player 1 -->
+            <view class="player-row">
+              <view class="player-info">
+                <text class="player-avatar">👤</text>
+                <view class="player-details">
+                  <view class="player-name">{{item.players[0].name}}</view>
+                  <view class="player-ranking">排名: {{item.players[0].ranking || 'N/A'}}</view>
+                </view>
+              </view>
+              
+              <!-- Score for Player 1 -->
+              <view class="score-container">
+                <block wx:for="{{item.sets}}" wx:for-item="set" wx:key="setNumber">
+                  <view class="set-score {{set.score.team1 > set.score.team2 ? 'winner' : ''}}">
+                    {{set.score.team1}}
+                  </view>
+                </block>
+              </view>
+            </view>
+            
+            <!-- Player 2 -->
+            <view class="player-row">
+              <view class="player-info">
+                <text class="player-avatar">👤</text>
+                <view class="player-details">
+                  <view class="player-name">{{item.players[1].name}}</view>
+                  <view class="player-ranking">排名: {{item.players[1].ranking || 'N/A'}}</view>
+                </view>
+              </view>
+              
+              <!-- Score for Player 2 -->
+              <view class="score-container">
+                <block wx:for="{{item.sets}}" wx:for-item="set" wx:key="setNumber">
+                  <view class="set-score {{set.score.team2 > set.score.team1 ? 'winner' : ''}}">
+                    {{set.score.team2}}
+                  </view>
+                </block>
+              </view>
+            </view>
+          </view>
+          
+          <!-- Right: Entry Section -->
+          <view class="entry-section">
+            <view class="match-info">
+              <view class="match-venue">{{item.venue}}</view>
+              <view class="match-duration">{{item.duration || ''}}</view>
+            </view>
+            
+            <view class="entry-action">
+                          <button class="btn-primary" catchtap="registerMatch" data-id="{{item._id}}">
+              报名
+            </button>
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+    
+    <!-- Empty State -->
+    <view wx:if="{{!loading && matches.length === 0}}" class="empty-state">
+      <text class="empty-icon">📭</text>
+      <view class="empty-text">暂无比赛数据</view>
+    </view>
+    
+    <!-- Loading State -->
+    <view wx:if="{{loading}}" class="loading-state">
+      <view class="loading-spinner"></view>
+      <view class="loading-text">加载中...</view>
+    </view>
+    
+    <!-- Load More -->
+    <view wx:if="{{hasMore && !loading && matches.length > 0}}" class="load-more" bindtap="loadMoreMatches">
+      加载更多
+    </view>
+  </view>
+</view> 

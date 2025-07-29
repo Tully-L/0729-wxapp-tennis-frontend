@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "赛事",
+  "usingComponents": {
+    "fixed-tab-bar": "../../components/fixed-tab-bar/fixed-tab-bar",
+    "tab-content": "../../components/tab-content/tab-content"
+  }
+} 

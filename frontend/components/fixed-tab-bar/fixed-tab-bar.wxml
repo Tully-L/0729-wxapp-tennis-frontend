@@ -1,0 +1,28 @@
+<!-- FixedTabBar Component - 固定标签栏组件 -->
+<view class="fixed-tab-bar {{className}}" style="{{customStyle}}">
+  <view 
+    wx:for="{{tabs}}" 
+    wx:key="id" 
+    class="tab-item {{activeTab === item.id ? 'active' : ''}} {{item.disabled ? 'disabled' : ''}}"
+    bindtap="onTabTap"
+    data-tab-id="{{item.id}}"
+    data-index="{{index}}"
+  >
+    <!-- Tab Icon -->
+    <view class="tab-icon">
+      <text class="icon-text">{{item.icon}}</text>
+      <!-- Badge for notifications -->
+      <view wx:if="{{item.badge && item.badge > 0}}" class="tab-badge">
+        <text class="badge-text">{{item.badge > 99 ? '99+' : item.badge}}</text>
+      </view>
+    </view>
+    
+    <!-- Tab Label -->
+    <view class="tab-label">
+      <text class="label-text">{{item.name}}</text>
+    </view>
+    
+    <!-- Active Indicator -->
+    <view wx:if="{{activeTab === item.id}}" class="active-indicator"></view>
+  </view>
+</view>"

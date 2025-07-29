@@ -1,0 +1,7 @@
+{
+  "desc": "Tennis Heat WeChat Mini Program sitemap configuration",
+  "rules": [{
+    "action": "allow",
+    "page": "*"
+  }]
+} 

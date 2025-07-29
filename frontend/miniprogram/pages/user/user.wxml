@@ -1,0 +1,185 @@
+<!-- user.wxml -->
+<view class="container">
+  <!-- Not Logged In -->
+  <view wx:if="{{!isLoggedIn}}" class="not-logged-in">
+    <text class="login-banner">🎾</text>
+    <view class="login-text">请登录查看您的个人资料</view>
+    <button class="btn-login" bindtap="login">登录 / 注册</button>
+  </view>
+  
+  <!-- Logged In -->
+  <block wx:else>
+    <!-- Loading State -->
+    <view wx:if="{{loading}}" class="loading-state">
+          <view class="loading-spinner"></view>
+    <view class="loading-text">加载个人资料中...</view>
+    </view>
+    
+    <!-- Profile Content -->
+    <block wx:elif="{{profile}}">
+      <!-- Profile Header -->
+      <view class="profile-header">
+        <view class="profile-header-content">
+          <text class="profile-avatar">👤</text>
+          <view class="profile-info">
+            <view class="profile-name">{{profile.nickname || '网球选手'}}</view>
+            <view class="profile-id">ID: {{profile.id || 'N/A'}}</view>
+          </view>
+          <view class="profile-actions">
+            <view class="profile-edit" bindtap="editProfile">
+              <text class="edit-icon">✏️</text>
+            </view>
+            <view class="profile-logout" bindtap="logout">
+              <text class="logout-icon">🚪</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- Stats Summary -->
+      <view class="stats-summary">
+        <view class="stat-item">
+          <view class="stat-value">{{profile.stats.participationCount || 0}}</view>
+          <view class="stat-label">比赛</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value">{{profile.stats.wins || 0}}</view>
+          <view class="stat-label">胜场</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value">{{profile.stats.winRate || '0%'}}</view>
+          <view class="stat-label">胜率</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value">{{profile.stats.etaPoints || 0}}</view>
+          <view class="stat-label">积分</view>
+        </view>
+      </view>
+      
+      <!-- Clubs Section -->
+      <view class="section clubs-section">
+        <view class="section-header">
+          <view class="section-title">我的俱乐部</view>
+        </view>
+        
+        <view class="section-content">
+          <view wx:if="{{clubsLoading}}" class="loading-mini">加载俱乐部中...</view>
+          <view wx:elif="{{clubs.length === 0}}" class="empty-text">您还没有加入任何俱乐部</view>
+          <view wx:else class="clubs-list">
+            <view 
+              wx:for="{{clubs}}" 
+              wx:key="id" 
+              class="club-item"
+              bindtap="goToClubDetail"
+              data-id="{{item.id}}"
+            >
+              <text class="club-logo">🏢</text>
+              <view class="club-info">
+                <view class="club-name">{{item.name}}</view>
+                <view class="club-points">{{item.points || 0}} 积分</view>
+              </view>
+              <text class="arrow-icon">➡️</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- Match History Section -->
+      <view class="section match-section">
+        <view class="section-header">
+          <view class="section-title">比赛记录</view>
+        </view>
+        
+        <!-- Match Filters -->
+        <view class="match-filters">
+          <view class="filter-group">
+            <view 
+              class="filter-item {{matchFilters.type === 'all' ? 'active' : ''}}"
+              bindtap="applyMatchFilter"
+              data-field="type"
+              data-value="all"
+            >全部类型</view>
+            <view 
+              class="filter-item {{matchFilters.type === 'singles' ? 'active' : ''}}"
+              bindtap="applyMatchFilter"
+              data-field="type"
+              data-value="singles"
+            >单打</view>
+            <view 
+              class="filter-item {{matchFilters.type === 'doubles' ? 'active' : ''}}"
+              bindtap="applyMatchFilter"
+              data-field="type"
+              data-value="doubles"
+            >双打</view>
+          </view>
+          
+          <view class="filter-group">
+            <view 
+              class="filter-item {{matchFilters.status === 'all' ? 'active' : ''}}"
+              bindtap="applyMatchFilter"
+              data-field="status"
+              data-value="all"
+            >全部状态</view>
+            <view 
+              class="filter-item {{matchFilters.status === 'completed' ? 'active' : ''}}"
+              bindtap="applyMatchFilter"
+              data-field="status"
+              data-value="completed"
+            >已完成</view>
+            <view 
+              class="filter-item {{matchFilters.status === 'upcoming' ? 'active' : ''}}"
+              bindtap="applyMatchFilter"
+              data-field="status"
+              data-value="upcoming"
+            >即将开始</view>
+          </view>
+        </view>
+        
+        <!-- Match List -->
+        <view class="section-content">
+          <view wx:if="{{matchesLoading && matches.length === 0}}" class="loading-mini">加载比赛中...</view>
+          <view wx:elif="{{matches.length === 0}}" class="empty-text">暂无比赛记录</view>
+          <view wx:else class="match-list">
+            <view 
+              wx:for="{{matches}}" 
+              wx:key="id" 
+              class="match-item"
+              bindtap="goToMatchDetail"
+              data-id="{{item._id}}"
+            >
+              <view class="match-item-header">
+                <text>{{item.eventType}}</text>
+                <text class="status-label {{item.status ? 'status-' + item.status : ''}}">
+                  {{item.stage || 'Match'}}
+                </text>
+              </view>
+              
+              <view class="match-item-content">
+                <view class="match-players">
+                  <view class="match-player">{{item.players[0].name}}</view>
+                  <view class="match-vs">VS</view>
+                  <view class="match-player">{{item.players[1].name}}</view>
+                </view>
+                
+                <view class="match-info">
+                  <view class="match-date">{{item.date || 'N/A'}}</view>
+                  <view class="match-venue">{{item.venue || 'N/A'}}</view>
+                </view>
+              </view>
+            </view>
+          </view>
+          
+          <!-- Load More -->
+          <view wx:if="{{hasMoreMatches && !matchesLoading && matches.length > 0}}" class="load-more" bindtap="loadMoreMatches">
+            加载更多
+          </view>
+          
+          <!-- Loading More -->
+          <view wx:if="{{matchesLoading && matches.length > 0}}" class="loading-mini">
+            加载更多中...
+          </view>
+        </view>
+      </view>
+    </block>
+  </block>
+</view> 

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(copy:*)",
+      "Bash(cp:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm start)",
+      "Bash(curl:*)",
+      "Bash(powershell:*)",
+      "Bash(node:*)",
+      "Bash(del \"D:\\0711-tennis-wxapp\\test-api.js\")",
+      "Bash(rm:*)"
+    ],
+    "deny": []
+  }
+}

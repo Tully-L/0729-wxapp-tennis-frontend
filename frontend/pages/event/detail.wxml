@@ -1,0 +1,144 @@
+<!-- event detail.wxml -->
+<view class="container">
+  <!-- 返回按钮 -->
+  <view class="back-btn" bindtap="goBack">
+    <image class="back-icon" src="../../images/icon/订单.png" mode="aspectFit"/>
+    <text>返回</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-state">
+    <view class="loading-spinner"></view>
+    <view class="loading-text">加载赛事信息中...</view>
+  </view>
+
+  <!-- 错误状态 -->
+  <view wx:elif="{{error}}" class="error-state">
+    <image class="error-icon" src="../../images/icon/赛事icon.png" mode="aspectFit"/>
+    <view class="error-text">加载失败</view>
+    <button class="btn-retry" bindtap="loadEventDetail">重试</button>
+  </view>
+
+  <!-- 赛事内容 -->
+  <block wx:else>
+    <!-- 赛事头部 -->
+    <view class="event-header">
+      <view class="event-title">{{event.name}}</view>
+      <view class="event-subtitle">{{event.eventType}} · {{event.venue}}</view>
+      <view class="event-status">
+        <text class="status-label status-{{event.status}}">
+          {{event.status === 'registration' ? '报名中' : event.status === 'upcoming' ? '即将开始' : '已结束'}}
+        </text>
+        <text class="registration-count">{{registrationCount}} 人已报名</text>
+      </view>
+    </view>
+
+    <!-- 赛事信息 -->
+    <view class="event-info">
+      <view class="info-item">
+        <view class="info-label">比赛时间</view>
+        <view class="info-value">{{event.eventDate}}</view>
+      </view>
+      <view class="info-item">
+        <view class="info-label">报名截止</view>
+        <view class="info-value">{{event.registrationDeadline}}</view>
+      </view>
+      <view class="info-item">
+        <view class="info-label">比赛地点</view>
+        <view class="info-value">{{event.venue}} - {{event.court}}</view>
+      </view>
+      <view class="info-item">
+        <view class="info-label">所在地区</view>
+        <view class="info-value">{{event.region}}</view>
+      </view>
+      <view class="info-item">
+        <view class="info-label">报名费用</view>
+        <view class="info-value">{{event.registrationFee}}</view>
+      </view>
+      <view class="info-item">
+        <view class="info-label">参赛人数</view>
+        <view class="info-value">最多 {{event.maxParticipants}} 人</view>
+      </view>
+    </view>
+
+    <!-- 赛事描述 -->
+    <view class="event-section">
+      <view class="section-title">赛事介绍</view>
+      <view class="section-content">
+        <text class="event-description">{{event.description}}</text>
+      </view>
+    </view>
+
+    <!-- 参赛规则 -->
+    <view class="event-section">
+      <view class="section-title">参赛规则</view>
+      <view class="section-content">
+        <view class="rules-list">
+          <view 
+            wx:for="{{event.rules}}" 
+            wx:key="index" 
+            class="rule-item"
+          >
+            <text class="rule-number">{{index + 1}}.</text>
+            <text class="rule-text">{{item}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 奖项设置 -->
+    <view class="event-section">
+      <view class="section-title">奖项设置</view>
+      <view class="section-content">
+        <view class="prizes-list">
+          <view 
+            wx:for="{{event.prizes}}" 
+            wx:key="index" 
+            class="prize-item"
+          >
+            {{item}}
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 主办方信息 -->
+    <view class="event-section">
+      <view class="section-title">主办方</view>
+      <view class="section-content">
+        <view class="organizer-info">
+          <view class="organizer-name">{{event.organizer.name}}</view>
+          <view class="organizer-contact">
+            <text bindtap="contactOrganizer">联系电话：{{event.organizer.contact}}</text>
+          </view>
+          <view class="organizer-email">邮箱：{{event.organizer.email}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 报名按钮 -->
+    <view class="registration-section">
+      <button 
+        wx:if="{{!isRegistered && event.status === 'registration'}}"
+        class="btn-register" 
+        bindtap="registerEvent"
+      >
+        立即报名
+      </button>
+      <button 
+        wx:elif="{{isRegistered}}"
+        class="btn-cancel-registration" 
+        bindtap="cancelRegistration"
+      >
+        取消报名
+      </button>
+      <button 
+        wx:else
+        class="btn-disabled"
+        disabled
+      >
+        {{event.status === 'upcoming' ? '报名已截止' : '赛事已结束'}}
+      </button>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,264 @@
+/* detail.wxss */
+
+/* Container */
+.container {
+  padding: 20rpx;
+}
+
+/* Back Button */
+.back-btn {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.back-icon {
+  font-size: 32rpx;
+  margin-right: 8rpx;
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16rpx;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: var(--text-tertiary);
+}
+
+/* Error State */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+}
+
+.error-icon {
+  font-size: 100rpx;
+  margin-bottom: 20rpx;
+}
+
+.error-text {
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  margin-bottom: 30rpx;
+}
+
+.btn-retry {
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+  font-size: 28rpx;
+  padding: 16rpx 40rpx;
+  border-radius: 4rpx;
+}
+
+/* Match Header */
+.match-header {
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+  padding: 30rpx 20rpx;
+  border-radius: 8rpx 8rpx 0 0;
+  margin-bottom: 0;
+}
+
+.match-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 32rpx;
+  font-weight: 500;
+  margin-bottom: 10rpx;
+}
+
+.status-label {
+  font-size: 24rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 4rpx;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.match-subtitle {
+  font-size: 26rpx;
+  opacity: 0.8;
+}
+
+/* Match Info */
+.match-info {
+  display: flex;
+  justify-content: space-between;
+  padding: 20rpx;
+  background-color: var(--card-background);
+  border-bottom: 1rpx solid var(--border-color);
+  font-size: 26rpx;
+  color: var(--text-secondary);
+}
+
+/* Match Content */
+.match-content {
+  background-color: var(--card-background);
+  padding: 30rpx 20rpx;
+}
+
+/* Player Section */
+.player-section {
+  margin-bottom: 30rpx;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+}
+
+.player-avatar {
+  font-size: 80rpx;
+  margin-right: 20rpx;
+}
+
+.player-details {
+  flex: 1;
+}
+
+.player-name {
+  font-size: 32rpx;
+  font-weight: 500;
+  margin-bottom: 6rpx;
+}
+
+.player-ranking {
+  font-size: 26rpx;
+  color: var(--text-tertiary);
+}
+
+/* Score Section */
+.score-section {
+  margin: 40rpx 0;
+}
+
+.vs-text {
+  text-align: center;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 20rpx;
+}
+
+.sets-container {
+  border: 1rpx solid var(--border-color);
+  border-radius: 4rpx;
+  overflow: hidden;
+}
+
+.set-header {
+  display: flex;
+  background-color: #f5f5f5;
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.set-label {
+  flex: 1;
+  text-align: center;
+  padding: 12rpx 0;
+  font-size: 24rpx;
+  color: var(--text-secondary);
+}
+
+.set-row {
+  display: flex;
+}
+
+.set-score {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  font-size: 28rpx;
+  position: relative;
+  border-right: 1rpx solid var(--border-color);
+}
+
+.set-score:last-child {
+  border-right: none;
+}
+
+.set-score.winner {
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+}
+
+.tiebreak-score {
+  font-size: 22rpx;
+  margin-top: 4rpx;
+}
+
+/* Match Details */
+.match-details {
+  background-color: var(--card-background);
+  margin-top: 20rpx;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.detail-section {
+  padding: 20rpx;
+}
+
+.detail-title {
+  font-size: 30rpx;
+  font-weight: 500;
+  margin-bottom: 20rpx;
+}
+
+.detail-item {
+  display: flex;
+  margin-bottom: 16rpx;
+}
+
+.detail-label {
+  width: 150rpx;
+  font-size: 26rpx;
+  color: var(--text-secondary);
+}
+
+.detail-value {
+  flex: 1;
+  font-size: 26rpx;
+}
+
+/* Registration Section */
+.registration-section {
+  margin-top: 40rpx;
+  padding: 0 20rpx;
+}
+
+.btn-register {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+  font-size: 30rpx;
+  border-radius: 4rpx;
+  text-align: center;
+}

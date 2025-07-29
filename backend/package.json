@@ -1,0 +1,47 @@
+{
+  "name": "tennis-heat-backend",
+  "version": "1.0.0",
+  "description": "网球热微信小程序的后端服务，提供赛事管理、用户认证、实时比分、推送通知和支付等功能。",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "dev:enhanced": "node scripts/start-dev.js",
+    "dev:smart": "node scripts/start-with-fallback.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:health": "curl http://localhost:3000/health",
+    "test:endpoints": "curl http://localhost:3000/test && curl http://localhost:3000/dev/indexes",
+    "diagnose": "node scripts/diagnose-mongodb.js",
+    "fix-dns": "node scripts/fix-dns.js",
+    "lint": "echo \"Linting not configured yet\"",
+    "build": "echo \"Build process not needed for Node.js\"",
+    "clean": "echo \"Cleaning temporary files...\" && rm -rf logs/*.log || echo \"No logs to clean\""
+  },
+  "keywords": [
+    "tennis",
+    "wechat",
+    "miniprogram",
+    "api"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.10.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "iconv-lite": "^0.6.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.0",
+    "morgan": "^1.10.0",
+    "socket.io": "^4.8.1",
+    "uuid": "^11.1.0",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

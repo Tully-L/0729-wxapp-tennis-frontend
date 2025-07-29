@@ -1,0 +1,154 @@
+/* login.wxss */
+.container {
+  padding: 40rpx;
+  min-height: 100vh;
+  background: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 80rpx;
+}
+
+.logo {
+  font-size: 120rpx;
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+.title {
+  font-size: 48rpx;
+  color: #0A4A39;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  color: #666666;
+  display: block;
+}
+
+.login-content {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 60rpx 40rpx;
+  margin-bottom: 40rpx;
+}
+
+.btn-wx-login {
+  width: 100%;
+  height: 88rpx;
+  background: #0A4A39;
+  color: #FFFFFF;
+  border-radius: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40rpx;
+  border: none;
+}
+
+.btn-icon {
+  font-size: 32rpx;
+  margin-right: 10rpx;
+}
+
+.btn-text {
+  font-size: 32rpx;
+  font-weight: 500;
+}
+
+.divider {
+  text-align: center;
+  margin: 40rpx 0;
+  position: relative;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1rpx;
+  background: #E5E5E5;
+}
+
+.divider-text {
+  background: #FFFFFF;
+  padding: 0 20rpx;
+  color: #999999;
+  font-size: 28rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.phone-login {
+  margin-top: 40rpx;
+}
+
+.input-group {
+  margin-bottom: 30rpx;
+}
+
+.input-phone,
+.input-code {
+  width: 100%;
+  height: 88rpx;
+  border: 2rpx solid #E5E5E5;
+  border-radius: 44rpx;
+  padding: 0 30rpx;
+  font-size: 32rpx;
+  box-sizing: border-box;
+}
+
+.code-group {
+  display: flex;
+  gap: 20rpx;
+}
+
+.input-code {
+  flex: 1;
+}
+
+.btn-code {
+  width: 200rpx;
+  height: 88rpx;
+  background: #0A4A39;
+  color: #FFFFFF;
+  border-radius: 44rpx;
+  font-size: 28rpx;
+  border: none;
+}
+
+.btn-code.disabled {
+  background: #CCCCCC;
+  color: #999999;
+}
+
+.btn-login {
+  width: 100%;
+  height: 88rpx;
+  background: #0A4A39;
+  color: #FFFFFF;
+  border-radius: 44rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  border: none;
+  margin-top: 40rpx;
+}
+
+.login-footer {
+  text-align: center;
+}
+
+.footer-text {
+  font-size: 24rpx;
+  color: #999999;
+  line-height: 1.5;
+} 

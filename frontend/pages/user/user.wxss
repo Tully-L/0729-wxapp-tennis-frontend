@@ -1,0 +1,359 @@
+/* user.wxss */
+
+/* Not Logged In */
+.not-logged-in {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx 40rpx;
+}
+
+.login-banner {
+  width: 120rpx;
+  height: 120rpx;
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.login-text {
+  font-size: 32rpx;
+  color: var(--text-secondary);
+  margin-bottom: 40rpx;
+  text-align: center;
+}
+
+.btn-login {
+  width: 80%;
+  height: 88rpx;
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+  font-size: 30rpx;
+  border-radius: 4rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16rpx;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: var(--text-tertiary);
+}
+
+.loading-mini {
+  text-align: center;
+  padding: 20rpx 0;
+  font-size: 26rpx;
+  color: var(--text-tertiary);
+}
+
+/* Profile Header */
+.profile-header {
+  height: 300rpx;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.profile-header:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6));
+}
+
+.profile-header-content {
+  position: absolute;
+  bottom: 30rpx;
+  left: 30rpx;
+  right: 30rpx;
+  display: flex;
+  align-items: flex-end;
+}
+
+.profile-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  margin-right: 20rpx;
+  border-radius: 50%;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: 500;
+  margin-bottom: 6rpx;
+}
+
+.profile-id {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 24rpx;
+}
+
+.profile-edit {
+  width: 60rpx;
+  height: 60rpx;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-icon {
+  width: 24rpx;
+  height: 24rpx;
+}
+
+.profile-actions {
+  display: flex;
+  align-items: center;
+}
+
+.profile-logout {
+  width: 60rpx;
+  height: 60rpx;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 16rpx;
+}
+
+.logout-icon {
+  width: 24rpx;
+  height: 24rpx;
+}
+
+/* Stats Summary */
+.stats-summary {
+  display: flex;
+  background-color: var(--card-background);
+  padding: 30rpx 0;
+  margin-bottom: 20rpx;
+}
+
+.stat-item {
+  flex: 1;
+  text-align: center;
+  border-right: 1rpx solid var(--border-color);
+}
+
+.stat-item:last-child {
+  border-right: none;
+}
+
+.stat-value {
+  font-size: 36rpx;
+  font-weight: 500;
+  color: var(--primary-color);
+  margin-bottom: 6rpx;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+}
+
+/* Section Styles */
+.section {
+  background-color: var(--card-background);
+  margin-bottom: 20rpx;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.section-header {
+  padding: 20rpx;
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 500;
+}
+
+.section-content {
+  padding: 20rpx;
+}
+
+.empty-text {
+  text-align: center;
+  padding: 40rpx 0;
+  color: var(--text-tertiary);
+  font-size: 28rpx;
+}
+
+/* Clubs List */
+.clubs-list {
+  margin: 0 -20rpx;
+}
+
+.club-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.club-item:last-child {
+  border-bottom: none;
+}
+
+.club-logo {
+  width: 48rpx;
+  height: 48rpx;
+  margin-right: 20rpx;
+}
+
+.club-info {
+  flex: 1;
+}
+
+.club-name {
+  font-size: 28rpx;
+  font-weight: 500;
+  margin-bottom: 6rpx;
+}
+
+.club-points {
+  font-size: 24rpx;
+  color: var(--primary-color);
+}
+
+.arrow-icon {
+  width: 20rpx;
+  height: 20rpx;
+}
+
+/* Match Filters */
+.match-filters {
+  padding: 20rpx;
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.filter-group {
+  display: flex;
+  margin-bottom: 16rpx;
+}
+
+.filter-group:last-child {
+  margin-bottom: 0;
+}
+
+.filter-item {
+  padding: 10rpx 20rpx;
+  font-size: 24rpx;
+  border: 1rpx solid var(--border-color);
+  border-radius: 4rpx;
+  margin-right: 16rpx;
+}
+
+.filter-item.active {
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+  border-color: var(--primary-color);
+}
+
+/* Match List */
+.match-item {
+  background-color: #fff;
+  border-radius: 8rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.match-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+  padding: 16rpx 20rpx;
+  font-size: 26rpx;
+}
+
+.status-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+  background-color: rgba(255, 255, 255, 0.2);
+  line-height: 1;
+}
+
+.match-item-content {
+  padding: 20rpx;
+}
+
+.match-players {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.match-player {
+  flex: 1;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.match-vs {
+  padding: 0 20rpx;
+  font-size: 24rpx;
+  color: var(--text-tertiary);
+}
+
+.match-info {
+  display: flex;
+  font-size: 24rpx;
+  color: var(--text-tertiary);
+}
+
+.match-date {
+  margin-right: 20rpx;
+}
+
+/* Load More */
+.load-more {
+  text-align: center;
+  padding: 20rpx 0;
+  font-size: 26rpx;
+  color: var(--text-secondary);
+} 

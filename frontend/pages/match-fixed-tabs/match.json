@@ -1,0 +1,1 @@
+{\n  \"navigationBarTitleText\": \"比赛\",\n  \"usingComponents\": {\n    \"fixed-tab-bar\": \"../../components/fixed-tab-bar/fixed-tab-bar\",\n    \"tab-content\": \"../../components/tab-content/tab-content\"\n  },\n  \"enablePullDownRefresh\": true,\n  \"backgroundTextStyle\": \"dark\",\n  \"backgroundColor\": \"#f8f8f8\"\n}"

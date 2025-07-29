@@ -1,0 +1,279 @@
+/* event detail.wxss */
+.container {
+  padding: 20rpx;
+  background-color: var(--background-color);
+  min-height: 100vh;
+}
+
+/* 返回按钮 */
+.back-btn {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+  font-size: 28rpx;
+  color: var(--text-secondary);
+}
+
+.back-icon {
+  width: 24rpx;
+  height: 24rpx;
+  margin-right: 8rpx;
+}
+
+/* 加载和错误状态 */
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16rpx;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text,
+.error-text {
+  font-size: 28rpx;
+  color: var(--text-tertiary);
+}
+
+.error-icon {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.btn-retry {
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+  font-size: 28rpx;
+  padding: 16rpx 40rpx;
+  border-radius: 8rpx;
+  border: none;
+  margin-top: 20rpx;
+}
+
+/* 赛事头部 */
+.event-header {
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+  padding: 40rpx 30rpx;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.event-title {
+  font-size: 36rpx;
+  font-weight: 500;
+  margin-bottom: 12rpx;
+}
+
+.event-subtitle {
+  font-size: 28rpx;
+  opacity: 0.9;
+  margin-bottom: 20rpx;
+}
+
+.event-status {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.status-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rpx 16rpx;
+  border-radius: 4rpx;
+  font-size: 24rpx;
+  background-color: rgba(255, 255, 255, 0.2);
+  line-height: 1;
+}
+
+.registration-count {
+  font-size: 24rpx;
+  opacity: 0.8;
+}
+
+/* 赛事信息 */
+.event-info {
+  background-color: var(--card-background);
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  width: 160rpx;
+}
+
+.info-value {
+  flex: 1;
+  font-size: 28rpx;
+  color: var(--text-primary);
+  text-align: right;
+}
+
+/* 赛事区块 */
+.event-section {
+  background-color: var(--card-background);
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 20rpx;
+  padding-bottom: 12rpx;
+  border-bottom: 2rpx solid var(--primary-color);
+}
+
+.section-content {
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
+/* 赛事描述 */
+.event-description {
+  color: var(--text-secondary);
+}
+
+/* 规则列表 */
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+}
+
+.rule-number {
+  color: var(--primary-color);
+  font-weight: 500;
+  margin-right: 12rpx;
+  min-width: 30rpx;
+}
+
+.rule-text {
+  flex: 1;
+  color: var(--text-secondary);
+}
+
+/* 奖项列表 */
+.prizes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.prize-item {
+  background-color: var(--background-color);
+  padding: 16rpx 20rpx;
+  border-radius: 8rpx;
+  color: var(--text-secondary);
+  border-left: 4rpx solid var(--primary-color);
+}
+
+/* 主办方信息 */
+.organizer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.organizer-name {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.organizer-contact {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.organizer-email {
+  color: var(--text-secondary);
+}
+
+/* 报名区域 */
+.registration-section {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--card-background);
+  padding: 20rpx;
+  border-top: 1rpx solid var(--border-color);
+}
+
+.btn-register,
+.btn-cancel-registration,
+.btn-disabled {
+  width: 100%;
+  height: 88rpx;
+  border-radius: 8rpx;
+  font-size: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+.btn-register {
+  background-color: var(--primary-color);
+  color: var(--text-on-primary);
+}
+
+.btn-cancel-registration {
+  background-color: #FF6B6B;
+  color: #FFFFFF;
+}
+
+.btn-disabled {
+  background-color: #CCCCCC;
+  color: #999999;
+}
+
+/* 为底部按钮留出空间 */
+.container {
+  padding-bottom: 120rpx;
+}

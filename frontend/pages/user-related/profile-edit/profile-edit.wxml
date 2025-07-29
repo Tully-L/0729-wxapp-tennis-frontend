@@ -1,0 +1,84 @@
+<!-- profile-edit.wxml -->
+<view class="container">
+  <view class="header">
+    <view class="title">编辑资料</view>
+  </view>
+
+  <view class="form-content">
+    <!-- 头像选择 -->
+    <view class="form-item">
+      <view class="form-label">头像</view>
+      <view class="avatar-section" bindtap="chooseAvatar">
+        <image 
+          class="avatar-preview" 
+          src="{{formData.avatar || '../../../images/icon/我的icon.png'}}" 
+          mode="aspectFill"
+        />
+        <view class="avatar-tip">点击更换头像</view>
+      </view>
+    </view>
+
+    <!-- 昵称 -->
+    <view class="form-item">
+      <view class="form-label">昵称 *</view>
+      <input 
+        class="form-input" 
+        placeholder="请输入昵称" 
+        value="{{formData.nickname}}"
+        bindinput="inputNickname"
+        maxlength="20"
+      />
+    </view>
+
+    <!-- 手机号 -->
+    <view class="form-item">
+      <view class="form-label">手机号</view>
+      <input 
+        class="form-input" 
+        placeholder="请输入手机号" 
+        value="{{formData.phone}}"
+        bindinput="inputPhone"
+        type="number"
+        maxlength="11"
+      />
+    </view>
+
+    <!-- 地区 -->
+    <view class="form-item">
+      <view class="form-label">地区</view>
+      <input 
+        class="form-input" 
+        placeholder="请输入所在地区" 
+        value="{{formData.region}}"
+        bindinput="inputRegion"
+        maxlength="50"
+      />
+    </view>
+
+    <!-- 个人简介 -->
+    <view class="form-item">
+      <view class="form-label">个人简介</view>
+      <textarea 
+        class="form-textarea" 
+        placeholder="介绍一下自己的网球经历和水平..." 
+        value="{{formData.bio}}"
+        bindinput="inputBio"
+        maxlength="200"
+        show-confirm-bar="{{false}}"
+      />
+      <view class="char-count">{{formData.bio.length}}/200</view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="form-actions">
+    <button class="btn-cancel" bindtap="cancel">取消</button>
+    <button 
+      class="btn-save {{submitting ? 'disabled' : ''}}" 
+      bindtap="saveProfile"
+      disabled="{{submitting}}"
+    >
+      {{submitting ? '保存中...' : '保存'}}
+    </button>
+  </view>
+</view>

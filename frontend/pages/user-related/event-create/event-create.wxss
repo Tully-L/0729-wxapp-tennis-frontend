@@ -1,0 +1,161 @@
+.create-container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 100px;
+}
+
+.form-section {
+  background: white;
+  margin: 12px;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.form-item {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.form-input {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+  background: #f9f9f9;
+}
+
+.form-input:focus {
+  border-color: #0A4A39;
+  background: white;
+}
+
+.type-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.type-option {
+  padding: 8px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #666;
+  background: white;
+}
+
+.type-option.active {
+  background: #0A4A39;
+  color: white;
+  border-color: #0A4A39;
+}
+
+.picker-input {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+  background: #f9f9f9;
+  display: flex;
+  align-items: center;
+}
+
+.picker-input.placeholder {
+  color: #999;
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 100px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  background: #f9f9f9;
+  resize: none;
+}
+
+.form-textarea:focus {
+  border-color: #0A4A39;
+  background: white;
+}
+
+.textarea-count {
+  text-align: right;
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.switch-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.switch-label {
+  font-size: 14px;
+  color: #333;
+}
+
+.switch-desc {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.form-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 16px 20px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  gap: 12px;
+}
+
+.btn-cancel {
+  flex: 1;
+  height: 44px;
+  background: #f5f5f5;
+  color: #666;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.btn-submit {
+  flex: 1;
+  height: 44px;
+  background: #0A4A39;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.btn-submit.disabled {
+  background: #ccc;
+  color: #666;
+} 

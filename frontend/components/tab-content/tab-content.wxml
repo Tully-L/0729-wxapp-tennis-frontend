@@ -1,0 +1,56 @@
+<!-- TabContent Component - 标签内容组件 -->
+<view class="tab-content {{className}}" style="{{customStyle}}">
+  <!-- Loading State -->
+  <view wx:if="{{loading}}" class="tab-loading">
+    <view class="loading-spinner"></view>
+    <view class="loading-text">{{loadingText || '加载中...'}}</view>
+  </view>
+  
+  <!-- Error State -->
+  <view wx:elif="{{error}}" class="tab-error">
+    <view class="error-icon">⚠️</view>
+    <view class="error-message">{{error}}</view>
+    <button wx:if="{{showRetry}}" class="retry-btn" bindtap="onRetry">重试</button>
+  </view>
+  
+  <!-- Content -->
+  <view wx:else class="tab-content-wrapper">
+    <!-- All Events Tab -->
+    <view wx:if="{{activeTab === 'all'}}" class="tab-panel all-events-panel">
+      <slot name="all-events"></slot>
+    </view>
+    
+    <!-- Search Tab -->
+    <view wx:elif="{{activeTab === 'search'}}" class="tab-panel search-panel">
+      <slot name="search"></slot>
+    </view>
+    
+    <!-- Create Tab -->
+    <view wx:elif="{{activeTab === 'create'}}" class="tab-panel create-panel">
+      <slot name="create"></slot>
+    </view>
+    
+    <!-- My Events Tab -->
+    <view wx:elif="{{activeTab === 'my'}}" class="tab-panel my-events-panel">
+      <slot name="my-events"></slot>
+    </view>
+    
+    <!-- Popular Tab -->
+    <view wx:elif="{{activeTab === 'popular'}}" class="tab-panel popular-panel">
+      <slot name="popular"></slot>
+    </view>
+    
+    <!-- Default/Fallback Content -->
+    <view wx:else class="tab-panel default-panel">
+      <view class="empty-state">
+        <text class="empty-icon">📭</text>
+        <view class="empty-text">暂无内容</view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- Transition Overlay for Smooth Switching -->
+  <view wx:if="{{isTransitioning}}" class="transition-overlay">
+    <view class="transition-spinner"></view>
+  </view>
+</view>"

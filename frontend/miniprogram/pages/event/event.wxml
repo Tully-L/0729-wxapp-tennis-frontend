@@ -1,0 +1,137 @@
+﻿<!-- event.wxml -->
+<view class="container">
+  <!-- Header -->
+  <view class="header">
+    <view class="header-title">赛事</view>
+    <view class="header-actions">
+      <view class="filter-btn" bindtap="toggleFilter">
+        <text class="filter-icon">🔍</text>
+        <text>筛选</text>
+      </view>
+      <view class="create-btn" bindtap="createEvent">
+        <text class="add-icon">➕</text>
+        <text>创建</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- Filter Panel (Hidden by default) -->
+  <view class="filter-panel {{showFilter ? 'show' : ''}}">
+    <view class="filter-section">
+      <view class="filter-section-title">赛事类型</view>
+      <view class="filter-options">
+        <view 
+          wx:for="{{eventTypes}}" 
+          wx:key="id" 
+          class="filter-option {{filters.eventType === item.id ? 'active' : ''}}"
+          bindtap="applyFilter"
+          data-field="eventType"
+          data-value="{{item.id}}"
+        >
+          {{item.name}}
+        </view>
+      </view>
+    </view>
+    
+    <view class="filter-section">
+      <view class="filter-section-title">地区</view>
+      <input 
+        class="filter-input" 
+        placeholder="按地区搜索" 
+        value="{{filters.region}}"
+        bindinput="inputRegion"
+      />
+    </view>
+    
+    <view class="filter-section">
+      <view class="filter-section-title">日期范围</view>
+      <view class="date-range">
+        <picker mode="date" bindchange="startDateChange">
+          <view class="date-picker {{filters.dateRange && filters.dateRange.start ? '' : 'placeholder'}}">
+            {{filters.dateRange && filters.dateRange.start || '开始日期'}}
+          </view>
+        </picker>
+        <view class="date-separator">至</view>
+        <picker mode="date" bindchange="endDateChange">
+          <view class="date-picker {{filters.dateRange && filters.dateRange.end ? '' : 'placeholder'}}">
+            {{filters.dateRange && filters.dateRange.end || '结束日期'}}
+          </view>
+        </picker>
+      </view>
+    </view>
+    
+    <view class="filter-actions">
+      <button class="btn-reset" bindtap="resetFilter">重置</button>
+      <button class="btn-apply" bindtap="toggleFilter">应用</button>
+    </view>
+  </view>
+  
+  <!-- Events List -->
+  <view class="events-list">
+    <block wx:if="{{events.length > 0}}">
+      <view 
+        wx:for="{{events}}" 
+        wx:key="id" 
+        class="event-card"
+        bindtap="goToEventDetail"
+        data-id="{{item._id}}"
+      >
+        <!-- Event Card Cover -->
+        <text class="event-cover">🎾</text>
+        
+        <!-- Event Card Content -->
+        <view class="event-content">
+          <view class="event-title">{{item.name}}</view>
+          
+          <view class="event-info">
+            <view class="event-type">{{item.eventType}}</view>
+            <view class="event-status status-{{item.status}}">{{item.status}}</view>
+          </view>
+          
+          <view class="event-details">
+            <view class="event-detail">
+              <text class="detail-icon">📅</text>
+              <text>{{item.eventDate || 'TBD'}}</text>
+            </view>
+            <view class="event-detail">
+              <text class="detail-icon">📍</text>
+              <text>{{item.venue || 'TBD'}} • {{item.region || 'TBD'}}</text>
+            </view>
+            <view class="event-detail">
+              <text class="detail-icon">👤</text>
+              <text>{{item.organizer.name || 'Tennis Heat'}}</text>
+            </view>
+          </view>
+          
+          <view class="event-footer">
+            <view class="deadline" wx:if="{{item.registrationDeadline}}">
+              报名截止: {{item.registrationDeadline}}
+            </view>
+            <view class="event-action">
+              <button class="btn-register" catchtap="registerEvent" data-id="{{item._id}}">
+                报名
+              </button>
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+    
+    <!-- Empty State -->
+    <view wx:if="{{!loading && events.length === 0}}" class="empty-state">
+      <text class="empty-icon">📭</text>
+      <view class="empty-text">暂无赛事数据</view>
+    </view>
+    
+    <!-- Loading State -->
+    <view wx:if="{{loading}}" class="loading-state">
+      <view class="loading-spinner"></view>
+      <view class="loading-text">加载赛事中...</view>
+    </view>
+    
+    <!-- Load More -->
+    <view wx:if="{{hasMore && !loading && events.length > 0}}" class="load-more" bindtap="loadMoreEvents">
+      加载更多
+    </view>
+  </view>
+</view> 
