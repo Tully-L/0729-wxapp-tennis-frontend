@@ -198,19 +198,29 @@ app.post('/dev/init-data', async (req, res) => {
     const Match = require('./models/Match');
     const mongoose = require('mongoose');
 
+    // 检查是否强制重新初始化
+    const force = req.query.force === 'true';
+
     // 检查是否已有数据
     const existingEvents = await Event.countDocuments();
     const existingMatches = await Match.countDocuments();
 
-    if (existingEvents > 0) {
+    if (existingEvents > 0 && !force) {
       return res.json({
         success: true,
-        message: '数据已存在，无需重复初始化',
+        message: '数据已存在，如需重新初始化请添加 ?force=true 参数',
         data: {
           events: existingEvents,
           matches: existingMatches
         }
       });
+    }
+
+    // 如果强制重新初始化，先清除现有数据
+    if (force) {
+      await Event.deleteMany({});
+      await Match.deleteMany({});
+      console.log('🧹 已清除现有数据');
     }
 
     // 创建简单的测试数据
