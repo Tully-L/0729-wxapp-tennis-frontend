@@ -318,7 +318,7 @@ app.post('/dev/create-matches', async (req, res) => {
     console.log('🏆 开始创建比赛数据...');
 
     // 获取所有赛事
-    const events = await Event.find({});
+    const events = await Event.find({}).lean();
     console.log(`📊 找到 ${events.length} 个赛事`);
 
     if (events.length === 0) {
@@ -329,18 +329,21 @@ app.post('/dev/create-matches', async (req, res) => {
     }
 
     // 清除现有比赛数据
-    await Match.deleteMany({});
-    console.log('🧹 已清除现有比赛数据');
+    const deleteResult = await Match.deleteMany({});
+    console.log(`🧹 已清除 ${deleteResult.deletedCount} 条现有比赛数据`);
 
     // 为每个赛事创建比赛
     const allMatches = [];
+    const mongoose = require('mongoose');
+
     for (let i = 0; i < events.length; i++) {
       const event = events[i];
+      console.log(`为赛事 "${event.name}" 创建比赛...`);
 
       // 为每个赛事创建3场比赛
       for (let j = 0; j < 3; j++) {
         const match = {
-          eventId: event._id,
+          eventId: new mongoose.Types.ObjectId(event._id),
           eventType: event.eventType,
           status: ['报名中', '比赛中', '已结束'][j],
           stage: '第一轮',
@@ -358,7 +361,7 @@ app.post('/dev/create-matches', async (req, res) => {
               ranking: 15 + j
             }
           },
-          organizer: event.organizer,
+          organizer: event.organizer || { name: '系统管理员', id: new mongoose.Types.ObjectId() },
           spectators: [],
           score: { sets: [], winner: null },
           statistics: { duration: null, totalGames: 0 },
@@ -366,12 +369,19 @@ app.post('/dev/create-matches', async (req, res) => {
           isPublic: true
         };
         allMatches.push(match);
+        console.log(`  准备创建: ${match.status} - ${match.eventType}`);
       }
     }
+
+    console.log(`准备批量创建 ${allMatches.length} 场比赛...`);
 
     // 批量创建比赛
     const createdMatches = await Match.insertMany(allMatches);
     console.log(`✅ 成功创建 ${createdMatches.length} 场比赛`);
+
+    // 验证创建结果
+    const totalMatches = await Match.countDocuments();
+    console.log(`📊 数据库中现有比赛总数: ${totalMatches}`);
 
     res.json({
       success: true,
@@ -379,11 +389,13 @@ app.post('/dev/create-matches', async (req, res) => {
       data: {
         events: events.length,
         matches: createdMatches.length,
+        totalInDB: totalMatches,
         matchDetails: createdMatches.map(m => ({
           id: m._id,
           eventType: m.eventType,
           status: m.status,
-          venue: m.venue
+          venue: m.venue,
+          isLive: m.isLive
         }))
       }
     });
@@ -393,7 +405,8 @@ app.post('/dev/create-matches', async (req, res) => {
     res.status(500).json({
       success: false,
       message: '创建比赛数据失败',
-      error: error.message
+      error: error.message,
+      stack: error.stack
     });
   }
 });
