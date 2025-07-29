@@ -9,6 +9,10 @@ const errorHandler = require('./middleware/errorHandler');
 const { ensureUtf8Encoding } = require('./middleware/encoding');
 const SocketService = require('./services/socketService');
 
+// 导入模型
+const Event = require('./models/Event');
+const Match = require('./models/Match');
+
 // 导入路由
 const authRoutes = require('./routes/auth');
 const eventRoutes = require('./routes/events');
@@ -194,9 +198,6 @@ app.get('/dev/indexes', async (req, res) => {
 // 临时测试数据初始化端点
 app.post('/dev/init-data', async (req, res) => {
   try {
-    const Event = require('./models/Event');
-    const Match = require('./models/Match');
-    const mongoose = require('mongoose');
 
     // 检查是否强制重新初始化
     const force = req.query.force === 'true';
@@ -306,6 +307,92 @@ app.post('/dev/init-data', async (req, res) => {
     res.status(500).json({
       success: false,
       message: '初始化测试数据失败',
+      error: error.message
+    });
+  }
+});
+
+// 快速创建比赛数据端点
+app.post('/dev/create-matches', async (req, res) => {
+  try {
+    console.log('🏆 开始创建比赛数据...');
+
+    // 获取所有赛事
+    const events = await Event.find({});
+    console.log(`📊 找到 ${events.length} 个赛事`);
+
+    if (events.length === 0) {
+      return res.json({
+        success: false,
+        message: '没有找到赛事，请先创建赛事数据'
+      });
+    }
+
+    // 清除现有比赛数据
+    await Match.deleteMany({});
+    console.log('🧹 已清除现有比赛数据');
+
+    // 为每个赛事创建比赛
+    const allMatches = [];
+    for (let i = 0; i < events.length; i++) {
+      const event = events[i];
+
+      // 为每个赛事创建3场比赛
+      for (let j = 0; j < 3; j++) {
+        const match = {
+          eventId: event._id,
+          eventType: event.eventType,
+          status: ['报名中', '比赛中', '已结束'][j],
+          stage: '第一轮',
+          venue: event.venue,
+          region: event.region,
+          scheduledTime: new Date(Date.now() + (j * 24 * 60 * 60 * 1000)),
+          isLive: j === 1,
+          players: {
+            team1: {
+              name: `选手${i * 3 + j + 1}`,
+              ranking: 10 + j
+            },
+            team2: {
+              name: `选手${i * 3 + j + 2}`,
+              ranking: 15 + j
+            }
+          },
+          organizer: event.organizer,
+          spectators: [],
+          score: { sets: [], winner: null },
+          statistics: { duration: null, totalGames: 0 },
+          tags: event.tags || [],
+          isPublic: true
+        };
+        allMatches.push(match);
+      }
+    }
+
+    // 批量创建比赛
+    const createdMatches = await Match.insertMany(allMatches);
+    console.log(`✅ 成功创建 ${createdMatches.length} 场比赛`);
+
+    res.json({
+      success: true,
+      message: '比赛数据创建完成',
+      data: {
+        events: events.length,
+        matches: createdMatches.length,
+        matchDetails: createdMatches.map(m => ({
+          id: m._id,
+          eventType: m.eventType,
+          status: m.status,
+          venue: m.venue
+        }))
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ 创建比赛数据失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '创建比赛数据失败',
       error: error.message
     });
   }

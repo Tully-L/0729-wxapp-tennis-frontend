@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: tennis-heat-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRE
+        value: 7d
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: MONGODB_URI
+        fromDatabase:
+          name: tennis-heat-db
+          property: connectionString
+      - key: WECHAT_APP_ID
+        value: wx0670b8a59611fccf
+      - key: WECHAT_APP_SECRET
+        value: your_wechat_app_secret
+      - key: WECHAT_MCH_ID
+        value: your_wechat_mch_id
+      - key: WECHAT_API_KEY
+        value: your_wechat_api_key
+      - key: WECHAT_NOTIFY_URL
+        value: https://tennis-heat-backend.onrender.com/api/payments/wechat/callback
+      - key: UPLOAD_PATH
+        value: ./uploads
+      - key: MAX_FILE_SIZE
+        value: 5242880
+    healthCheckPath: /health
+    autoDeploy: true
+
+databases:
+  - name: tennis-heat-db
+    databaseName: tennis_heat
+    user: tennis_user
+    plan: free

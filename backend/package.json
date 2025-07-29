@@ -8,13 +8,14 @@
     "dev": "nodemon src/app.js",
     "dev:enhanced": "node scripts/start-dev.js",
     "dev:smart": "node scripts/start-with-fallback.js",
+    "build": "npm install && npm run setup:production",
+    "setup:production": "echo 'Setting up production environment...'",
     "test": "echo \"Error: no test specified\" && exit 1",
     "test:health": "curl http://localhost:3000/health",
     "test:endpoints": "curl http://localhost:3000/test && curl http://localhost:3000/dev/indexes",
     "diagnose": "node scripts/diagnose-mongodb.js",
     "fix-dns": "node scripts/fix-dns.js",
     "lint": "echo \"Linting not configured yet\"",
-    "build": "echo \"Build process not needed for Node.js\"",
     "clean": "echo \"Cleaning temporary files...\" && rm -rf logs/*.log || echo \"No logs to clean\""
   },
   "keywords": [

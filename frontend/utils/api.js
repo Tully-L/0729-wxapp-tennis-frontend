@@ -1,8 +1,28 @@
 // API request utility
 const app = getApp();
 
-// Base API URL
-const BASE_URL = 'http://localhost:8080/api';
+// API配置 - 支持本地开发和生产环境
+const API_CONFIG = {
+  // 生产环境API地址 (Render部署后的真实地址)
+  production: 'https://zero729-wxapp-tennis.onrender.com/api',
+  // 本地开发API地址
+  development: 'http://localhost:8080/api'
+};
+
+// 使用生产环境 - Render服务已部署完成
+const BASE_URL = API_CONFIG.production;
+
+// 调试信息 - 在控制台显示当前使用的API地址
+console.log('🚀 Tennis Heat API配置:');
+console.log('📍 当前API地址:', BASE_URL);
+console.log('🌍 环境模式: 生产环境 (Render云端)');
+
+// 如果需要在开发时切换到本地环境，请取消下面的注释：
+// const BASE_URL = (() => {
+//   const systemInfo = wx.getSystemInfoSync();
+//   const isDevTool = systemInfo.platform === 'devtools';
+//   return isDevTool ? API_CONFIG.development : API_CONFIG.production;
+// })();
 
 // Mock data for development
 const mockMatches = [
