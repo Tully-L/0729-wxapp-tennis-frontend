@@ -191,6 +191,116 @@ app.get('/dev/indexes', async (req, res) => {
   }
 });
 
+// 临时测试数据初始化端点
+app.post('/dev/init-data', async (req, res) => {
+  try {
+    const Event = require('./models/Event');
+    const Match = require('./models/Match');
+    const mongoose = require('mongoose');
+
+    // 检查是否已有数据
+    const existingEvents = await Event.countDocuments();
+    const existingMatches = await Match.countDocuments();
+
+    if (existingEvents > 0) {
+      return res.json({
+        success: true,
+        message: '数据已存在，无需重复初始化',
+        data: {
+          events: existingEvents,
+          matches: existingMatches
+        }
+      });
+    }
+
+    // 创建简单的测试数据
+    const testEvents = [
+      {
+        name: '温布尔登网球锦标赛',
+        eventType: '男子单打',
+        status: 'ongoing',
+        venue: '全英俱乐部',
+        region: '英国伦敦',
+        eventDate: new Date('2024-08-15'),
+        registrationDeadline: new Date('2024-08-01'),
+        organizer: { name: '温布尔登网球俱乐部', id: new mongoose.Types.ObjectId() },
+        description: '世界最负盛名的网球赛事之一',
+        maxParticipants: 128,
+        currentParticipants: 64,
+        registrationFee: 500,
+        participants: [],
+        matches: [],
+        tags: ['大满贯', '草地'],
+        isPublic: true
+      },
+      {
+        name: '法国网球公开赛',
+        eventType: '女子单打',
+        status: 'registration',
+        venue: '罗兰·加洛斯',
+        region: '法国巴黎',
+        eventDate: new Date('2024-09-01'),
+        registrationDeadline: new Date('2024-08-20'),
+        organizer: { name: '法国网球协会', id: new mongoose.Types.ObjectId() },
+        description: '在红土球场上举行的大满贯赛事',
+        maxParticipants: 128,
+        currentParticipants: 32,
+        registrationFee: 450,
+        participants: [],
+        matches: [],
+        tags: ['大满贯', '红土'],
+        isPublic: true
+      }
+    ];
+
+    const createdEvents = await Event.insertMany(testEvents);
+
+    // 创建测试比赛
+    const testMatches = [];
+    createdEvents.forEach((event, index) => {
+      for (let i = 0; i < 3; i++) {
+        testMatches.push({
+          eventId: event._id,
+          eventType: event.eventType,
+          status: ['报名中', '比赛中', '已结束'][i],
+          stage: '第一轮',
+          venue: event.venue,
+          region: event.region,
+          scheduledTime: new Date(Date.now() + (i * 24 * 60 * 60 * 1000)),
+          isLive: i === 1,
+          players: {
+            team1: { name: `选手${index * 3 + i + 1}`, ranking: 10 + i },
+            team2: { name: `选手${index * 3 + i + 2}`, ranking: 15 + i }
+          },
+          organizer: event.organizer,
+          spectators: [],
+          score: { sets: [], winner: null },
+          statistics: { duration: null, totalGames: 0 },
+          tags: event.tags,
+          isPublic: true
+        });
+      }
+    });
+
+    const createdMatches = await Match.insertMany(testMatches);
+
+    res.json({
+      success: true,
+      message: '测试数据初始化完成',
+      data: {
+        events: createdEvents.length,
+        matches: createdMatches.length
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: '初始化测试数据失败',
+      error: error.message
+    });
+  }
+});
+
 // 404 处理
 app.use('*', (req, res) => {
   res.status(404).json({
