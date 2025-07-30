@@ -1,2 +1,346 @@
-/* Match Page with Fixed Tabs Styles - 比赛页面样式 */\n\n/* Import base styles */\n@import \"../../styles/base.wxss\";\n@import \"../../styles/components.wxss\";\n\n/* Container */\n.match-container {\n  width: 100%;\n  min-height: 100vh;\n  background-color: var(--background-color, #f8f8f8);\n}\n\n/* Match Tab Content Container */\n.match-tab-content-container {\n  margin-top: 100rpx; /* Account for fixed tab bar */\n  min-height: calc(100vh - 100rpx);\n  padding: 0;\n  box-sizing: border-box;\n}\n\n/* Match Tab Bar Specific Styles */\n.match-tab-bar {\n  background: linear-gradient(135deg, var(--primary-color, #0A4A39) 0%, var(--primary-color-dark, #083529) 100%);\n  box-shadow: 0 4rpx 12rpx rgba(10, 74, 57, 0.15);\n}\n\n/* All Matches Tab Styles */\n.all-matches-content {\n  padding: 20rpx;\n}\n\n/* Match Filter Bar */\n.match-filter-bar {\n  margin-bottom: 24rpx;\n  padding: 16rpx 0;\n}\n\n.filter-chips {\n  display: flex;\n  gap: 16rpx;\n  overflow-x: auto;\n  padding: 0 4rpx;\n}\n\n.filter-chip {\n  flex-shrink: 0;\n  padding: 12rpx 24rpx;\n  background-color: var(--card-background, #ffffff);\n  border: 2rpx solid var(--border-color, #e0e0e0);\n  border-radius: 24rpx;\n  font-size: 26rpx;\n  color: var(--text-secondary, #666666);\n  transition: all 0.3s ease;\n  white-space: nowrap;\n}\n\n.filter-chip.active {\n  background-color: var(--primary-color, #0A4A39);\n  border-color: var(--primary-color, #0A4A39);\n  color: var(--text-on-primary, #ffffff);\n  transform: scale(1.05);\n}\n\n.filter-chip:active {\n  transform: scale(0.95);\n}"\n/* M
-atch List */\n.match-list {\n  display: flex;\n  flex-direction: column;\n  gap: 20rpx;\n}\n\n/* Match Card */\n.match-card {\n  background-color: var(--card-background, #ffffff);\n  border-radius: 16rpx;\n  padding: 24rpx;\n  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);\n  position: relative;\n  transition: all 0.3s ease;\n  border: 2rpx solid transparent;\n}\n\n.match-card:active {\n  transform: scale(0.98);\n  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.12);\n}\n\n.match-card.live {\n  border-color: #FF3B30;\n  background: linear-gradient(135deg, #FFF 0%, #FFF8F8 100%);\n}\n\n.match-card.upcoming {\n  border-color: var(--primary-color, #0A4A39);\n}\n\n.match-card.completed {\n  opacity: 0.8;\n}\n\n/* Match Status Badge */\n.match-status-badge {\n  position: absolute;\n  top: 16rpx;\n  right: 16rpx;\n  display: flex;\n  align-items: center;\n  gap: 8rpx;\n  padding: 8rpx 16rpx;\n  border-radius: 20rpx;\n  font-size: 22rpx;\n  font-weight: 500;\n}\n\n.match-status-badge.status-upcoming {\n  background-color: rgba(10, 74, 57, 0.1);\n  color: var(--primary-color, #0A4A39);\n}\n\n.match-status-badge.status-live {\n  background-color: rgba(255, 59, 48, 0.1);\n  color: #FF3B30;\n}\n\n.match-status-badge.status-completed {\n  background-color: rgba(102, 102, 102, 0.1);\n  color: var(--text-secondary, #666666);\n}\n\n.status-dot {\n  width: 12rpx;\n  height: 12rpx;\n  border-radius: 50%;\n  background-color: currentColor;\n}\n\n.status-live .status-dot {\n  animation: pulse 2s infinite;\n}\n\n@keyframes pulse {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.5; }\n}\n\n/* Match Header */\n.match-header {\n  margin-bottom: 20rpx;\n  padding-right: 120rpx; /* Space for status badge */\n}\n\n.match-title {\n  font-size: 32rpx;\n  font-weight: 600;\n  color: var(--text-primary, #333333);\n  margin-bottom: 8rpx;\n  line-height: 1.4;\n}\n\n.match-time {\n  font-size: 26rpx;\n  color: var(--text-secondary, #666666);\n}\n\n/* Match Players */\n.match-players {\n  display: flex;\n  align-items: center;\n  margin-bottom: 20rpx;\n}\n\n.player-section {\n  flex: 1;\n  display: flex;\n  align-items: center;\n  gap: 16rpx;\n}\n\n.player-section.reverse {\n  flex-direction: row-reverse;\n}\n\n.player-info {\n  display: flex;\n  align-items: center;\n  gap: 12rpx;\n  flex: 1;\n}\n\n.player-info.reverse {\n  flex-direction: row-reverse;\n  text-align: right;\n}\n\n.player-avatar {\n  width: 60rpx;\n  height: 60rpx;\n  border-radius: 50%;\n  border: 2rpx solid var(--border-color, #e0e0e0);\n}\n\n.player-details {\n  flex: 1;\n  min-width: 0;\n}\n\n.player-name {\n  font-size: 28rpx;\n  font-weight: 500;\n  color: var(--text-primary, #333333);\n  margin-bottom: 4rpx;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.player-rank {\n  font-size: 22rpx;\n  color: var(--text-secondary, #666666);\n}\n\n/* Score Display */\n.score-display {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  min-width: 80rpx;\n}\n\n.score-number {\n  font-size: 36rpx;\n  font-weight: 700;\n  color: var(--text-secondary, #666666);\n  padding: 8rpx 16rpx;\n  border-radius: 8rpx;\n  background-color: var(--background-color, #f8f8f8);\n  min-width: 60rpx;\n  text-align: center;\n  transition: all 0.3s ease;\n}\n\n.score-number.winner {\n  color: var(--primary-color, #0A4A39);\n  background-color: rgba(10, 74, 57, 0.1);\n  transform: scale(1.1);\n}\n\n/* VS Divider */\n.vs-divider {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  margin: 0 20rpx;\n}\n\n.vs-text {\n  font-size: 24rpx;\n  font-weight: 600;\n  color: var(--text-secondary, #666666);\n  padding: 8rpx 12rpx;\n  border-radius: 20rpx;\n  background-color: var(--background-color, #f8f8f8);\n}\n\n/* Match Footer */\n.match-footer {\n  display: flex;\n  align-items: center;\n  gap: 24rpx;\n  padding-top: 16rpx;\n  border-top: 1rpx solid var(--border-color, #e0e0e0);\n  margin-top: 16rpx;\n}\n\n.match-venue,\n.match-type,\n.spectator-count {\n  display: flex;\n  align-items: center;\n  gap: 6rpx;\n  font-size: 24rpx;\n  color: var(--text-secondary, #666666);\n}\n\n.venue-icon,\n.type-icon,\n.spectator-icon {\n  font-size: 20rpx;\n}\n\n/* Empty State */\n.empty-matches {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  padding: 80rpx 40rpx;\n  text-align: center;\n}\n\n.empty-icon {\n  width: 120rpx;\n  height: 120rpx;\n  opacity: 0.6;\n  margin-bottom: 24rpx;\n}\n\n.empty-text {\n  font-size: 28rpx;\n  color: var(--text-secondary, #666666);\n  margin-bottom: 32rpx;\n}\n\n.create-match-btn {\n  background-color: var(--primary-color, #0A4A39);\n  color: var(--text-on-primary, #ffffff);\n  border: none;\n  border-radius: 24rpx;\n  padding: 16rpx 32rpx;\n  font-size: 28rpx;\n  font-weight: 500;\n}\n\n.create-match-btn:active {\n  background-color: var(--primary-color-dark, #083529);\n  transform: scale(0.95);\n}\n\n/* Load More */\n.load-more-matches {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 32rpx;\n  margin-top: 20rpx;\n  background-color: var(--card-background, #ffffff);\n  border-radius: 12rpx;\n  font-size: 28rpx;\n  color: var(--primary-color, #0A4A39);\n  transition: all 0.3s ease;\n}\n\n.load-more-matches:active {\n  background-color: rgba(10, 74, 57, 0.05);\n  transform: scale(0.98);\n}"
+/* Match Page with Fixed Tabs Styles - 比赛页面样式 */
+
+/* Container */
+.match-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--background-color, #f8f8f8);
+}
+
+/* Match Tab Content Container */
+.match-tab-content-container {
+  margin-top: 100rpx; /* Account for fixed tab bar */
+  min-height: calc(100vh - 100rpx);
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Match Tab Bar Specific Styles */
+.match-tab-bar {
+  background: linear-gradient(135deg, var(--primary-color, #0A4A39) 0%, var(--primary-color-dark, #083529) 100%);
+  box-shadow: 0 4rpx 12rpx rgba(10, 74, 57, 0.15);
+}
+
+/* All Matches Tab Styles */
+.all-matches-content {
+  padding: 20rpx;
+}
+
+/* Match Filter Bar */
+.match-filter-bar {
+  margin-bottom: 24rpx;
+  padding: 16rpx 0;
+}
+
+.filter-chips {
+  display: flex;
+  gap: 16rpx;
+  overflow-x: auto;
+  padding: 0 4rpx;
+}
+
+.filter-chip {
+  flex-shrink: 0;
+  padding: 12rpx 24rpx;
+  background-color: var(--card-background, #ffffff);
+  border: 2rpx solid var(--border-color, #e0e0e0);
+  border-radius: 24rpx;
+  font-size: 26rpx;
+  color: var(--text-secondary, #666666);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.filter-chip.active {
+  background-color: var(--primary-color, #0A4A39);
+  border-color: var(--primary-color, #0A4A39);
+  color: var(--text-on-primary, #ffffff);
+  transform: scale(1.05);
+}
+
+.filter-chip:active {
+  transform: scale(0.95);
+}
+
+/* Match List */
+.match-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+/* Match Card */
+.match-card {
+  background-color: var(--card-background, #ffffff);
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+  position: relative;
+  transition: all 0.3s ease;
+  border: 2rpx solid transparent;
+}
+
+.match-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.12);
+}
+
+.match-card.live {
+  border-color: #FF3B30;
+  background: linear-gradient(135deg, #FFF 0%, #FFF8F8 100%);
+}
+
+.match-card.upcoming {
+  border-color: var(--primary-color, #0A4A39);
+}
+
+.match-card.completed {
+  opacity: 0.8;
+}
+
+/* Match Status Badge */
+.match-status-badge {
+  position: absolute;
+  top: 16rpx;
+  right: 16rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+.match-status-badge.status-upcoming {
+  background-color: rgba(10, 74, 57, 0.1);
+  color: var(--primary-color, #0A4A39);
+}
+
+.match-status-badge.status-live {
+  background-color: rgba(255, 59, 48, 0.1);
+  color: #FF3B30;
+}
+
+.match-status-badge.status-completed {
+  background-color: rgba(102, 102, 102, 0.1);
+  color: var(--text-secondary, #666666);
+}
+
+.status-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.status-live .status-dot {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Match Header */
+.match-header {
+  margin-bottom: 20rpx;
+  padding-right: 120rpx; /* Space for status badge */
+}
+
+.match-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-primary, #333333);
+  margin-bottom: 8rpx;
+  line-height: 1.4;
+}
+
+.match-time {
+  font-size: 26rpx;
+  color: var(--text-secondary, #666666);
+}
+
+/* Match Players */
+.match-players {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.player-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.player-section.reverse {
+  flex-direction: row-reverse;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex: 1;
+}
+
+.player-info.reverse {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.player-avatar {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  border: 2rpx solid var(--border-color, #e0e0e0);
+}
+
+.player-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.player-name {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: var(--text-primary, #333333);
+  margin-bottom: 4rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-rank {
+  font-size: 22rpx;
+  color: var(--text-secondary, #666666);
+}
+
+/* Score Display */
+.score-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80rpx;
+}
+
+.score-number {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--text-secondary, #666666);
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+  background-color: var(--background-color, #f8f8f8);
+  min-width: 60rpx;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.score-number.winner {
+  color: var(--primary-color, #0A4A39);
+  background-color: rgba(10, 74, 57, 0.1);
+  transform: scale(1.1);
+}
+
+/* VS Divider */
+.vs-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 20rpx;
+}
+
+.vs-text {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--text-secondary, #666666);
+  padding: 8rpx 12rpx;
+  border-radius: 20rpx;
+  background-color: var(--background-color, #f8f8f8);
+}
+
+/* Match Footer */
+.match-footer {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid var(--border-color, #e0e0e0);
+  margin-top: 16rpx;
+}
+
+.match-venue,
+.match-type,
+.spectator-count {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  font-size: 24rpx;
+  color: var(--text-secondary, #666666);
+}
+
+.venue-icon,
+.type-icon,
+.spectator-icon {
+  font-size: 20rpx;
+}
+
+/* Empty State */
+.empty-matches {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 40rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  width: 120rpx;
+  height: 120rpx;
+  opacity: 0.6;
+  margin-bottom: 24rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: var(--text-secondary, #666666);
+  margin-bottom: 32rpx;
+}
+
+.create-match-btn {
+  background-color: var(--primary-color, #0A4A39);
+  color: var(--text-on-primary, #ffffff);
+  border: none;
+  border-radius: 24rpx;
+  padding: 16rpx 32rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.create-match-btn:active {
+  background-color: var(--primary-color-dark, #083529);
+  transform: scale(0.95);
+}
+
+/* Load More */
+.load-more-matches {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32rpx;
+  margin-top: 20rpx;
+  background-color: var(--card-background, #ffffff);
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  color: var(--primary-color, #0A4A39);
+  transition: all 0.3s ease;
+}
+
+.load-more-matches:active {
+  background-color: rgba(10, 74, 57, 0.05);
+  transform: scale(0.98);
+}

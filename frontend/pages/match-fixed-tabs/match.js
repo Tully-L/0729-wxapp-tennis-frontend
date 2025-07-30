@@ -1,1 +1,800 @@
-// Match Page with Fixed Tabs - 比赛页面\nconst API = require('../../utils/api');\nconst auth = require('../../utils/auth');\nconst { notification } = require('../../utils/notification');\n\nPage({\n  data: {\n    // Match Tab System\n    activeMatchTab: 'all-matches',\n    matchTabs: [\n      { id: 'all-matches', name: '全部比赛', icon: '📋', badge: 0 },\n      { id: 'live-matches', name: '直播', icon: '🔴', badge: 0 },\n      { id: 'my-matches', name: '我的比赛', icon: '👤', badge: 0, requiresAuth: true },\n      { id: 'tournament-bracket', name: '对阵表', icon: '🏆', badge: 0 },\n      { id: 'statistics', name: '统计', icon: '📊', badge: 0, requiresAuth: true }\n    ],\n    \n    // Match Tab Data\n    matchTabData: {\n      allMatches: {\n        matches: [],\n        loading: false,\n        hasMore: true,\n        currentPage: 1,\n        scrollTop: 0\n      },\n      liveMatches: {\n        matches: [],\n        loading: false,\n        lastUpdated: null,\n        autoRefresh: true\n      },\n      myMatches: {\n        matches: [],\n        loading: false,\n        type: 'all', // all, playing, watching\n        hasMore: true,\n        currentPage: 1\n      },\n      tournamentBracket: {\n        tournaments: [],\n        selectedTournament: null,\n        loading: false\n      },\n      statistics: {\n        matchStats: {},\n        performanceData: [],\n        recentMatches: [],\n        loading: false\n      }\n    },\n    \n    // Match Filters\n    matchFilters: {\n      status: '', // '', 'upcoming', 'live', 'completed'\n      matchType: '',\n      venue: ''\n    },\n    \n    // Loading and Error States\n    matchLoading: false,\n    matchError: '',\n    \n    // User Info\n    userInfo: null,\n    isLoggedIn: false,\n    \n    // Tournament Data\n    tournaments: [],\n    selectedTournamentIndex: 0,\n    selectedTournament: null,\n    \n    // Statistics Data\n    matchStats: {\n      totalMatches: 0,\n      wins: 0,\n      losses: 0,\n      winRate: 0,\n      ranking: null\n    },\n    performanceData: [],\n    recentMatches: [],\n    statsPeriod: '30d',\n    \n    // Live Match Updates\n    liveUpdateTimer: null,\n    liveUpdateInterval: 30000 // 30 seconds\n  },\n\n  onLoad: function() {\n    // Check login status\n    const isLoggedIn = auth.checkLogin();\n    const userInfo = auth.getUserInfo();\n    \n    this.setData({\n      userInfo: userInfo,\n      isLoggedIn: isLoggedIn\n    });\n    \n    // Initialize match tab system\n    this.initMatchTabSystem();\n    \n    // Initialize touch gestures\n    this.initTouchGestures();\n    \n    // Load initial tab data\n    this.loadMatchTabData(this.data.activeMatchTab);\n    \n    // Start live updates if on live tab\n    if (this.data.activeMatchTab === 'live-matches') {\n      this.startLiveUpdates();\n    }\n  },\n\n  onUnload: function() {\n    // Clean up live updates\n    this.stopLiveUpdates();\n  },\n\n  // Match Tab System Methods\n  initMatchTabSystem: function() {\n    const tabs = this.data.matchTabs.map(tab => {\n      if (tab.requiresAuth && !this.data.isLoggedIn) {\n        return { ...tab, disabled: true };\n      }\n      return tab;\n    });\n    \n    this.setData({ matchTabs: tabs });\n    \n    // Initialize scroll positions\n    this.scrollPositions = {};\n    this.data.matchTabs.forEach(tab => {\n      this.scrollPositions[tab.id] = 0;\n    });\n  },\n\n  onMatchTabChange: function(e) {\n    const { activeTab, previousTab } = e.detail;\n    \n    // Save current scroll position\n    if (previousTab) {\n      this.saveScrollPosition(previousTab);\n    }\n    \n    // Stop live updates if leaving live tab\n    if (previousTab === 'live-matches') {\n      this.stopLiveUpdates();\n    }\n    \n    // Switch to new tab\n    this.setData({ activeMatchTab: activeTab });\n    \n    // Load tab data if needed\n    this.loadMatchTabData(activeTab);\n    \n    // Start live updates if entering live tab\n    if (activeTab === 'live-matches') {\n      this.startLiveUpdates();\n    }\n    \n    // Restore scroll position\n    setTimeout(() => {\n      this.restoreScrollPosition(activeTab);\n    }, 100);\n  },\n\n  loadMatchTabData: function(tabId) {\n    switch (tabId) {\n      case 'all-matches':\n        this.loadAllMatches();\n        break;\n      case 'live-matches':\n        this.loadLiveMatches();\n        break;\n      case 'my-matches':\n        this.loadMyMatches();\n        break;\n      case 'tournament-bracket':\n        this.loadTournamentBracket();\n        break;\n      case 'statistics':\n        this.loadStatistics();\n        break;\n    }\n  },\n\n  // All Matches Tab Methods\n  loadAllMatches: function() {\n    const tabData = this.data.matchTabData.allMatches;\n    if (tabData.matches.length === 0 && !tabData.loading) {\n      this.setData({\n        'matchTabData.allMatches.loading': true,\n        matchLoading: true\n      });\n      \n      const params = {\n        page: 1,\n        pageSize: 20,\n        ...this.data.matchFilters\n      };\n      \n      API.getMatches(params)\n        .then(res => {\n          if (res.success) {\n            // Generate mock data for demonstration\n            const mockMatches = this.generateMockMatches(20);\n            \n            this.setData({\n              'matchTabData.allMatches.matches': mockMatches,\n              'matchTabData.allMatches.hasMore': true,\n              'matchTabData.allMatches.loading': false,\n              'matchTabData.allMatches.currentPage': 1,\n              matchLoading: false\n            });\n          } else {\n            this.setData({\n              'matchTabData.allMatches.loading': false,\n              matchLoading: false,\n              matchError: res.message || '加载比赛失败'\n            });\n          }\n        })\n        .catch(err => {\n          console.error('Failed to load matches:', err);\n          \n          // Use mock data on error\n          const mockMatches = this.generateMockMatches(20);\n          this.setData({\n            'matchTabData.allMatches.matches': mockMatches,\n            'matchTabData.allMatches.loading': false,\n            matchLoading: false\n          });\n        });\n    }\n  },\n\n  generateMockMatches: function(count) {\n    const statuses = ['upcoming', 'live', 'completed'];\n    const venues = ['中央球场', '1号球场', '2号球场', '3号球场'];\n    const matchTypes = ['单打', '双打', '混双'];\n    const players = [\n      { nickname: '张三', ranking: 15, avatar: '/images/default-avatar.svg' },\n      { nickname: '李四', ranking: 23, avatar: '/images/default-avatar.svg' },\n      { nickname: '王五', ranking: 8, avatar: '/images/default-avatar.svg' },\n      { nickname: '赵六', ranking: 42, avatar: '/images/default-avatar.svg' },\n      { nickname: '钱七', ranking: 31, avatar: '/images/default-avatar.svg' },\n      { nickname: '孙八', ranking: 19, avatar: '/images/default-avatar.svg' }\n    ];\n    \n    const matches = [];\n    for (let i = 0; i < count; i++) {\n      const status = statuses[Math.floor(Math.random() * statuses.length)];\n      const player1 = players[Math.floor(Math.random() * players.length)];\n      let player2 = players[Math.floor(Math.random() * players.length)];\n      while (player2.nickname === player1.nickname) {\n        player2 = players[Math.floor(Math.random() * players.length)];\n      }\n      \n      const match = {\n        _id: 'match_' + i,\n        matchName: `${matchTypes[Math.floor(Math.random() * matchTypes.length)]}比赛 #${i + 1}`,\n        status: status,\n        startTime: status === 'live' ? '进行中' : '2024-01-' + String(15 + i).padStart(2, '0') + ' 14:00',\n        venue: venues[Math.floor(Math.random() * venues.length)],\n        matchType: matchTypes[Math.floor(Math.random() * matchTypes.length)],\n        participants: [\n          {\n            player: player1,\n            score: status === 'completed' ? Math.floor(Math.random() * 3) + 1 : Math.floor(Math.random() * 7),\n            isWinner: status === 'completed' ? Math.random() > 0.5 : false\n          },\n          {\n            player: player2,\n            score: status === 'completed' ? Math.floor(Math.random() * 3) + 1 : Math.floor(Math.random() * 7),\n            isWinner: false\n          }\n        ],\n        spectators: Array.from({ length: Math.floor(Math.random() * 20) }, (_, idx) => ({ userId: { _id: 'user_' + idx } })),\n        canInteract: true\n      };\n      \n      // Ensure only one winner\n      if (status === 'completed' && match.participants[0].isWinner) {\n        match.participants[1].isWinner = false;\n      } else if (status === 'completed' && !match.participants[0].isWinner) {\n        match.participants[1].isWinner = true;\n      }\n      \n      matches.push(match);\n    }\n    \n    return matches;\n  },\n\n  filterMatches: function(e) {\n    const { type, value } = e.currentTarget.dataset;\n    \n    this.setData({\n      [`matchFilters.${type}`]: value,\n      'matchTabData.allMatches.matches': [],\n      'matchTabData.allMatches.currentPage': 1,\n      'matchTabData.allMatches.hasMore': true\n    });\n    \n    this.loadAllMatches();\n  },\n\n  loadMoreMatches: function() {\n    const tabData = this.data.matchTabData.allMatches;\n    if (tabData.loading || !tabData.hasMore) return;\n    \n    this.setData({\n      'matchTabData.allMatches.loading': true\n    });\n    \n    // Simulate loading more matches\n    setTimeout(() => {\n      const newMatches = this.generateMockMatches(10);\n      this.setData({\n        'matchTabData.allMatches.matches': [...tabData.matches, ...newMatches],\n        'matchTabData.allMatches.hasMore': tabData.matches.length < 50,\n        'matchTabData.allMatches.loading': false,\n        'matchTabData.allMatches.currentPage': tabData.currentPage + 1\n      });\n    }, 1000);\n  },\n\n  // Live Matches Tab Methods\n  loadLiveMatches: function() {\n    this.setData({\n      'matchTabData.liveMatches.loading': true,\n      matchLoading: true\n    });\n    \n    // Generate mock live matches\n    setTimeout(() => {\n      const liveMatches = this.generateMockMatches(5).filter(match => match.status === 'live');\n      \n      // Add live-specific data\n      liveMatches.forEach(match => {\n        match.participants[0].currentScore = Math.floor(Math.random() * 7);\n        match.participants[1].currentScore = Math.floor(Math.random() * 7);\n        match.participants[0].setScores = ['6', '4', '2'];\n        match.participants[1].setScores = ['4', '6', '1'];\n        match.elapsedTime = Math.floor(Math.random() * 120) + 30 + ' 分钟';\n        match.liveViewers = Math.floor(Math.random() * 500) + 50;\n      });\n      \n      this.setData({\n        'matchTabData.liveMatches.matches': liveMatches,\n        'matchTabData.liveMatches.loading': false,\n        'matchTabData.liveMatches.lastUpdated': new Date().toLocaleTimeString(),\n        matchLoading: false\n      });\n      \n      // Update live matches badge\n      this.updateMatchTabBadge('live-matches', liveMatches.length);\n    }, 800);\n  },\n\n  startLiveUpdates: function() {\n    if (this.liveUpdateTimer) {\n      clearInterval(this.liveUpdateTimer);\n    }\n    \n    this.liveUpdateTimer = setInterval(() => {\n      if (this.data.activeMatchTab === 'live-matches' && \n          this.data.matchTabData.liveMatches.autoRefresh) {\n        this.loadLiveMatches();\n      }\n    }, this.data.liveUpdateInterval);\n  },\n\n  stopLiveUpdates: function() {\n    if (this.liveUpdateTimer) {\n      clearInterval(this.liveUpdateTimer);\n      this.liveUpdateTimer = null;\n    }\n  },\n\n  refreshLiveMatches: function() {\n    this.loadLiveMatches();\n    \n    // Haptic feedback\n    wx.vibrateShort({\n      type: 'light'\n    });\n    \n    notification.showSuccess('已刷新直播比赛');\n  },\n\n  // My Matches Tab Methods\n  loadMyMatches: function() {\n    if (!this.data.isLoggedIn) {\n      notification.showWarning('请先登录查看我的比赛');\n      return;\n    }\n    \n    const tabData = this.data.matchTabData.myMatches;\n    \n    this.setData({\n      'matchTabData.myMatches.loading': true,\n      matchLoading: true\n    });\n    \n    // Generate mock my matches\n    setTimeout(() => {\n      const myMatches = this.generateMockMatches(8).map(match => ({\n        ...match,\n        userRole: Math.random() > 0.3 ? 'player' : 'spectator',\n        userResult: match.status === 'completed' ? (Math.random() > 0.5 ? 'win' : 'lose') : null,\n        finalScore: match.status === 'completed' ? '6-4, 3-6, 6-2' : null\n      }));\n      \n      this.setData({\n        'matchTabData.myMatches.matches': myMatches,\n        'matchTabData.myMatches.loading': false,\n        'matchTabData.myMatches.hasMore': false,\n        matchLoading: false\n      });\n    }, 600);\n  },\n\n  switchMyMatchType: function(e) {\n    const type = e.currentTarget.dataset.type;\n    this.setData({\n      'matchTabData.myMatches.type': type,\n      'matchTabData.myMatches.matches': [],\n      'matchTabData.myMatches.currentPage': 1,\n      'matchTabData.myMatches.hasMore': true\n    });\n    this.loadMyMatches();\n  },\n\n  // Tournament Bracket Tab Methods\n  loadTournamentBracket: function() {\n    this.setData({\n      'matchTabData.tournamentBracket.loading': true,\n      matchLoading: true\n    });\n    \n    // Generate mock tournament data\n    setTimeout(() => {\n      const tournaments = [\n        {\n          name: '春季网球锦标赛',\n          currentStage: '半决赛',\n          progress: 75,\n          rounds: [\n            {\n              name: '第一轮',\n              date: '2024-01-15',\n              matches: this.generateMockMatches(4)\n            },\n            {\n              name: '四分之一决赛',\n              date: '2024-01-18',\n              matches: this.generateMockMatches(2)\n            },\n            {\n              name: '半决赛',\n              date: '2024-01-20',\n              matches: this.generateMockMatches(1)\n            }\n          ]\n        },\n        {\n          name: '夏季公开赛',\n          currentStage: '第一轮',\n          progress: 25,\n          rounds: [\n            {\n              name: '第一轮',\n              date: '2024-02-01',\n              matches: this.generateMockMatches(8)\n            }\n          ]\n        }\n      ];\n      \n      this.setData({\n        'matchTabData.tournamentBracket.tournaments': tournaments,\n        tournaments: tournaments,\n        'matchTabData.tournamentBracket.loading': false,\n        matchLoading: false,\n        selectedTournamentIndex: 0,\n        selectedTournament: tournaments[0]\n      });\n    }, 700);\n  },\n\n  onTournamentChange: function(e) {\n    const index = e.detail.value;\n    const tournament = this.data.tournaments[index];\n    \n    this.setData({\n      selectedTournamentIndex: index,\n      selectedTournament: tournament\n    });\n  },\n\n  // Statistics Tab Methods\n  loadStatistics: function() {\n    if (!this.data.isLoggedIn) {\n      notification.showWarning('请先登录查看统计数据');\n      return;\n    }\n    \n    this.setData({\n      'matchTabData.statistics.loading': true,\n      matchLoading: true\n    });\n    \n    // Generate mock statistics\n    setTimeout(() => {\n      const matchStats = {\n        totalMatches: 45,\n        wins: 28,\n        losses: 17,\n        winRate: 62,\n        ranking: 15\n      };\n      \n      const performanceData = [\n        { date: '1/15', winPercentage: 60, losePercentage: 40 },\n        { date: '1/16', winPercentage: 75, losePercentage: 25 },\n        { date: '1/17', winPercentage: 50, losePercentage: 50 },\n        { date: '1/18', winPercentage: 80, losePercentage: 20 },\n        { date: '1/19', winPercentage: 65, losePercentage: 35 },\n        { date: '1/20', winPercentage: 70, losePercentage: 30 },\n        { date: '1/21', winPercentage: 55, losePercentage: 45 }\n      ];\n      \n      const recentMatches = [\n        { _id: 'recent1', userResult: 'win', opponentName: '张三', date: '1/20', score: '6-4, 6-2' },\n        { _id: 'recent2', userResult: 'lose', opponentName: '李四', date: '1/18', score: '4-6, 3-6' },\n        { _id: 'recent3', userResult: 'win', opponentName: '王五', date: '1/15', score: '6-3, 7-5' },\n        { _id: 'recent4', userResult: 'win', opponentName: '赵六', date: '1/12', score: '6-2, 6-1' },\n        { _id: 'recent5', userResult: 'lose', opponentName: '钱七', date: '1/10', score: '5-7, 4-6' }\n      ];\n      \n      this.setData({\n        matchStats: matchStats,\n        performanceData: performanceData,\n        recentMatches: recentMatches,\n        'matchTabData.statistics.matchStats': matchStats,\n        'matchTabData.statistics.performanceData': performanceData,\n        'matchTabData.statistics.recentMatches': recentMatches,\n        'matchTabData.statistics.loading': false,\n        matchLoading: false\n      });\n    }, 900);\n  },\n\n  changeStatsPeriod: function(e) {\n    const period = e.currentTarget.dataset.period;\n    this.setData({\n      statsPeriod: period\n    });\n    \n    // Reload performance data with new period\n    this.loadStatistics();\n  },\n\n  // Navigation Methods\n  goToMatchDetail: function(e) {\n    const matchId = e.currentTarget.dataset.id;\n    wx.navigateTo({\n      url: `/pages/match/detail?id=${matchId}`\n    });\n  },\n\n  goToLiveMatch: function(e) {\n    const matchId = e.currentTarget.dataset.id;\n    wx.navigateTo({\n      url: `/pages/match/live?id=${matchId}`\n    });\n  },\n\n  goToCreateMatch: function() {\n    wx.navigateTo({\n      url: '/pages/match/create'\n    });\n  },\n\n  // Action Methods\n  prepareForMatch: function(e) {\n    const matchId = e.currentTarget.dataset.id;\n    notification.showInfo('准备比赛功能开发中...');\n  },\n\n  watchLiveMatch: function(e) {\n    const matchId = e.currentTarget.dataset.id;\n    wx.navigateTo({\n      url: `/pages/match/live?id=${matchId}`\n    });\n  },\n\n  shareMatch: function(e) {\n    const matchId = e.currentTarget.dataset.id;\n    const match = this.findMatchById(matchId);\n    \n    if (match) {\n      wx.showShareMenu({\n        withShareTicket: true,\n        menus: ['shareAppMessage', 'shareTimeline']\n      });\n      \n      notification.showSuccess('分享成功');\n    }\n  },\n\n  findMatchesToJoin: function() {\n    this.setData({\n      activeMatchTab: 'all-matches'\n    });\n    this.loadMatchTabData('all-matches');\n  },\n\n  viewAllHistory: function() {\n    wx.navigateTo({\n      url: '/pages/match/history'\n    });\n  },\n\n  // Utility Methods\n  findMatchById: function(matchId) {\n    // Search in all tab data\n    const allTabs = ['allMatches', 'liveMatches', 'myMatches'];\n    \n    for (const tabKey of allTabs) {\n      const matches = this.data.matchTabData[tabKey].matches || [];\n      const match = matches.find(m => m._id === matchId);\n      if (match) return match;\n    }\n    \n    return null;\n  },\n\n  updateMatchTabBadge: function(tabId, count) {\n    const tabs = [...this.data.matchTabs];\n    const tab = tabs.find(t => t.id === tabId);\n    if (tab) {\n      tab.badge = count;\n      this.setData({ matchTabs: tabs });\n    }\n  },\n\n  // Touch Gesture Methods\n  initTouchGestures: function() {\n    this.touchStartX = 0;\n    this.touchStartY = 0;\n    this.touchEndX = 0;\n    this.touchEndY = 0;\n    this.minSwipeDistance = 50;\n    this.maxVerticalDistance = 100;\n  },\n\n  onTouchStart: function(e) {\n    if (e.touches && e.touches.length > 0) {\n      this.touchStartX = e.touches[0].clientX;\n      this.touchStartY = e.touches[0].clientY;\n    }\n  },\n\n  onTouchMove: function(e) {\n    if (e.touches && e.touches.length > 0) {\n      const currentX = e.touches[0].clientX;\n      const currentY = e.touches[0].clientY;\n      \n      const deltaX = Math.abs(currentX - this.touchStartX);\n      const deltaY = Math.abs(currentY - this.touchStartY);\n      \n      if (deltaX > deltaY && deltaX > 20) {\n        e.preventDefault();\n      }\n    }\n  },\n\n  onTouchEnd: function(e) {\n    if (e.changedTouches && e.changedTouches.length > 0) {\n      this.touchEndX = e.changedTouches[0].clientX;\n      this.touchEndY = e.changedTouches[0].clientY;\n      \n      this.handleSwipeGesture();\n    }\n  },\n\n  handleSwipeGesture: function() {\n    const deltaX = this.touchEndX - this.touchStartX;\n    const deltaY = Math.abs(this.touchEndY - this.touchStartY);\n    \n    if (Math.abs(deltaX) > this.minSwipeDistance && deltaY < this.maxVerticalDistance) {\n      const currentTabIndex = this.data.matchTabs.findIndex(tab => tab.id === this.data.activeMatchTab);\n      let newTabIndex;\n      \n      if (deltaX > 0) {\n        newTabIndex = currentTabIndex > 0 ? currentTabIndex - 1 : this.data.matchTabs.length - 1;\n      } else {\n        newTabIndex = currentTabIndex < this.data.matchTabs.length - 1 ? currentTabIndex + 1 : 0;\n      }\n      \n      const newTab = this.data.matchTabs[newTabIndex];\n      \n      if (!newTab.disabled) {\n        wx.vibrateShort({ type: 'light' });\n        this.switchToMatchTab(newTab.id);\n      }\n    }\n  },\n\n  switchToMatchTab: function(tabId) {\n    if (tabId === this.data.activeMatchTab) return;\n    \n    const previousTab = this.data.activeMatchTab;\n    this.saveScrollPosition(previousTab);\n    \n    this.setData({ activeMatchTab: tabId });\n    this.loadMatchTabData(tabId);\n    \n    setTimeout(() => {\n      this.restoreScrollPosition(tabId);\n    }, 100);\n  },\n\n  saveScrollPosition: function(tabId) {\n    wx.createSelectorQuery()\n      .selectViewport()\n      .scrollOffset()\n      .exec((res) => {\n        if (res[0]) {\n          this.scrollPositions[tabId] = res[0].scrollTop;\n        }\n      });\n  },\n\n  restoreScrollPosition: function(tabId) {\n    const scrollTop = this.scrollPositions[tabId] || 0;\n    if (scrollTop > 0) {\n      wx.pageScrollTo({\n        scrollTop: scrollTop,\n        duration: 300\n      });\n    }\n  },\n\n  // Tab Content Event Handlers\n  onMatchTabContentChange: function(e) {\n    const { activeTab, previousTab } = e.detail;\n    console.log('Match tab content changed:', activeTab, previousTab);\n  },\n\n  onMatchTabLazyLoad: function(e) {\n    const { tabId } = e.detail;\n    console.log('Lazy loading match tab:', tabId);\n    this.loadMatchTabData(tabId);\n  },\n\n  onMatchTabRetry: function(e) {\n    const { activeTab } = e.detail;\n    console.log('Retrying match tab:', activeTab);\n    this.setData({ matchError: '' });\n    this.loadMatchTabData(activeTab);\n  },\n\n  // Share App Message\n  onShareAppMessage: function() {\n    return {\n      title: '网球比赛 - 精彩对决',\n      path: '/pages/match-fixed-tabs/match',\n      imageUrl: '/images/tennis-ball.svg'\n    };\n  },\n\n  // Page Lifecycle\n  onShow: function() {\n    // Refresh current tab data\n    this.loadMatchTabData(this.data.activeMatchTab);\n    \n    // Restart live updates if on live tab\n    if (this.data.activeMatchTab === 'live-matches') {\n      this.startLiveUpdates();\n    }\n  },\n\n  onHide: function() {\n    // Stop live updates when page is hidden\n    this.stopLiveUpdates();\n  },\n\n  onPullDownRefresh: function() {\n    // Refresh current tab data\n    this.loadMatchTabData(this.data.activeMatchTab);\n    \n    setTimeout(() => {\n      wx.stopPullDownRefresh();\n    }, 1000);\n  }\n});"
+// Match Page with Fixed Tabs - 比赛页面
+const API = require('../../utils/api');
+const auth = require('../../utils/auth');
+const { notification } = require('../../utils/notification');
+
+Page({
+    data: {
+        // Match Tab System
+        activeMatchTab: 'all-matches',
+        matchTabs: [
+            { id: 'all-matches', name: '全部比赛', icon: '📋', badge: 0 },
+            { id: 'live-matches', name: '直播', icon: '🔴', badge: 0 },
+            { id: 'my-matches', name: '我的比赛', icon: '👤', badge: 0, requiresAuth: true },
+            { id: 'tournament-bracket', name: '对阵表', icon: '🏆', badge: 0 },
+            { id: 'statistics', name: '统计', icon: '📊', badge: 0, requiresAuth: true }
+        ],
+
+        // Match Tab Data
+        matchTabData: {
+            allMatches: {
+                matches: [],
+                loading: false,
+                hasMore: true,
+                currentPage: 1,
+                scrollTop: 0
+            },
+            liveMatches: {
+                matches: [],
+                loading: false,
+                lastUpdated: null,
+                autoRefresh: true
+            },
+            myMatches: {
+                matches: [],
+                loading: false,
+                type: 'all', // all, playing, watching
+                hasMore: true,
+                currentPage: 1
+            },
+            tournamentBracket: {
+                tournaments: [],
+                selectedTournament: null,
+                loading: false
+            },
+            statistics: {
+                matchStats: {},
+                performanceData: [],
+                recentMatches: [],
+                loading: false
+            }
+        },
+
+        // Match Filters
+        matchFilters: {
+            status: '', // '', 'upcoming', 'live', 'completed'
+            matchType: '',
+            venue: ''
+        },
+
+        // Loading and Error States
+        matchLoading: false,
+        matchError: '',
+
+        // User Info
+        userInfo: null,
+        isLoggedIn: false,
+
+        // Tournament Data
+        tournaments: [],
+        selectedTournamentIndex: 0,
+        selectedTournament: null,
+
+        // Statistics Data
+        matchStats: {
+            totalMatches: 0,
+            wins: 0,
+            losses: 0,
+            winRate: 0,
+            ranking: null
+        },
+        performanceData: [],
+        recentMatches: [],
+        statsPeriod: '30d',
+
+        // Live Match Updates
+        liveUpdateTimer: null,
+        liveUpdateInterval: 30000 // 30 seconds
+    },
+
+    onLoad: function () {
+        // Check login status
+        const isLoggedIn = auth.checkLogin();
+        const userInfo = auth.getUserInfo();
+
+        this.setData({
+            userInfo: userInfo,
+            isLoggedIn: isLoggedIn
+        });
+
+        // Initialize match tab system
+        this.initMatchTabSystem();
+
+        // Initialize touch gestures
+        this.initTouchGestures();
+
+        // Load initial tab data
+        this.loadMatchTabData(this.data.activeMatchTab);
+
+        // Start live updates if on live tab
+        if (this.data.activeMatchTab === 'live-matches') {
+            this.startLiveUpdates();
+        }
+    },
+
+    onUnload: function () {
+        // Clean up live updates
+        this.stopLiveUpdates();
+    },
+
+    // Match Tab System Methods
+    initMatchTabSystem: function () {
+        const tabs = this.data.matchTabs.map(tab => {
+            if (tab.requiresAuth && !this.data.isLoggedIn) {
+                return { ...tab, disabled: true };
+            }
+            return tab;
+        });
+
+        this.setData({ matchTabs: tabs });
+
+        // Initialize scroll positions
+        this.scrollPositions = {};
+        this.data.matchTabs.forEach(tab => {
+            this.scrollPositions[tab.id] = 0;
+        });
+    },
+
+    onMatchTabChange: function (e) {
+        const { activeTab, previousTab } = e.detail;
+
+        // Save current scroll position
+        if (previousTab) {
+            this.saveScrollPosition(previousTab);
+        }
+
+        // Stop live updates if leaving live tab
+        if (previousTab === 'live-matches') {
+            this.stopLiveUpdates();
+        }
+
+        // Switch to new tab
+        this.setData({ activeMatchTab: activeTab });
+
+        // Load tab data if needed
+        this.loadMatchTabData(activeTab);
+
+        // Start live updates if entering live tab
+        if (activeTab === 'live-matches') {
+            this.startLiveUpdates();
+        }
+
+        // Restore scroll position
+        setTimeout(() => {
+            this.restoreScrollPosition(activeTab);
+        }, 100);
+    },
+
+    loadMatchTabData: function (tabId) {
+        switch (tabId) {
+            case 'all-matches':
+                this.loadAllMatches();
+                break;
+            case 'live-matches':
+                this.loadLiveMatches();
+                break;
+            case 'my-matches':
+                this.loadMyMatches();
+                break;
+            case 'tournament-bracket':
+                this.loadTournamentBracket();
+                break;
+            case 'statistics':
+                this.loadStatistics();
+                break;
+        }
+    },
+
+    // All Matches Tab Methods
+    loadAllMatches: function () {
+        const tabData = this.data.matchTabData.allMatches;
+        if (tabData.matches.length === 0 && !tabData.loading) {
+            this.setData({
+                'matchTabData.allMatches.loading': true,
+                matchLoading: true
+            });
+
+            const params = {
+                page: 1,
+                pageSize: 20,
+                ...this.data.matchFilters
+            };
+
+            API.getMatches(params)
+                .then(res => {
+                    if (res.success) {
+                        // Generate mock data for demonstration
+                        const mockMatches = this.generateMockMatches(20);
+
+                        this.setData({
+                            'matchTabData.allMatches.matches': mockMatches,
+                            'matchTabData.allMatches.hasMore': true,
+                            'matchTabData.allMatches.loading': false,
+                            'matchTabData.allMatches.currentPage': 1,
+                            matchLoading: false
+                        });
+                    } else {
+                        this.setData({
+                            'matchTabData.allMatches.loading': false,
+                            matchLoading: false,
+                            matchError: res.message || '加载比赛失败'
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to load matches:', err);
+
+                    // Use mock data on error
+                    const mockMatches = this.generateMockMatches(20);
+                    this.setData({
+                        'matchTabData.allMatches.matches': mockMatches,
+                        'matchTabData.allMatches.loading': false,
+                        matchLoading: false
+                    });
+                });
+        }
+    },
+
+    generateMockMatches: function (count) {
+        const statuses = ['upcoming', 'live', 'completed'];
+        const venues = ['中央球场', '1号球场', '2号球场', '3号球场'];
+        const matchTypes = ['单打', '双打', '混双'];
+        const players = [
+            { nickname: '张三', ranking: 15, avatar: '/images/default-avatar.svg' },
+            { nickname: '李四', ranking: 23, avatar: '/images/default-avatar.svg' },
+            { nickname: '王五', ranking: 8, avatar: '/images/default-avatar.svg' },
+            { nickname: '赵六', ranking: 42, avatar: '/images/default-avatar.svg' },
+            { nickname: '钱七', ranking: 31, avatar: '/images/default-avatar.svg' },
+            { nickname: '孙八', ranking: 19, avatar: '/images/default-avatar.svg' }
+        ];
+
+        const matches = [];
+        for (let i = 0; i < count; i++) {
+            const status = statuses[Math.floor(Math.random() * statuses.length)];
+            const player1 = players[Math.floor(Math.random() * players.length)];
+            let player2 = players[Math.floor(Math.random() * players.length)];
+            while (player2.nickname === player1.nickname) {
+                player2 = players[Math.floor(Math.random() * players.length)];
+            }
+
+            const match = {
+                _id: 'match_' + i,
+                matchName: `${matchTypes[Math.floor(Math.random() * matchTypes.length)]}比赛 #${i + 1}`,
+                status: status,
+                startTime: status === 'live' ? '进行中' : '2024-01-' + String(15 + i).padStart(2, '0') + ' 14:00',
+                venue: venues[Math.floor(Math.random() * venues.length)],
+                matchType: matchTypes[Math.floor(Math.random() * matchTypes.length)],
+                participants: [
+                    {
+                        player: player1,
+                        score: status === 'completed' ? Math.floor(Math.random() * 3) + 1 : Math.floor(Math.random() * 7),
+                        isWinner: status === 'completed' ? Math.random() > 0.5 : false
+                    },
+                    {
+                        player: player2,
+                        score: status === 'completed' ? Math.floor(Math.random() * 3) + 1 : Math.floor(Math.random() * 7),
+                        isWinner: false
+                    }
+                ],
+                spectators: Array.from({ length: Math.floor(Math.random() * 20) }, (_, idx) => ({ userId: { _id: 'user_' + idx } })),
+                canInteract: true
+            };
+
+            // Ensure only one winner
+            if (status === 'completed' && match.participants[0].isWinner) {
+                match.participants[1].isWinner = false;
+            } else if (status === 'completed' && !match.participants[0].isWinner) {
+                match.participants[1].isWinner = true;
+            }
+
+            matches.push(match);
+        }
+
+        return matches;
+    },
+
+    filterMatches: function (e) {
+        const { type, value } = e.currentTarget.dataset;
+
+        this.setData({
+            [`matchFilters.${type}`]: value,
+            'matchTabData.allMatches.matches': [],
+            'matchTabData.allMatches.currentPage': 1,
+            'matchTabData.allMatches.hasMore': true
+        });
+
+        this.loadAllMatches();
+    },
+
+    loadMoreMatches: function () {
+        const tabData = this.data.matchTabData.allMatches;
+        if (tabData.loading || !tabData.hasMore) return;
+
+        this.setData({
+            'matchTabData.allMatches.loading': true
+        });
+
+        // Simulate loading more matches
+        setTimeout(() => {
+            const newMatches = this.generateMockMatches(10);
+            this.setData({
+                'matchTabData.allMatches.matches': [...tabData.matches, ...newMatches],
+                'matchTabData.allMatches.hasMore': tabData.matches.length < 50,
+                'matchTabData.allMatches.loading': false,
+                'matchTabData.allMatches.currentPage': tabData.currentPage + 1
+            });
+        }, 1000);
+    },
+
+    // Live Matches Tab Methods
+    loadLiveMatches: function () {
+        this.setData({
+            'matchTabData.liveMatches.loading': true,
+            matchLoading: true
+        });
+
+        // Generate mock live matches
+        setTimeout(() => {
+            const liveMatches = this.generateMockMatches(5).filter(match => match.status === 'live');
+
+            // Add live-specific data
+            liveMatches.forEach(match => {
+                match.participants[0].currentScore = Math.floor(Math.random() * 7);
+                match.participants[1].currentScore = Math.floor(Math.random() * 7);
+                match.participants[0].setScores = ['6', '4', '2'];
+                match.participants[1].setScores = ['4', '6', '1'];
+                match.elapsedTime = Math.floor(Math.random() * 120) + 30 + ' 分钟';
+                match.liveViewers = Math.floor(Math.random() * 500) + 50;
+            });
+
+            this.setData({
+                'matchTabData.liveMatches.matches': liveMatches,
+                'matchTabData.liveMatches.loading': false,
+                'matchTabData.liveMatches.lastUpdated': new Date().toLocaleTimeString(),
+                matchLoading: false
+            });
+
+            // Update live matches badge
+            this.updateMatchTabBadge('live-matches', liveMatches.length);
+        }, 800);
+    },
+
+    startLiveUpdates: function () {
+        if (this.liveUpdateTimer) {
+            clearInterval(this.liveUpdateTimer);
+        }
+
+        this.liveUpdateTimer = setInterval(() => {
+            if (this.data.activeMatchTab === 'live-matches' &&
+                this.data.matchTabData.liveMatches.autoRefresh) {
+                this.loadLiveMatches();
+            }
+        }, this.data.liveUpdateInterval);
+    },
+
+    stopLiveUpdates: function () {
+        if (this.liveUpdateTimer) {
+            clearInterval(this.liveUpdateTimer);
+            this.liveUpdateTimer = null;
+        }
+    },
+
+    refreshLiveMatches: function () {
+        this.loadLiveMatches();
+
+        // Haptic feedback
+        wx.vibrateShort({
+            type: 'light'
+        });
+
+        notification.showSuccess('已刷新直播比赛');
+    },
+
+    // My Matches Tab Methods
+    loadMyMatches: function () {
+        if (!this.data.isLoggedIn) {
+            notification.showWarning('请先登录查看我的比赛');
+            return;
+        }
+
+        const tabData = this.data.matchTabData.myMatches;
+
+        this.setData({
+            'matchTabData.myMatches.loading': true,
+            matchLoading: true
+        });
+
+        // Generate mock my matches
+        setTimeout(() => {
+            const myMatches = this.generateMockMatches(8).map(match => ({
+                ...match,
+                userRole: Math.random() > 0.3 ? 'player' : 'spectator',
+                userResult: match.status === 'completed' ? (Math.random() > 0.5 ? 'win' : 'lose') : null,
+                finalScore: match.status === 'completed' ? '6-4, 3-6, 6-2' : null
+            }));
+
+            this.setData({
+                'matchTabData.myMatches.matches': myMatches,
+                'matchTabData.myMatches.loading': false,
+                'matchTabData.myMatches.hasMore': false,
+                matchLoading: false
+            });
+        }, 600);
+    },
+
+    switchMyMatchType: function (e) {
+        const type = e.currentTarget.dataset.type;
+        this.setData({
+            'matchTabData.myMatches.type': type,
+            'matchTabData.myMatches.matches': [],
+            'matchTabData.myMatches.currentPage': 1,
+            'matchTabData.myMatches.hasMore': true
+        });
+        this.loadMyMatches();
+    },
+
+    // Tournament Bracket Tab Methods
+    loadTournamentBracket: function () {
+        this.setData({
+            'matchTabData.tournamentBracket.loading': true,
+            matchLoading: true
+        });
+
+        // Generate mock tournament data
+        setTimeout(() => {
+            const tournaments = [
+                {
+                    name: '春季网球锦标赛',
+                    currentStage: '半决赛',
+                    progress: 75,
+                    rounds: [
+                        {
+                            name: '第一轮',
+                            date: '2024-01-15',
+                            matches: this.generateMockMatches(4)
+                        },
+                        {
+                            name: '四分之一决赛',
+                            date: '2024-01-18',
+                            matches: this.generateMockMatches(2)
+                        },
+                        {
+                            name: '半决赛',
+                            date: '2024-01-20',
+                            matches: this.generateMockMatches(1)
+                        }
+                    ]
+                },
+                {
+                    name: '夏季公开赛',
+                    currentStage: '第一轮',
+                    progress: 25,
+                    rounds: [
+                        {
+                            name: '第一轮',
+                            date: '2024-02-01',
+                            matches: this.generateMockMatches(8)
+                        }
+                    ]
+                }
+            ];
+
+            this.setData({
+                'matchTabData.tournamentBracket.tournaments': tournaments,
+                tournaments: tournaments,
+                'matchTabData.tournamentBracket.loading': false,
+                matchLoading: false,
+                selectedTournamentIndex: 0,
+                selectedTournament: tournaments[0]
+            });
+        }, 700);
+    },
+
+    onTournamentChange: function (e) {
+        const index = e.detail.value;
+        const tournament = this.data.tournaments[index];
+
+        this.setData({
+            selectedTournamentIndex: index,
+            selectedTournament: tournament
+        });
+    },
+
+    // Statistics Tab Methods
+    loadStatistics: function () {
+        if (!this.data.isLoggedIn) {
+            notification.showWarning('请先登录查看统计数据');
+            return;
+        }
+
+        this.setData({
+            'matchTabData.statistics.loading': true,
+            matchLoading: true
+        });
+
+        // Generate mock statistics
+        setTimeout(() => {
+            const matchStats = {
+                totalMatches: 45,
+                wins: 28,
+                losses: 17,
+                winRate: 62,
+                ranking: 15
+            };
+
+            const performanceData = [
+                { date: '1/15', winPercentage: 60, losePercentage: 40 },
+                { date: '1/16', winPercentage: 75, losePercentage: 25 },
+                { date: '1/17', winPercentage: 50, losePercentage: 50 },
+                { date: '1/18', winPercentage: 80, losePercentage: 20 },
+                { date: '1/19', winPercentage: 65, losePercentage: 35 },
+                { date: '1/20', winPercentage: 70, losePercentage: 30 },
+                { date: '1/21', winPercentage: 55, losePercentage: 45 }
+            ];
+
+            const recentMatches = [
+                { _id: 'recent1', userResult: 'win', opponentName: '张三', date: '1/20', score: '6-4, 6-2' },
+                { _id: 'recent2', userResult: 'lose', opponentName: '李四', date: '1/18', score: '4-6, 3-6' },
+                { _id: 'recent3', userResult: 'win', opponentName: '王五', date: '1/15', score: '6-3, 7-5' },
+                { _id: 'recent4', userResult: 'win', opponentName: '赵六', date: '1/12', score: '6-2, 6-1' },
+                { _id: 'recent5', userResult: 'lose', opponentName: '钱七', date: '1/10', score: '5-7, 4-6' }
+            ];
+
+            this.setData({
+                matchStats: matchStats,
+                performanceData: performanceData,
+                recentMatches: recentMatches,
+                'matchTabData.statistics.matchStats': matchStats,
+                'matchTabData.statistics.performanceData': performanceData,
+                'matchTabData.statistics.recentMatches': recentMatches,
+                'matchTabData.statistics.loading': false,
+                matchLoading: false
+            });
+        }, 900);
+    },
+
+    changeStatsPeriod: function (e) {
+        const period = e.currentTarget.dataset.period;
+        this.setData({
+            statsPeriod: period
+        });
+
+        // Reload performance data with new period
+        this.loadStatistics();
+    },
+
+    // Navigation Methods
+    goToMatchDetail: function (e) {
+        const matchId = e.currentTarget.dataset.id;
+        wx.navigateTo({
+            url: `/pages/match/detail?id=${matchId}`
+        });
+    },
+
+    goToLiveMatch: function (e) {
+        const matchId = e.currentTarget.dataset.id;
+        wx.navigateTo({
+            url: `/pages/match/live?id=${matchId}`
+        });
+    },
+
+    goToCreateMatch: function () {
+        wx.navigateTo({
+            url: '/pages/match/create'
+        });
+    },
+
+    // Action Methods
+    prepareForMatch: function (e) {
+        const matchId = e.currentTarget.dataset.id;
+        notification.showInfo('准备比赛功能开发中...');
+    },
+
+    watchLiveMatch: function (e) {
+        const matchId = e.currentTarget.dataset.id;
+        wx.navigateTo({
+            url: `/pages/match/live?id=${matchId}`
+        });
+    },
+
+    shareMatch: function (e) {
+        const matchId = e.currentTarget.dataset.id;
+        const match = this.findMatchById(matchId);
+
+        if (match) {
+            wx.showShareMenu({
+                withShareTicket: true,
+                menus: ['shareAppMessage', 'shareTimeline']
+            });
+
+            notification.showSuccess('分享成功');
+        }
+    },
+
+    findMatchesToJoin: function () {
+        this.setData({
+            activeMatchTab: 'all-matches'
+        });
+        this.loadMatchTabData('all-matches');
+    },
+
+    viewAllHistory: function () {
+        wx.navigateTo({
+            url: '/pages/match/history'
+        });
+    },
+
+    // Utility Methods
+    findMatchById: function (matchId) {
+        // Search in all tab data
+        const allTabs = ['allMatches', 'liveMatches', 'myMatches'];
+
+        for (const tabKey of allTabs) {
+            const matches = this.data.matchTabData[tabKey].matches || [];
+            const match = matches.find(m => m._id === matchId);
+            if (match) return match;
+        }
+
+        return null;
+    },
+
+    updateMatchTabBadge: function (tabId, count) {
+        const tabs = [...this.data.matchTabs];
+        const tab = tabs.find(t => t.id === tabId);
+        if (tab) {
+            tab.badge = count;
+            this.setData({ matchTabs: tabs });
+        }
+    },
+
+    // Touch Gesture Methods
+    initTouchGestures: function () {
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.touchEndX = 0;
+        this.touchEndY = 0;
+        this.minSwipeDistance = 50;
+        this.maxVerticalDistance = 100;
+    },
+
+    onTouchStart: function (e) {
+        if (e.touches && e.touches.length > 0) {
+            this.touchStartX = e.touches[0].clientX;
+            this.touchStartY = e.touches[0].clientY;
+        }
+    },
+
+    onTouchMove: function (e) {
+        if (e.touches && e.touches.length > 0) {
+            const currentX = e.touches[0].clientX;
+            const currentY = e.touches[0].clientY;
+
+            const deltaX = Math.abs(currentX - this.touchStartX);
+            const deltaY = Math.abs(currentY - this.touchStartY);
+
+            if (deltaX > deltaY && deltaX > 20) {
+                e.preventDefault();
+            }
+        }
+    },
+
+    onTouchEnd: function (e) {
+        if (e.changedTouches && e.changedTouches.length > 0) {
+            this.touchEndX = e.changedTouches[0].clientX;
+            this.touchEndY = e.changedTouches[0].clientY;
+
+            this.handleSwipeGesture();
+        }
+    },
+
+    handleSwipeGesture: function () {
+        const deltaX = this.touchEndX - this.touchStartX;
+        const deltaY = Math.abs(this.touchEndY - this.touchStartY);
+
+        if (Math.abs(deltaX) > this.minSwipeDistance && deltaY < this.maxVerticalDistance) {
+            const currentTabIndex = this.data.matchTabs.findIndex(tab => tab.id === this.data.activeMatchTab);
+            let newTabIndex;
+
+            if (deltaX > 0) {
+                newTabIndex = currentTabIndex > 0 ? currentTabIndex - 1 : this.data.matchTabs.length - 1;
+            } else {
+                newTabIndex = currentTabIndex < this.data.matchTabs.length - 1 ? currentTabIndex + 1 : 0;
+            }
+
+            const newTab = this.data.matchTabs[newTabIndex];
+
+            if (!newTab.disabled) {
+                wx.vibrateShort({ type: 'light' });
+                this.switchToMatchTab(newTab.id);
+            }
+        }
+    },
+
+    switchToMatchTab: function (tabId) {
+        if (tabId === this.data.activeMatchTab) return;
+
+        const previousTab = this.data.activeMatchTab;
+        this.saveScrollPosition(previousTab);
+
+        this.setData({ activeMatchTab: tabId });
+        this.loadMatchTabData(tabId);
+
+        setTimeout(() => {
+            this.restoreScrollPosition(tabId);
+        }, 100);
+    },
+
+    saveScrollPosition: function (tabId) {
+        wx.createSelectorQuery()
+            .selectViewport()
+            .scrollOffset()
+            .exec((res) => {
+                if (res[0]) {
+                    this.scrollPositions[tabId] = res[0].scrollTop;
+                }
+            });
+    },
+
+    restoreScrollPosition: function (tabId) {
+        const scrollTop = this.scrollPositions[tabId] || 0;
+        if (scrollTop > 0) {
+            wx.pageScrollTo({
+                scrollTop: scrollTop,
+                duration: 300
+            });
+        }
+    },
+
+    // Tab Content Event Handlers
+    onMatchTabContentChange: function (e) {
+        const { activeTab, previousTab } = e.detail;
+        console.log('Match tab content changed:', activeTab, previousTab);
+    },
+
+    onMatchTabLazyLoad: function (e) {
+        const { tabId } = e.detail;
+        console.log('Lazy loading match tab:', tabId);
+        this.loadMatchTabData(tabId);
+    },
+
+    onMatchTabRetry: function (e) {
+        const { activeTab } = e.detail;
+        console.log('Retrying match tab:', activeTab);
+        this.setData({ matchError: '' });
+        this.loadMatchTabData(activeTab);
+    },
+
+    // Share App Message
+    onShareAppMessage: function () {
+        return {
+            title: '网球比赛 - 精彩对决',
+            path: '/pages/match-fixed-tabs/match',
+            imageUrl: '/images/tennis-ball.svg'
+        };
+    },
+
+    // Page Lifecycle
+    onShow: function () {
+        // Refresh current tab data
+        this.loadMatchTabData(this.data.activeMatchTab);
+
+        // Restart live updates if on live tab
+        if (this.data.activeMatchTab === 'live-matches') {
+            this.startLiveUpdates();
+        }
+    },
+
+    onHide: function () {
+        // Stop live updates when page is hidden
+        this.stopLiveUpdates();
+    },
+
+    onPullDownRefresh: function () {
+        // Refresh current tab data
+        this.loadMatchTabData(this.data.activeMatchTab);
+
+        setTimeout(() => {
+            wx.stopPullDownRefresh();
+        }, 1000);
+    }
+});
