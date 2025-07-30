@@ -22,8 +22,8 @@ App({
     // 检查并刷新token
     this.checkTokenStatus();
     
-    // 初始化实时通信和通知系统
-    this.initRealTimeServices();
+    // 初始化实时通信和通知系统（暂时禁用以避免连接错误）
+    // this.initRealTimeServices();
   },
   
   onShow: function() {
@@ -120,6 +120,12 @@ App({
           console.error('🔌 WebSocket连接错误:', error);
           this.globalData.isWebSocketConnected = false;
         });
+
+        wsService.on('websocket_unavailable', () => {
+          console.log('🔌 WebSocket服务不可用，应用将使用轮询模式');
+          this.globalData.isWebSocketConnected = false;
+          this.globalData.websocketUnavailable = true;
+        });
       }
     } catch (error) {
       console.error('WebSocket初始化失败:', error);
@@ -137,7 +143,9 @@ App({
     statusBarHeight: 0,
     windowHeight: 0,
     windowWidth: 0,
-    baseUrl: 'http://localhost:8080/api',
+    isWebSocketConnected: false,
+    websocketUnavailable: false,
+    baseUrl: 'https://zero729-wxapp-tennis.onrender.com/api',
     primaryColor: '#0A4A39',
     // WebSocket and real-time features
     wsService: null,

@@ -17,7 +17,7 @@
   <view wx:else class="tab-content-wrapper">
     <!-- All Events Tab -->
     <view wx:if="{{activeTab === 'all'}}" class="tab-panel all-events-panel">
-      <slot name="all-events"></slot>
+      <slot name="all"></slot>
     </view>
     
     <!-- Search Tab -->
@@ -32,7 +32,7 @@
     
     <!-- My Events Tab -->
     <view wx:elif="{{activeTab === 'my'}}" class="tab-panel my-events-panel">
-      <slot name="my-events"></slot>
+      <slot name="my"></slot>
     </view>
     
     <!-- Popular Tab -->

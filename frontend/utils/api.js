@@ -106,6 +106,62 @@ const defaultEvents = [
     coverImage: null,
     createdAt: '2024-01-02',
     createdBy: 'system'
+  },
+  {
+    _id: '3',
+    name: '法国公开赛 2024',
+    eventType: '男子单打',
+    status: 'registration',
+    venue: '罗兰加洛斯',
+    region: '巴黎',
+    eventDate: '2024-05-26',
+    registrationDeadline: '2024-05-01',
+    organizer: { name: '法国网球协会' },
+    coverImage: null,
+    createdAt: '2024-01-03',
+    createdBy: 'system'
+  },
+  {
+    _id: '4',
+    name: '法国网球公开赛女子组',
+    eventType: '女子单打',
+    status: 'registration',
+    venue: '法国巴黎罗兰加洛斯',
+    region: '法国',
+    eventDate: '2024-06-01',
+    registrationDeadline: '2024-05-15',
+    organizer: { name: '法国体育协会' },
+    coverImage: null,
+    createdAt: '2024-01-04',
+    createdBy: 'system'
+  },
+  {
+    _id: '5',
+    name: '澳大利亚网球公开赛',
+    eventType: '混合双打',
+    status: 'upcoming',
+    venue: '墨尔本公园',
+    region: '墨尔本',
+    eventDate: '2024-01-15',
+    registrationDeadline: '2024-01-01',
+    organizer: { name: '澳大利亚网球协会' },
+    coverImage: null,
+    createdAt: '2024-01-05',
+    createdBy: 'system'
+  },
+  {
+    _id: '6',
+    name: '网球热业余锦标赛',
+    eventType: '男子双打',
+    status: 'registration',
+    venue: '网球热体育中心',
+    region: '北京',
+    eventDate: '2024-08-15',
+    registrationDeadline: '2024-08-01',
+    organizer: { name: '网球热' },
+    coverImage: null,
+    createdAt: '2024-01-06',
+    createdBy: 'system'
   }
 ];
 
@@ -139,79 +195,251 @@ const request = (url, method = 'GET', data = {}, showLoading = true) => {
     // 获取用户token
     const token = wx.getStorageSync('token');
     
+    // 检查是否为mock token，如果是则直接使用fallback
+    if (token && token.startsWith('mock_token_')) {
+      console.log('检测到mock token，直接使用本地模拟数据');
+      // 使用nextTick确保loading状态正确关闭
+      if (showLoading) {
+        wx.nextTick(() => {
+          try {
+            wx.hideLoading();
+          } catch (e) {
+            console.log('hideLoading已执行或不存在对应的showLoading');
+          }
+        });
+      }
+      handleMockFallback(url, method, cleanRequestData(data), resolve, reject, false);
+      return;
+    }
+    
+    // 清理和验证数据
+    const cleanData = cleanRequestData(data);
+    
     // 构建请求配置
     const requestConfig = {
       url: BASE_URL + url,
-      method: method,
+      method: method.toUpperCase(),
       header: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         ...(token && { 'Authorization': `Bearer ${token}` })
       },
+      timeout: 30000, // 30秒超时
       success: (res) => {
         try {
+          // 使用nextTick确保loading状态正确关闭
           if (showLoading) {
-            wx.hideLoading();
+            wx.nextTick(() => {
+              try {
+                wx.hideLoading();
+              } catch (e) {
+                console.log('hideLoading已执行或不存在对应的showLoading');
+              }
+            });
           }
           
+          console.log(`API请求成功 ${method} ${url}:`, {
+            statusCode: res.statusCode,
+            header: res.header,
+            dataType: typeof res.data
+          });
+          
           if (res.statusCode >= 200 && res.statusCode < 300) {
-            // Check if response is JSON
-            if (typeof res.data === 'string' && res.data.includes('<!DOCTYPE html>')) {
-              console.warn('API返回HTML而非JSON，可能服务器配置错误，使用本地模拟数据');
-              handleMockFallback(url, method, data, resolve, reject);
-              return;
+            // 验证响应格式
+            if (validateResponseFormat(res)) {
+              resolve(res.data);
+            } else {
+              console.warn('API返回格式异常，使用本地模拟数据');
+              handleMockFallback(url, method, cleanData, resolve, reject);
             }
-            resolve(res.data);
+          } else if (res.statusCode === 401) {
+            // Token过期或无效
+            console.warn('Token无效，清除本地认证信息');
+            clearAuthInfo();
+            handleMockFallback(url, method, cleanData, resolve, reject);
+          } else if (res.statusCode >= 500) {
+            // 服务器错误
+            console.error('服务器错误:', res.statusCode);
+            handleMockFallback(url, method, cleanData, resolve, reject);
           } else {
-            console.error('API Error:', res);
-            reject(new Error(res.data?.message || '请求失败'));
+            // 对于404和403错误，直接使用fallback，不记录错误日志
+            if (res.statusCode === 403 || res.statusCode === 404) {
+              console.log('API endpoint not available, using fallback data for:', url);
+              handleMockFallback(url, method, cleanData, resolve, reject);
+            } else {
+              console.error('API请求失败:', res);
+              reject(new Error(res.data?.message || `请求失败 (${res.statusCode})`));
+            }
           }
         } catch (error) {
           if (showLoading) {
-            wx.hideLoading();
+            wx.nextTick(() => {
+              try {
+                wx.hideLoading();
+              } catch (e) {
+                console.log('hideLoading已执行或不存在对应的showLoading');
+              }
+            });
           }
-          console.error('Success handler error:', error);
-          reject(error);
+          console.error('响应处理错误:', error);
+          handleMockFallback(url, method, cleanData, resolve, reject);
         }
       },
       fail: (err) => {
         try {
           if (showLoading) {
-            wx.hideLoading();
+            wx.nextTick(() => {
+              try {
+                wx.hideLoading();
+              } catch (e) {
+                console.log('hideLoading已执行或不存在对应的showLoading');
+              }
+            });
           }
           
-          console.error('Network Error:', err);
+          console.error('网络请求失败:', err);
           
-          // 如果网络请求失败，回退到本地模拟数据
-          console.log('网络请求失败，使用本地模拟数据');
-          handleMockFallback(url, method, data, resolve, reject);
+          // 根据错误类型提供不同的处理
+          if (err.errMsg) {
+            if (err.errMsg.includes('timeout')) {
+              console.log('请求超时，使用本地模拟数据');
+            } else if (err.errMsg.includes('fail')) {
+              console.log('网络连接失败，使用本地模拟数据');
+            } else {
+              console.log('其他网络错误，使用本地模拟数据');
+            }
+          }
+          
+          handleMockFallback(url, method, cleanData, resolve, reject);
         } catch (error) {
           if (showLoading) {
-            wx.hideLoading();
+            wx.nextTick(() => {
+              try {
+                wx.hideLoading();
+              } catch (e) {
+                console.log('hideLoading已执行或不存在对应的showLoading');
+              }
+            });
           }
-          console.error('Fail handler error:', error);
+          console.error('错误处理失败:', error);
           reject(error);
         }
       }
     };
 
-    // 如果是POST/PUT请求，添加数据
-    if (method === 'POST' || method === 'PUT') {
-      requestConfig.data = data;
-    } else if (method === 'GET' && Object.keys(data).length > 0) {
+    // 根据请求方法处理数据
+    if (method.toUpperCase() === 'POST' || method.toUpperCase() === 'PUT') {
+      requestConfig.data = JSON.stringify(cleanData);
+    } else if (method.toUpperCase() === 'GET' && Object.keys(cleanData).length > 0) {
       // GET请求的参数作为查询字符串
-      const queryString = Object.keys(data)
-        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`)
+      const queryParams = Object.keys(cleanData)
+        .filter(key => cleanData[key] !== null && cleanData[key] !== undefined && cleanData[key] !== '')
+        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(cleanData[key])}`)
         .join('&');
-      requestConfig.url += `?${queryString}`;
+      
+      if (queryParams) {
+        requestConfig.url += (requestConfig.url.includes('?') ? '&' : '?') + queryParams;
+      }
     }
+
+    console.log(`发起API请求 ${method} ${requestConfig.url}`, {
+      headers: requestConfig.header,
+      data: cleanData
+    });
 
     // 发起请求
     wx.request(requestConfig);
   });
 };
 
+// 清理请求数据
+const cleanRequestData = (data) => {
+  if (!data || typeof data !== 'object') {
+    return data;
+  }
+  
+  const cleaned = {};
+  Object.keys(data).forEach(key => {
+    const value = data[key];
+    
+    // 过滤掉无效值
+    if (value !== null && value !== undefined) {
+      // 处理特殊字符
+      if (typeof value === 'string') {
+        cleaned[key] = value.trim();
+      } else if (typeof value === 'object') {
+        // 特殊处理日期范围对象
+        if (key === 'dateRange' && value.start !== undefined && value.end !== undefined) {
+          // 如果日期范围为空，则不包含此参数
+          if (value.start || value.end) {
+            cleaned['dateStart'] = value.start || '';
+            cleaned['dateEnd'] = value.end || '';
+          }
+          // 不添加原始的dateRange对象
+        } else {
+          // 递归清理其他对象
+          const cleanedObj = cleanRequestData(value);
+          // 只有非空对象才添加
+          if (Object.keys(cleanedObj).length > 0) {
+            cleaned[key] = cleanedObj;
+          }
+        }
+      } else {
+        cleaned[key] = value;
+      }
+    }
+  });
+  
+  return cleaned;
+};
+
+// 验证响应格式
+const validateResponseFormat = (res) => {
+  // 检查是否返回HTML（通常表示服务器配置错误）
+  if (typeof res.data === 'string' && res.data.includes('<!DOCTYPE html>')) {
+    return false;
+  }
+  
+  // 检查Content-Type
+  const contentType = res.header['content-type'] || res.header['Content-Type'] || '';
+  if (!contentType.includes('application/json') && typeof res.data === 'string') {
+    return false;
+  }
+  
+  return true;
+};
+
+// 清除认证信息
+const clearAuthInfo = () => {
+  try {
+    wx.removeStorageSync('token');
+    wx.removeStorageSync('refreshToken');
+    wx.removeStorageSync('userInfo');
+    
+    // 更新全局状态
+    const app = getApp();
+    if (app) {
+      app.globalData.isLoggedIn = false;
+      app.globalData.userInfo = null;
+    }
+  } catch (error) {
+    console.error('清除认证信息失败:', error);
+  }
+};
+
 // 网络失败时的模拟数据回退处理
-const handleMockFallback = (url, method, data, resolve, reject) => {
+const handleMockFallback = (url, method, data, resolve, reject, needHideLoading = true) => {
+  // 确保loading状态被正确关闭，使用异步确保不会产生警告
+  if (needHideLoading) {
+    wx.nextTick(() => {
+      try {
+        wx.hideLoading();
+      } catch (e) {
+        // 忽略hideLoading错误
+      }
+    });
+  }
+  
   setTimeout(() => {
     try {
       // Mock API responses as fallback
@@ -265,6 +493,48 @@ const handleMockFallback = (url, method, data, resolve, reject) => {
             pages: Math.ceil(filteredMatches.length / pageSize)
           }
         });
+      } else if (url.includes('/events/search')) {
+        // 搜索赛事
+        const events = getStoredEvents();
+        const query = data.query || '';
+        let filteredEvents = events;
+        
+        if (query) {
+          filteredEvents = events.filter(event => 
+            event.name.toLowerCase().includes(query.toLowerCase()) ||
+            event.eventType.toLowerCase().includes(query.toLowerCase()) ||
+            event.venue.toLowerCase().includes(query.toLowerCase()) ||
+            event.region.toLowerCase().includes(query.toLowerCase())
+          );
+        }
+        
+        resolve({ 
+          success: true,
+          data: { 
+            events: filteredEvents,
+            total: filteredEvents.length
+          }
+        });
+      } else if (url.includes('/events/user')) {
+        // 获取用户赛事
+        const events = getStoredEvents();
+        const userEvents = events.filter(event => event.createdBy === wx.getStorageSync('userInfo')?.id);
+        resolve({ 
+          success: true,
+          data: { events: userEvents }
+        });
+      } else if (url.includes('/events/stats')) {
+        // 获取赛事统计
+        const events = getStoredEvents();
+        resolve({
+          success: true,
+          data: {
+            total: events.length,
+            registration: events.filter(e => e.status === 'registration').length,
+            upcoming: events.filter(e => e.status === 'upcoming').length,
+            completed: events.filter(e => e.status === 'completed').length
+          }
+        });
       } else if (url.includes('/events') && method === 'GET') {
         // 获取赛事列表
         const events = getStoredEvents();
@@ -315,6 +585,44 @@ const handleMockFallback = (url, method, data, resolve, reject) => {
             accessToken: wx.getStorageSync('token')
           } 
         });
+      } else if (url.includes('/auth/sms-code')) {
+        // 模拟发送短信验证码成功
+        console.log('模拟发送短信验证码到:', data.phone);
+        resolve({
+          success: true,
+          message: '验证码已发送',
+          data: {
+            phone: data.phone,
+            expiresIn: 300 // 5分钟有效期
+          }
+        });
+      } else if (url.includes('/auth/verify-sms')) {
+        // 模拟验证短信验证码
+        const isValidCode = data.code === '1234' || data.code === '123456'; // 开发模式固定验证码
+        if (isValidCode) {
+          const mockUser = {
+            id: 'user_' + Date.now(),
+            nickName: `网球选手${data.phone.slice(-4)}`,
+            phone: data.phone,
+            avatarUrl: null
+          };
+          const mockToken = 'mock_token_' + Date.now();
+          wx.setStorageSync('token', mockToken);
+          wx.setStorageSync('userInfo', mockUser);
+          resolve({
+            success: true,
+            data: {
+              user: mockUser,
+              accessToken: mockToken,
+              refreshToken: 'mock_refresh_' + Date.now()
+            }
+          });
+        } else {
+          resolve({
+            success: false,
+            message: '验证码错误或已过期'
+          });
+        }
       } else {
         resolve({ data: [] });
       }
@@ -448,7 +756,9 @@ const generateTennisMatches = (count = 30) => {
 
     const match = {
       _id: `match_${i + 1}`,
+      id: `match_${i + 1}`,
       matchName: `${eventName} ${eventType} ${stage}`,
+      matchType: eventType,
       eventType: eventType,
       eventName: eventName,
       status: status,
@@ -456,23 +766,63 @@ const generateTennisMatches = (count = 30) => {
       venue: venue.name,
       court: venue.court,
       region: venue.location,
-      scheduledTime: scheduledTime,
+      scheduledTime: scheduledTime.toISOString(),
+      date: scheduledTime.toDateString(),
+      time: `${scheduledTime.getHours().toString().padStart(2, '0')}:${scheduledTime.getMinutes().toString().padStart(2, '0')}`,
       timeString: `${scheduledTime.getHours().toString().padStart(2, '0')}:${scheduledTime.getMinutes().toString().padStart(2, '0')}`,
       duration: status === '已结束' ? generateDuration(score.sets) : null,
       players: {
         team1: team1Players,
         team2: team2Players
       },
+      // Add complete score information
       score: score,
+      scoreSummary: score,
+      currentScore: status === '比赛中' ? generateCurrentScore() : null,
       isLive: status === '比赛中',
+      live: status === '比赛中',
       viewCount: Math.floor(Math.random() * 50000),
-      createdAt: scheduledTime
+      // Add tournament info
+      tournament: {
+        name: eventName,
+        round: stage,
+        surface: ['硬地', '红土', '草地'][Math.floor(Math.random() * 3)]
+      },
+      // Add betting odds for realism
+      odds: generateOdds(team1Players, team2Players),
+      // Add result info for completed matches
+      result: status === '已结束' ? (score.winner === 'team1' ? 'win' : 'loss') : null,
+      winnerId: status === '已结束' ? (score.winner === 'team1' ? team1Players[0].name : team2Players[0].name) : null,
+      createdAt: scheduledTime.toISOString(),
+      updatedAt: new Date().toISOString()
     };
 
     matches.push(match);
   }
 
   return matches;
+};
+
+// Generate current score for live matches
+const generateCurrentScore = () => {
+  return {
+    currentSet: Math.floor(Math.random() * 3) + 1,
+    team1Games: Math.floor(Math.random() * 7),
+    team2Games: Math.floor(Math.random() * 7),
+    team1Points: ['0', '15', '30', '40', 'ADV'][Math.floor(Math.random() * 5)],
+    team2Points: ['0', '15', '30', '40', 'ADV'][Math.floor(Math.random() * 5)]
+  };
+};
+
+// Generate betting odds
+const generateOdds = (team1, team2) => {
+  const team1Odds = (Math.random() * 4 + 1).toFixed(2);
+  const team2Odds = (Math.random() * 4 + 1).toFixed(2);
+  return {
+    team1: parseFloat(team1Odds),
+    team2: parseFloat(team2Odds),
+    market: 'Match Winner'
+  };
 };
 
 // 生成已完成比赛的比分
@@ -622,6 +972,8 @@ const API = {
   login: (data) => request('/auth/login', 'POST', data),
   devLogin: (data) => request('/auth/dev-login', 'POST', data),
   refreshToken: (data) => request('/auth/refresh', 'POST', data),
+  sendSmsCode: (data) => request('/auth/sms-code', 'POST', data),
+  verifySmsCode: (data) => request('/auth/verify-sms', 'POST', data),
   getUserProfile: () => request('/auth/profile', 'GET'),
   updateUserProfile: (data) => request('/auth/profile', 'PUT', data),
   getUserStats: () => request('/auth/stats', 'GET'),
@@ -638,9 +990,12 @@ const API = {
   // Events
   getEvents: (params) => request('/events', 'GET', params),
   getEventDetail: (id) => request(`/events/${id}`, 'GET'),
+  searchEvents: (params) => request('/events/search', 'GET', params),
   createEvent: (data) => request('/events', 'POST', data),
   updateEvent: (id, data) => request(`/events/${id}`, 'PUT', data),
   deleteEvent: (id) => request(`/events/${id}`, 'DELETE'),
+  getUserEvents: (params) => request('/events/user', 'GET', params),
+  getEventStats: () => request('/events/stats', 'GET'),
   
   // Matches - Enhanced Match Management System
   getMatches: (params) => request('/matches', 'GET', params),

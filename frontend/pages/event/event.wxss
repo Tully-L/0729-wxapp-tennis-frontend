@@ -1,115 +1,612 @@
 /* event.wxss */
 
-/* 赛事概览样式 */
-.events-overview {
-  background: white;
-  margin: 20rpx 30rpx;
-  border-radius: 20rpx;
-  padding: 30rpx;
-  box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.1);
-}
-
-.overview-header {
+/* ==================== Button Navigation Group ==================== */
+.button-nav-group {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25rpx;
-  padding-bottom: 20rpx;
-  border-bottom: 2rpx solid #f0f0f0;
+  background: white;
+  padding: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
 }
 
-.overview-title {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #1a1a1a;
-}
-
-.overview-count {
-  font-size: 24rpx;
-  color: #666;
-  background: #f8f9fa;
-  padding: 8rpx 16rpx;
-  border-radius: 15rpx;
-}
-
-.overview-list {
+.nav-button {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 15rpx;
-}
-
-.overview-item {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 20rpx;
+  justify-content: center;
+  padding: 20rpx 10rpx;
+  margin: 0 8rpx;
   background: #f8f9fa;
+  border: none;
   border-radius: 15rpx;
   transition: all 0.3s ease;
+  position: relative;
+  min-height: 120rpx;
+  font-size: 24rpx;
 }
 
-.overview-item:active {
-  transform: scale(0.98);
-  background: #f0f0f0;
+.nav-button.active {
+  background: linear-gradient(135deg, #0A4A39, #083A2F);
+  color: white;
+  transform: translateY(-4rpx);
+  box-shadow: 0 8rpx 25rpx rgba(10, 74, 57, 0.3);
 }
 
-.overview-info {
-  flex: 1;
+.nav-button.disabled {
+  opacity: 0.5;
+  background: #e0e0e0;
 }
 
-.overview-name {
-  font-size: 28rpx;
-  font-weight: bold;
-  color: #1a1a1a;
+.nav-button:not(.disabled):not(.active):active {
+  background: #e9ecef;
+  transform: translateY(2rpx);
+}
+
+.nav-icon {
+  font-size: 32rpx;
   margin-bottom: 8rpx;
   display: block;
 }
 
-.overview-type {
-  font-size: 24rpx;
-  color: #666;
+.nav-button.active .nav-icon {
+  color: white;
 }
 
-.overview-status {
-  padding: 8rpx 16rpx;
-  border-radius: 15rpx;
+.nav-label {
   font-size: 22rpx;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.nav-button.active .nav-label {
+  color: white;
   font-weight: 600;
 }
 
-.status-ongoing {
-  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+.nav-badge {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+  background: #ff3b30;
+  color: white;
+  font-size: 18rpx;
+  padding: 4rpx 8rpx;
+  border-radius: 20rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.nav-button.active .nav-badge {
+  background: rgba(255, 255, 255, 0.9);
   color: #0A4A39;
 }
 
-.status-registration {
-  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
-  color: #0A4A39;
+/* ==================== Tab Content Wrapper ==================== */
+.tab-content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-.status-upcoming {
-  background: linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%);
-  color: #2e7d32;
+.tab-panel {
+  flex: 1;
+  width: 100%;
+  min-height: 80vh;
 }
 
-.status-completed {
-  background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
-  color: #616161;
+.default-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.no-events {
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  padding: 60rpx 20rpx;
 }
 
-.no-events-text {
+.empty-state .empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.5;
+}
+
+.empty-state .empty-text {
   font-size: 28rpx;
   color: #999;
 }
 
+/* ==================== Search Tab Styles ==================== */
+.search-content {
+  padding: 0 30rpx 30rpx 30rpx;
+  min-height: 80vh;
+}
+
+.search-header {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 40rpx;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-input-main {
+  flex: 1;
+  height: 80rpx;
+  padding: 0 30rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  background: #f8f9fa;
+}
+
+.search-input-main:focus {
+  border-color: #0A4A39;
+  background: #fff;
+}
+
+.search-btn-main {
+  height: 80rpx;
+  width: 120rpx;
+  background: #0A4A39;
+  color: white;
+  border: none;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.search-results {
+  margin-bottom: 40rpx;
+}
+
+.results-header {
+  padding: 20rpx 0;
+  border-bottom: 2rpx solid #f0f0f0;
+  margin-bottom: 30rpx;
+}
+
+.results-header text {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.event-card.search-result {
+  margin-bottom: 30rpx;
+  border: 2rpx solid #f0f0f0;
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+
+.search-history {
+  background: #f8f9fa;
+  border-radius: 20rpx;
+  padding: 30rpx;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx solid #e0e0e0;
+}
+
+.history-header text {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.clear-history {
+  background: none;
+  border: none;
+  color: #0A4A39;
+  font-size: 26rpx;
+  padding: 0;
+}
+
+.history-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.history-item {
+  background: white;
+  padding: 20rpx 30rpx;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+  color: #333;
+  border: 2rpx solid #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.history-item:active {
+  background: #0A4A39;
+  color: white;
+  border-color: #0A4A39;
+}
+
+.search-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+}
+
+.search-empty .empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.5;
+}
+
+.search-empty .empty-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* ==================== Create Tab Styles ==================== */
+.create-content {
+  padding: 0 30rpx 30rpx 30rpx;
+  min-height: 80vh;
+}
+
+.create-header {
+  text-align: center;
+  margin-bottom: 40rpx;
+  padding-bottom: 30rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.create-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.quick-create-form {
+  background: #f8f9fa;
+  border-radius: 20rpx;
+  padding: 40rpx;
+  margin-bottom: 40rpx;
+}
+
+.form-section {
+  margin-bottom: 40rpx;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 20rpx;
+  font-weight: 500;
+}
+
+.form-input {
+  width: 100%;
+  height: 80rpx;
+  padding: 0 30rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 15rpx;
+  font-size: 28rpx;
+  background: white;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: #0A4A39;
+}
+
+.picker-display {
+  height: 80rpx;
+  line-height: 80rpx;
+  padding: 0 30rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 15rpx;
+  background: white;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.form-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 50rpx;
+}
+
+.btn-save-draft {
+  flex: 1;
+  height: 80rpx;
+  background: #f0f0f0;
+  color: #333;
+  border: none;
+  border-radius: 15rpx;
+  font-size: 28rpx;
+}
+
+.btn-create {
+  flex: 2;
+  height: 80rpx;
+  background: #0A4A39;
+  color: white;
+  border: none;
+  border-radius: 15rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.full-form-link {
+  text-align: center;
+}
+
+.btn-full-form {
+  background: none;
+  border: 2rpx solid #0A4A39;
+  color: #0A4A39;
+  height: 70rpx;
+  padding: 0 40rpx;
+  border-radius: 35rpx;
+  font-size: 26rpx;
+}
+
+/* ==================== My Events Tab Styles ==================== */
+.my-events-content {
+  padding: 0 30rpx 30rpx 30rpx;
+  min-height: 80vh;
+}
+
+.my-events-header {
+  margin-bottom: 40rpx;
+}
+
+.event-type-tabs {
+  display: flex;
+  background: #f8f9fa;
+  border-radius: 15rpx;
+  padding: 8rpx;
+}
+
+.type-tab {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx;
+  font-size: 26rpx;
+  color: #666;
+  border-radius: 10rpx;
+  transition: all 0.3s ease;
+}
+
+.type-tab.active {
+  background: white;
+  color: #0A4A39;
+  font-weight: 500;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.my-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 30rpx;
+}
+
+.event-card.my-event {
+  background: white;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 8rpx 25rpx rgba(0, 0, 0, 0.1);
+}
+
+.role-badge {
+  position: absolute;
+  top: 15rpx;
+  right: 15rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 20rpx;
+  color: white;
+  font-weight: 500;
+}
+
+.role-badge.organizer {
+  background: #ff6b35;
+}
+
+.role-badge.participant {
+  background: #0A4A39;
+}
+
+.quick-actions {
+  display: flex;
+  gap: 15rpx;
+  margin-top: 20rpx;
+}
+
+.event-actions {
+  display: flex;
+  gap: 10rpx;
+  flex-shrink: 0;
+}
+
+.action-btn {
+  padding: 4rpx 8rpx;
+  border: none;
+  background: #0A4A39;
+  font-size: 25rpx;
+  color: white;
+  border-radius: 4rpx;
+  align-self: flex-start;
+  flex-shrink: 0;
+}
+
+.action-btn.edit {
+  background: #0A4A39;
+}
+
+.action-btn.share {
+  background: #0A4A39;
+}
+
+.my-events-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+}
+
+.my-events-empty .empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.5;
+}
+
+.my-events-empty .empty-text {
+  font-size: 28rpx;
+  color: #999;
+  margin-bottom: 40rpx;
+}
+
+.btn-create-first {
+  background: #0A4A39;
+  color: white;
+  border: none;
+  height: 70rpx;
+  padding: 0 40rpx;
+  border-radius: 35rpx;
+  font-size: 28rpx;
+}
+
+/* ==================== Popular Tab Styles ==================== */
+.popular-content {
+  padding: 0 30rpx 30rpx 30rpx;
+  min-height: 80vh;
+}
+
+.popular-header {
+  margin-bottom: 40rpx;
+}
+
+.time-range-tabs {
+  display: flex;
+  background: #f8f9fa;
+  border-radius: 15rpx;
+  padding: 8rpx;
+}
+
+.time-tab {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx;
+  font-size: 26rpx;
+  color: #666;
+  border-radius: 10rpx;
+  transition: all 0.3s ease;
+}
+
+.time-tab.active {
+  background: white;
+  color: #ff6b35;
+  font-weight: 500;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.popular-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 30rpx;
+}
+
+.event-card.popular-event {
+  background: white;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 8rpx 25rpx rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.popularity-badge {
+  position: absolute;
+  top: 15rpx;
+  right: 15rpx;
+  background: linear-gradient(45deg, #ff6b35, #f7931e);
+  color: white;
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  font-size: 20rpx;
+  font-weight: 500;
+}
+
+.fire-icon {
+  font-size: 24rpx;
+}
+
+.popularity-metrics {
+  display: flex;
+  gap: 30rpx;
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 2rpx solid #f0f0f0;
+}
+
+.metric {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.metric-icon {
+  font-size: 20rpx;
+}
+
+.metric-value {
+  font-size: 24rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.popular-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+}
+
+.popular-empty .empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.5;
+}
+
+.popular-empty .empty-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+
 /* 页面状态指示器 */
 .page-status {
-  margin: 20rpx 30rpx;
   padding: 30rpx;
   border-radius: 15rpx;
   text-align: center;
@@ -168,9 +665,7 @@
 
 /* Tab Content Container */
 .tab-content-container {
-  margin-top: 100rpx; /* Account for fixed tab bar */
-  min-height: calc(100vh - 100rpx);
-  padding: 20rpx;
+  min-height: calc(100vh - 200rpx);
   box-sizing: border-box;
 }
 
@@ -346,13 +841,21 @@
   padding: 20rpx;
 }
 
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
 .event-title {
   font-size: 32rpx;
   font-weight: 500;
-  margin-bottom: 16rpx;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
+  margin-right: 20rpx;
 }
 
 .event-info {

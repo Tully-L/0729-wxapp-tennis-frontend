@@ -1,42 +1,22 @@
 <!-- Event Pxml -->
 <view class="container">
-  <!-- Fixed Tab Bar -->
-  <fixed-tab-bar 
-    tabs="{{tabs}}"
-    activeTab="{{activeTab}}"
-    bindtabchange="onTabChange"
-    className="event-tab-bar"
-  ></fixed-tab-bar>
-  
-  <!-- 赛事概览 -->
-  <view class="events-overview">
-    <view class="overview-header">
-      <text class="overview-title">🏆 赛事总览</text>
-      <text class="overview-count">{{events.length}} 个赛事</text>
-    </view>
-    <view wx:if="{{events.length > 0}}" class="overview-list">
-      <view wx:for="{{events}}" wx:key="_id" class="overview-item">
-        <view class="overview-info">
-          <text class="overview-name">{{item.name}}</text>
-          <text class="overview-type">{{item.eventType}}</text>
-        </view>
-        <view class="overview-status status-{{item.status}}">
-          <text class="status-text">{{item.status === 'ongoing' ? '进行中' : item.status === 'registration' ? '报名中' : item.status === 'upcoming' ? '即将开始' : '已结束'}}</text>
-        </view>
-      </view>
-    </view>
-    <view wx:else class="no-events">
-      <text class="no-events-text">暂无赛事数据</text>
-    </view>
+  <!-- Simple Button Group Navigation -->
+  <view class="button-nav-group">
+    <button 
+      wx:for="{{tabs}}" 
+      wx:key="id"
+      class="nav-button {{activeTab === item.id ? 'active' : ''}} {{item.disabled ? 'disabled' : ''}}"
+      bindtap="onButtonNavClick"
+      data-tab-id="{{item.id}}"
+      disabled="{{item.disabled}}"
+    >
+      <text class="nav-icon">{{item.icon}}</text>
+      <text class="nav-label">{{item.name}}</text>
+      <view wx:if="{{item.badge > 0}}" class="nav-badge">{{item.badge}}</view>
+    </button>
   </view>
-
   <!-- Tab Content Container -->
-  <view
-    class="tab-content-container"
-    bindtouchstart="onTouchStart"
-    bindtouchmove="onTouchMove"
-    bindtouchend="onTouchEnd"
-  >
+  <view class="tab-content-container">
 
     <!-- 页面状态指示器 -->
     <view class="page-status" wx:if="{{loading || error}}">
@@ -50,77 +30,13 @@
       </view>
     </view>
 
-    <!-- Tab Content Component -->
-    <tab-content 
-      activeTab="{{activeTab}}"
-      loading="{{loading}}"
-      error="{{error}}"
-      enableLazyLoad="{{true}}"
-      enableCache="{{true}}"
-      bindtabcontentchange="onTabContentChange"
-      bindlazyload="onTabLazyLoad"
-      bindretry="onTabRetry"
-    >
+    <!-- Direct Tab Content Rendering -->
+    <view class="tab-content-wrapper">
+      
       <!-- All Events Tab Content -->
-      <view slot="all-events">
-        <!-- Search Bar -->
-        <view class="search-bar {{showSearch ? 'show' : ''}}">
-          <input 
-            class="search-input" 
-            placeholder="搜索赛事名称、描述、场地..." 
-            value="{{searchQuery}}"
-            bindinput="onSearchInput"
-            bindconfirm="searchEvents"
-          />
-          <button class="search-submit" bindtap="searchEvents">搜索</button>
-        </view>
+      <view wx:if="{{activeTab === 'all'}}" class="tab-panel all-events-panel">
 
-        <!-- Statistics Panel -->
-        <view class="stats-panel" wx:if="{{isLoggedIn && eventStats}}">
-          <view class="stats-item">
-            <text class="stats-number">{{eventStats.total}}</text>
-            <text class="stats-label">总赛事</text>
-          </view>
-          <view class="stats-item">
-            <text class="stats-number">{{eventStats.totalParticipants}}</text>
-            <text class="stats-label">总参与者</text>
-          </view>
-          <view class="stats-item">
-            <text class="stats-number">¥{{eventStats.totalRevenue}}</text>
-            <text class="stats-label">总收入</text>
-          </view>
-        </view>
 
-        <!-- User Events Toggle -->
-        <view class="user-events-toggle" wx:if="{{isLoggedIn}}">
-          <button class="toggle-btn {{showUserEvents ? 'active' : ''}}" bindtap="toggleUserEvents">
-            我的赛事
-          </button>
-          
-          <view class="user-event-types" wx:if="{{showUserEvents}}">
-            <view 
-              class="type-btn {{userEventType === 'all' ? 'active' : ''}}"
-              bindtap="switchUserEventType"
-              data-type="all"
-            >
-              全部
-            </view>
-            <view 
-              class="type-btn {{userEventType === 'organized' ? 'active' : ''}}"
-              bindtap="switchUserEventType"
-              data-type="organized"
-            >
-              我组织的
-            </view>
-            <view 
-              class="type-btn {{userEventType === 'participated' ? 'active' : ''}}"
-              bindtap="switchUserEventType"
-              data-type="participated"
-            >
-              我参与的
-            </view>
-          </view>
-        </view>
 
         <!-- Filter Panel (Hidden by default) -->
         <view class="filter-panel {{showFilter ? 'show' : ''}}">
@@ -216,142 +132,19 @@
           </view>
         </view>
 
-        <!-- Batch Actions Bar -->
-  <view class="batch-actions-bar {{showBatchActions ? 'show' : ''}}">
-    <view class="batch-info">
-      已选择 {{selectedEvents.length}} 个赛事
-    </view>
-    <view class="batch-buttons">
-      <button class="batch-btn" bindtap="batchUpdateStatus" data-status="upcoming">
-        批量开始
-      </button>
-      <button class="batch-btn" bindtap="batchUpdateStatus" data-status="cancelled">
-        批量取消
-      </button>
-      <button class="batch-btn clear" bindtap="clearSelection">
-        清除选择
-      </button>
-    </view>
-  </view>
   
   <!-- Events List -->
   <view class="events-list {{viewMode}}">
-    <!-- List Header with Batch Selection -->
-    <view class="list-header" wx:if="{{events.length > 0 && isLoggedIn}}">
-      <view class="batch-select">
-        <checkbox bindchange="selectAllEvents">全选</checkbox>
-      </view>
+    <!-- List Header -->
+    <view class="list-header" wx:if="{{events.length > 0}}">
       <view class="list-count">
         共 {{events.length}} 个赛事
       </view>
     </view>
 
-    <!-- User Events Display -->
-    <block wx:if="{{showUserEvents && userEvents.length > 0}}">
-      <view class="section-title">我的赛事</view>
-      <view
-        wx:for="{{userEvents}}"
-        wx:key="_id"
-        class="event-card user-event {{item.userRole}}"
-        bindtap="goToEventDetail"
-        data-id="{{item._id}}"
-      >
-        <!-- Selection Checkbox -->
-        <view class="event-select" wx:if="{{isLoggedIn}}" catchtap="toggleEventSelection" data-id="{{item._id}}">
-          <checkbox checked="{{selectedEvents.indexOf(item._id) > -1}}"></checkbox>
-        </view>
-
-        <!-- Event Card Cover -->
-        <view class="event-cover">
-          <text class="cover-icon">🎾</text>
-          <view class="role-badge {{item.userRole}}">
-            {{item.userRole === 'organizer' ? '组织者' : '参与者'}}
-          </view>
-        </view>
-        
-        <!-- Event Card Content -->
-        <view class="event-content">
-          <view class="event-header">
-            <view class="event-title">{{item.name}}</view>
-            <view class="event-actions">
-              <button class="action-btn share" catchtap="shareEvent" data-id="{{item._id}}">
-                分享
-              </button>
-            </view>
-          </view>
-          
-          <view class="event-info">
-            <view class="event-type">{{item.eventType}}</view>
-            <view class="event-status status-{{item.status}}">
-              {{item.status === 'registration' ? '报名中' : 
-                item.status === 'upcoming' ? '即将开始' :
-                item.status === 'ongoing' ? '进行中' :
-                item.status === 'completed' ? '已结束' : '已取消'}}
-            </view>
-          </view>
-          
-          <view class="event-details">
-            <view class="event-detail">
-              <text class="detail-icon">📅</text>
-              <text>{{item.eventDate || 'TBD'}}</text>
-            </view>
-            <view class="event-detail">
-              <text class="detail-icon">📍</text>
-              <text>{{item.venue || 'TBD'}} • {{item.region || 'TBD'}}</text>
-            </view>
-            <view class="event-detail">
-              <text class="detail-icon">👥</text>
-              <text>{{item.currentParticipants || 0}}/{{item.maxParticipants || '∞'}} 人</text>
-            </view>
-            <view class="event-detail" wx:if="{{item.registrationFee > 0}}">
-              <text class="detail-icon">💰</text>
-              <text>¥{{item.registrationFee}}</text>
-            </view>
-          </view>
-          
-          <view class="event-footer">
-            <view class="deadline" wx:if="{{item.registrationDeadline}}">
-              报名截止: {{item.registrationDeadline}}
-            </view>
-            <view class="event-actions">
-              <button 
-                wx:if="{{item.userRole === 'participant' && item.status === 'registration'}}"
-                class="btn-cancel" 
-                catchtap="cancelRegistration" 
-                data-id="{{item._id}}"
-              >
-                取消报名
-              </button>
-              <button 
-                wx:elif="{{!item.isRegistered && item.status === 'registration'}}"
-                class="btn-register" 
-                catchtap="registerEvent" 
-                data-id="{{item._id}}"
-              >
-                报名
-              </button>
-              <view wx:else class="registration-status">
-                {{item.isRegistered ? '已报名' : '不可报名'}}
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-    </block>
 
     <!-- All Events Display -->
-    <!-- 调试信息 -->
-    <view style="background: #f0f0f0; padding: 10px; margin: 10px; font-size: 12px; border: 2px solid red;">
-      调试信息:<br/>
-      - activeTab: {{activeTab}}<br/>
-      - showUserEvents: {{showUserEvents}}<br/>
-      - events.length: {{events.length}}<br/>
-      - loading: {{loading}}<br/>
-      - error: {{error}}<br/>
-      - 渲染条件: {{!showUserEvents && events.length > 0}}
-    </view>
-
-    <block wx:if="{{!showUserEvents && events.length > 0}}">
+    <block wx:if="{{events.length > 0}}">
       <view class="section-title" wx:if="{{searchQuery}}">
         搜索结果 "{{searchQuery}}"
       </view>
@@ -362,10 +155,6 @@
         bindtap="goToEventDetail"
         data-id="{{item._id}}"
       >
-        <!-- Selection Checkbox -->
-        <view class="event-select" wx:if="{{isLoggedIn}}" catchtap="toggleEventSelection" data-id="{{item._id}}">
-          <checkbox checked="{{selectedEvents.indexOf(item._id) > -1}}"></checkbox>
-        </view>
 
         <!-- Event Card Cover -->
         <view class="event-cover">
@@ -478,7 +267,7 @@
       </view>
       
       <!-- Search Tab Content -->
-      <view slot="search">
+      <view wx:elif="{{activeTab === 'search'}}" class="tab-panel search-panel">
         <view class="search-content">
           <view class="search-header">
             <input 
@@ -551,7 +340,7 @@
       </view>
       
       <!-- Create Tab Content -->
-      <view slot="create">
+      <view wx:elif="{{activeTab === 'create'}}" class="tab-panel create-panel">
         <view class="create-content">
           <view class="create-header">
             <text class="create-title">创建新赛事</text>
@@ -625,7 +414,7 @@
       </view>
       
       <!-- My Events Tab Content -->
-      <view slot="my-events">
+      <view wx:elif="{{activeTab === 'my'}}" class="tab-panel my-events-panel">
         <view class="my-events-content">
           <view class="my-events-header">
             <view class="event-type-tabs">
@@ -706,7 +495,7 @@
       </view>
       
       <!-- Popular Tab Content -->
-      <view slot="popular">
+      <view wx:elif="{{activeTab === 'popular'}}" class="tab-panel popular-panel">
         <view class="popular-content">
           <view class="popular-header">
             <view class="time-range-tabs">
@@ -787,7 +576,15 @@
         </view>
       </view>
       
-    </tab-content>
+      <!-- Default/Fallback Content -->
+      <view wx:else class="tab-panel default-panel">
+        <view class="empty-state">
+          <text class="empty-icon">📭</text>
+          <view class="empty-text">未知标签: {{activeTab}}</view>
+        </view>
+      </view>
+      
+    </view> <!-- End of tab-content-wrapper -->
     
   </view> <!-- End of tab-content-container -->
 </view> 

@@ -22,17 +22,25 @@ class WebSocketService {
     }
 
     const userInfo = auth.getUserInfo();
-    if (!userInfo) {
-      console.log('用户未登录，跳过WebSocket连接');
-      return;
+    const token = auth.getToken();
+    
+    if (!userInfo && !token) {
+      console.log('用户未登录，使用匿名WebSocket连接');
+      // 允许匿名连接以获取公共数据
     }
 
-    const wsUrl = `wss://your-domain.com/ws?userId=${userInfo._id}&token=${userInfo.token}`;
+    // 使用生产环境的WebSocket地址或本地模拟
+    const wsUrl = this.getWebSocketUrl();
+    
+    console.log('尝试连接WebSocket:', wsUrl);
     
     try {
       this.socket = wx.connectSocket({
         url: wsUrl,
-        protocols: ['tennis-protocol']
+        protocols: ['tennis-protocol'],
+        header: {
+          'Authorization': token ? `Bearer ${token}` : ''
+        }
       });
 
       this.socket.onOpen(() => {
@@ -48,28 +56,86 @@ class WebSocketService {
           const data = JSON.parse(res.data);
           this.handleMessage(data);
         } catch (error) {
-          console.error('WebSocket消息解析失败:', error);
+          console.error('WebSocket消息解析失败:', error, res.data);
         }
       });
 
-      this.socket.onClose(() => {
-        console.log('🔌 WebSocket连接关闭');
+      this.socket.onClose((res) => {
+        console.log('🔌 WebSocket连接关闭', res);
         this.isConnected = false;
         this.stopHeartbeat();
         this.emit('disconnected');
-        this.attemptReconnect();
+        
+        // 只有在非主动断开且非服务器不可用的情况下才重连
+        if (res.code !== 1000 && res.code !== 1006 && this.reconnectAttempts < this.maxReconnectAttempts) {
+          this.attemptReconnect();
+        } else if (res.code === 1006) {
+          console.log('WebSocket异常关闭，服务器可能不支持WebSocket');
+          this.handleConnectionError();
+        }
       });
 
       this.socket.onError((error) => {
         console.error('🔌 WebSocket连接错误:', error);
         this.isConnected = false;
         this.emit('error', error);
+        
+        // 对于连接错误，直接停止重连
+        if (error.errMsg && error.errMsg.includes('未完成的操作')) {
+          console.log('WebSocket服务器不可用，停止连接尝试');
+          this.handleConnectionError();
+        }
       });
 
     } catch (error) {
-      console.error('WebSocket连接失败:', error);
+      console.error('WebSocket初始化失败:', error);
+      this.handleConnectionError();
     }
   }
+
+  // 获取WebSocket URL
+  getWebSocketUrl() {
+    const userInfo = auth.getUserInfo();
+    const token = auth.getToken();
+    
+    // 生产环境WebSocket地址
+    const productionWsUrl = 'wss://zero729-wxapp-tennis.onrender.com/ws';
+    
+    // 本地开发WebSocket地址
+    const developmentWsUrl = 'ws://localhost:8080/ws';
+    
+    // 根据环境选择URL
+    let baseUrl = productionWsUrl;
+    
+    // 添加认证参数
+    const params = [];
+    if (userInfo && userInfo.id) {
+      params.push(`userId=${encodeURIComponent(userInfo.id)}`);
+    }
+    if (token) {
+      params.push(`token=${encodeURIComponent(token)}`);
+    }
+    
+    if (params.length > 0) {
+      baseUrl += '?' + params.join('&');
+    }
+    
+    return baseUrl;
+  }
+
+  // 处理连接错误
+  handleConnectionError() {
+    console.log('WebSocket连接失败，禁用WebSocket功能');
+    
+    // 禁用重连
+    this.reconnectAttempts = this.maxReconnectAttempts;
+    this.isConnected = false;
+    
+    // 通知应用WebSocket不可用
+    this.emit('websocket_unavailable');
+  }
+
+  // 模拟数据推送已移除，不再需要
 
   // 断开连接
   disconnect() {
@@ -289,7 +355,8 @@ class WebSocketService {
   // 尝试重连
   attemptReconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.log('达到最大重连次数，停止重连');
+      console.log('达到最大重连次数，停止重连，WebSocket服务不可用');
+      this.handleConnectionError();
       return;
     }
 

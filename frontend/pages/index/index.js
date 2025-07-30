@@ -84,6 +84,12 @@ Page({
       wx.setStorageSync('eventTypes', this.data.eventTypes);
     }
 
+    // 检查WebSocket状态
+    const app = getApp();
+    if (app.globalData.websocketUnavailable) {
+      console.log('ℹ️ WebSocket服务不可用，使用轮询模式获取实时数据');
+    }
+
     // Load initial data
     this.loadMatches();
     this.loadMatchStats();
@@ -583,8 +589,19 @@ Page({
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     matches.forEach(match => {
-      // 确保日期格式兼容iOS
-      const matchDate = new Date(match.scheduledTime);
+      // 确保日期格式兼容iOS，处理无效日期
+      let matchDate;
+      if (!match.scheduledTime) {
+        // 如果没有时间，使用当前时间
+        matchDate = new Date();
+      } else {
+        matchDate = new Date(match.scheduledTime);
+        // 检查日期是否有效
+        if (isNaN(matchDate.getTime())) {
+          console.warn('Invalid date in match:', match.scheduledTime);
+          matchDate = new Date(); // 使用当前时间作为回退
+        }
+      }
       // 使用ISO格式的日期作为key，避免iOS兼容性问题
       const dateKey = matchDate.toISOString().split('T')[0]; // 格式: "2024-07-29"
 
