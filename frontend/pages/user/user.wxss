@@ -75,13 +75,19 @@
 /* Profile Header */
 .profile-header {
   height: 300rpx;
-  background-size: cover;
-  background-position: center;
   position: relative;
+  overflow: hidden;
 }
 
-.profile-header:before {
-  content: '';
+.profile-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.profile-header-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -104,6 +110,7 @@
   height: 100rpx;
   margin-right: 20rpx;
   border-radius: 50%;
+  border: 3rpx solid rgba(255, 255, 255, 0.8);
 }
 
 .profile-info {
@@ -120,6 +127,14 @@
 .profile-id {
   color: rgba(255, 255, 255, 0.8);
   font-size: 24rpx;
+  margin-bottom: 4rpx;
+}
+
+.profile-signature {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 26rpx;
+  font-style: italic;
+  opacity: 0.9;
 }
 
 .profile-edit {

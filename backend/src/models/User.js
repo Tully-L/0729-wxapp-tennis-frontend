@@ -13,12 +13,30 @@ const userSchema = new mongoose.Schema({
     unique: true,
     sparse: true
   },
+  customId: {
+    type: String,
+    unique: true,
+    sparse: true,
+    trim: true,
+    minlength: 4,
+    maxlength: 20,
+    match: /^[a-zA-Z0-9]+$/
+  },
   nickname: {
     type: String,
     required: true,
     trim: true
   },
+  signature: {
+    type: String,
+    trim: true,
+    maxlength: 30
+  },
   avatar: {
+    type: String,
+    default: null
+  },
+  backgroundImage: {
     type: String,
     default: null
   },
@@ -39,6 +57,11 @@ const userSchema = new mongoose.Schema({
   region: {
     type: String,
     trim: true
+  },
+  bio: {
+    type: String,
+    trim: true,
+    maxlength: 200
   },
   stats: {
     participationCount: {

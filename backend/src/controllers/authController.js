@@ -137,42 +137,66 @@ const getUserProfile = async (req, res, next) => {
 // 更新用户信息
 const updateUserProfile = async (req, res, next) => {
   try {
-    const { nickname, phone, email, region } = req.body;
-    
+    const { customId, nickname, signature, phone, email, region, bio, avatar, backgroundImage } = req.body;
+
     // 验证输入数据
     if (nickname && nickname.trim().length < 2) {
       throw new BusinessError('昵称至少需要2个字符', 'INVALID_NICKNAME');
     }
-    
+
+    if (customId && (customId.length < 4 || customId.length > 20 || !/^[a-zA-Z0-9]+$/.test(customId))) {
+      throw new BusinessError('用户ID必须是4-20位字母数字组合', 'INVALID_CUSTOM_ID');
+    }
+
+    if (signature && signature.length > 30) {
+      throw new BusinessError('个性签名不能超过30个字符', 'SIGNATURE_TOO_LONG');
+    }
+
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       throw new BusinessError('邮箱格式不正确', 'INVALID_EMAIL');
     }
-    
+
     if (phone && !/^1[3-9]\d{9}$/.test(phone)) {
       throw new BusinessError('手机号格式不正确', 'INVALID_PHONE');
     }
 
     const user = await User.findById(req.user._id);
-    
+
     if (!user) {
       throw new BusinessError('用户不存在', 'USER_NOT_FOUND');
     }
 
+    // 检查自定义ID是否已被其他用户使用
+    if (customId && customId !== user.customId) {
+      const existingUser = await User.findOne({
+        customId: customId.trim(),
+        _id: { $ne: user._id }
+      });
+      if (existingUser) {
+        throw new BusinessError('用户ID已被使用', 'CUSTOM_ID_TAKEN');
+      }
+      user.customId = customId.trim();
+    }
+
     // 检查昵称是否已被其他用户使用
     if (nickname && nickname !== user.nickname) {
-      const existingUser = await User.findOne({ 
-        nickname: nickname.trim(), 
-        _id: { $ne: user._id } 
+      const existingUser = await User.findOne({
+        nickname: nickname.trim(),
+        _id: { $ne: user._id }
       });
       if (existingUser) {
         throw new BusinessError('昵称已被使用', 'NICKNAME_TAKEN');
       }
       user.nickname = nickname.trim();
     }
-    
+
+    if (signature !== undefined) user.signature = signature ? signature.trim() : null;
     if (phone) user.phone = phone;
     if (email) user.email = email.toLowerCase();
     if (region) user.region = region.trim();
+    if (bio !== undefined) user.bio = bio ? bio.trim() : null;
+    if (avatar) user.avatar = avatar;
+    if (backgroundImage) user.backgroundImage = backgroundImage;
     
     await user.save();
 

@@ -2,40 +2,86 @@
 <view class="container">
   <view class="header">
     <view class="title">编辑资料</view>
+    <view class="wechat-sync" bindtap="syncFromWechat">
+      <image class="wechat-icon" src="../../../images/icon/微信.svg" mode="aspectFit"/>
+      <text class="sync-text">从微信同步</text>
+    </view>
   </view>
 
   <view class="form-content">
+    <!-- 背景照片 -->
+    <view class="form-item">
+      <view class="form-label">背景照片</view>
+      <view class="background-section" bindtap="chooseBackground">
+        <image
+          class="background-preview"
+          src="{{formData.backgroundImage || '../../../images/default-bg.jpg'}}"
+          mode="aspectFill"
+        />
+        <view class="background-overlay">
+          <view class="background-tip">点击更换背景</view>
+        </view>
+      </view>
+    </view>
+
     <!-- 头像选择 -->
     <view class="form-item">
       <view class="form-label">头像</view>
       <view class="avatar-section" bindtap="chooseAvatar">
-        <image 
-          class="avatar-preview" 
-          src="{{formData.avatar || '../../../images/icon/我的icon.png'}}" 
+        <image
+          class="avatar-preview"
+          src="{{formData.avatar || '../../../images/icon/我的icon.png'}}"
           mode="aspectFill"
         />
         <view class="avatar-tip">点击更换头像</view>
       </view>
     </view>
 
+    <!-- 用户ID -->
+    <view class="form-item">
+      <view class="form-label">用户ID {{isNewUser ? '' : '(不可修改)'}}</view>
+      <input
+        class="form-input {{isNewUser ? '' : 'disabled'}}"
+        placeholder="{{isNewUser ? '请输入用户ID（4-20位字母数字）' : '用户ID不可修改'}}"
+        value="{{formData.customId}}"
+        bindinput="inputCustomId"
+        maxlength="20"
+        disabled="{{!isNewUser}}"
+      />
+      <view wx:if="{{isNewUser}}" class="form-hint">用户ID一旦设置不可修改，建议使用易记的字母数字组合</view>
+    </view>
+
     <!-- 昵称 -->
     <view class="form-item">
       <view class="form-label">昵称 *</view>
-      <input 
-        class="form-input" 
-        placeholder="请输入昵称" 
+      <input
+        class="form-input"
+        placeholder="请输入昵称"
         value="{{formData.nickname}}"
         bindinput="inputNickname"
         maxlength="20"
       />
     </view>
 
+    <!-- 个性签名 -->
+    <view class="form-item">
+      <view class="form-label">个性签名</view>
+      <input
+        class="form-input"
+        placeholder="写下你的个性签名..."
+        value="{{formData.signature}}"
+        bindinput="inputSignature"
+        maxlength="30"
+      />
+      <view class="char-count">{{formData.signature.length}}/30</view>
+    </view>
+
     <!-- 手机号 -->
     <view class="form-item">
       <view class="form-label">手机号</view>
-      <input 
-        class="form-input" 
-        placeholder="请输入手机号" 
+      <input
+        class="form-input"
+        placeholder="请输入手机号"
         value="{{formData.phone}}"
         bindinput="inputPhone"
         type="number"
@@ -46,9 +92,9 @@
     <!-- 地区 -->
     <view class="form-item">
       <view class="form-label">地区</view>
-      <input 
-        class="form-input" 
-        placeholder="请输入所在地区" 
+      <input
+        class="form-input"
+        placeholder="请输入所在地区"
         value="{{formData.region}}"
         bindinput="inputRegion"
         maxlength="50"
@@ -58,9 +104,9 @@
     <!-- 个人简介 -->
     <view class="form-item">
       <view class="form-label">个人简介</view>
-      <textarea 
-        class="form-textarea" 
-        placeholder="介绍一下自己的网球经历和水平..." 
+      <textarea
+        class="form-textarea"
+        placeholder="介绍一下自己的网球经历和水平..."
         value="{{formData.bio}}"
         bindinput="inputBio"
         maxlength="200"
@@ -73,8 +119,8 @@
   <!-- 操作按钮 -->
   <view class="form-actions">
     <button class="btn-cancel" bindtap="cancel">取消</button>
-    <button 
-      class="btn-save {{submitting ? 'disabled' : ''}}" 
+    <button
+      class="btn-save {{submitting ? 'disabled' : ''}}"
       bindtap="saveProfile"
       disabled="{{submitting}}"
     >

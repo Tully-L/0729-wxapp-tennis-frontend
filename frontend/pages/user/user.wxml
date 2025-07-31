@@ -19,11 +19,24 @@
     <block wx:elif="{{profile}}">
       <!-- Profile Header -->
       <view class="profile-header">
+        <!-- Background Image -->
+        <image
+          class="profile-background"
+          src="{{profile.backgroundImage || '../../images/default-bg.jpg'}}"
+          mode="aspectFill"
+        />
+        <view class="profile-header-overlay"></view>
+
         <view class="profile-header-content">
-          <image class="profile-avatar" src="../../images/icon/我的icon.png" mode="aspectFit"/>
+          <image
+            class="profile-avatar"
+            src="{{profile.avatar || '../../images/icon/我的icon.png'}}"
+            mode="aspectFill"
+          />
           <view class="profile-info">
             <view class="profile-name">{{profile.nickname || '网球选手'}}</view>
-            <view class="profile-id">ID: {{profile.id || 'N/A'}}</view>
+            <view class="profile-id">ID: {{profile.customId || profile.id || 'N/A'}}</view>
+            <view wx:if="{{profile.signature}}" class="profile-signature">{{profile.signature}}</view>
           </view>
           <view class="profile-actions">
             <view class="profile-edit" bindtap="editProfile">

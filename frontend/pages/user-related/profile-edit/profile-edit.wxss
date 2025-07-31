@@ -6,7 +6,9 @@
 }
 
 .header {
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 20rpx 0 40rpx;
 }
 
@@ -14,6 +16,26 @@
   font-size: 36rpx;
   font-weight: 500;
   color: var(--text-primary);
+}
+
+.wechat-sync {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 20rpx;
+  background-color: #07C160;
+  border-radius: 20rpx;
+  color: white;
+  font-size: 24rpx;
+}
+
+.wechat-icon {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 8rpx;
+}
+
+.sync-text {
+  font-size: 24rpx;
 }
 
 .form-content {
@@ -53,6 +75,18 @@
   border-color: var(--primary-color);
 }
 
+.form-input.disabled {
+  background-color: #F5F5F5;
+  color: var(--text-tertiary);
+}
+
+.form-hint {
+  font-size: 24rpx;
+  color: var(--text-tertiary);
+  margin-top: 8rpx;
+  line-height: 1.4;
+}
+
 .form-textarea {
   width: 100%;
   min-height: 120rpx;
@@ -73,6 +107,39 @@
   font-size: 24rpx;
   color: var(--text-tertiary);
   margin-top: 8rpx;
+}
+
+/* 背景图片选择 */
+.background-section {
+  position: relative;
+  width: 100%;
+  height: 200rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  border: 2rpx solid var(--border-color);
+}
+
+.background-preview {
+  width: 100%;
+  height: 100%;
+}
+
+.background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.background-tip {
+  color: white;
+  font-size: 28rpx;
+  font-weight: 500;
 }
 
 /* 头像选择 */

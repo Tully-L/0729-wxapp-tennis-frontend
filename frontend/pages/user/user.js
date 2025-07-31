@@ -119,8 +119,11 @@ Page({
     // 使用模拟数据，因为API返回的是模拟数据
     const mockProfile = {
       id: this.data.userInfo ? (this.data.userInfo.id || 'user123') : 'user123',
+      customId: this.data.userInfo ? this.data.userInfo.customId : null,
       nickname: this.data.userInfo ? (this.data.userInfo.nickName || '网球选手') : '网球选手',
+      signature: this.data.userInfo ? this.data.userInfo.signature : null,
       avatar: this.data.userInfo ? this.data.userInfo.avatarUrl : null,
+      backgroundImage: this.data.userInfo ? this.data.userInfo.backgroundImage : null,
       stats: {
         participationCount: 15,
         wins: 10,
