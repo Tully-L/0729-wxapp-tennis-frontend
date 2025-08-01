@@ -1,0 +1,143 @@
+<!-- match-filter.wxml - 比赛筛选组件 -->
+<view class="match-filter-container">
+  <!-- 筛选头部 -->
+  <view class="filter-header">
+    <view class="filter-title">
+      <text class="title-icon">🎾</text>
+      <text class="title-text">比赛筛选</text>
+    </view>
+    <view class="filter-actions">
+      <text class="reset-btn" bindtap="resetFilters">重置</text>
+      <text class="close-btn" bindtap="closeFilter">✕</text>
+    </view>
+  </view>
+
+  <!-- 赛事项目筛选 -->
+  <view class="filter-section">
+    <view class="section-title">
+      <text class="section-icon">🏆</text>
+      <text class="section-text">赛事项目</text>
+    </view>
+    <view class="event-type-grid">
+      <view 
+        wx:for="{{eventTypes}}" 
+        wx:key="id"
+        class="event-type-item {{filters.eventType === item.id ? 'active' : ''}}"
+        bindtap="selectEventType"
+        data-type="{{item.id}}"
+      >
+        <view class="event-icon">{{item.icon}}</view>
+        <text class="event-name">{{item.name}}</text>
+        <text class="event-count">{{item.count}}场</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 比赛状态筛选 -->
+  <view class="filter-section">
+    <view class="section-title">
+      <text class="section-icon">⚡</text>
+      <text class="section-text">比赛状态</text>
+    </view>
+    <view class="status-chips">
+      <view 
+        wx:for="{{statusOptions}}" 
+        wx:key="id"
+        class="status-chip {{filters.status === item.id ? 'active' : ''}}"
+        bindtap="selectStatus"
+        data-status="{{item.id}}"
+      >
+        <text class="chip-icon">{{item.icon}}</text>
+        <text class="chip-text">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 地区搜索 -->
+  <view class="filter-section">
+    <view class="section-title">
+      <text class="section-icon">📍</text>
+      <text class="section-text">地区</text>
+    </view>
+    <region-search
+      placeholder="搜索城市或地区"
+      showHotRegions="{{true}}"
+      showRecentSearches="{{true}}"
+      maxSuggestions="{{8}}"
+      bindselect="onRegionSelect"
+      bindclear="onRegionClear"
+    />
+  </view>
+
+  <!-- 时间选择 -->
+  <view class="filter-section">
+    <view class="section-title">
+      <text class="section-icon">📅</text>
+      <text class="section-text">时间范围</text>
+    </view>
+
+    <!-- 时间选择触发器 -->
+    <view class="time-selector" bindtap="showTimePicker">
+      <view class="time-display">
+        <text class="time-text">{{getTimeDisplayText()}}</text>
+        <text class="time-icon">⏰</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 时间选择器 -->
+  <time-picker
+    visible="{{showTimePickerModal}}"
+    showTimeRange="{{true}}"
+    showDigitalTime="{{true}}"
+    defaultStartDate="{{filters.startDate}}"
+    defaultEndDate="{{filters.endDate}}"
+    bindconfirm="onTimePickerConfirm"
+    bindcancel="onTimePickerCancel"
+  />
+
+  <!-- 选手搜索 -->
+  <view class="filter-section">
+    <view class="section-title">
+      <text class="section-icon">👤</text>
+      <text class="section-text">选手</text>
+    </view>
+    <view class="player-search">
+      <input 
+        class="player-input"
+        placeholder="搜索选手姓名"
+        value="{{filters.player}}"
+        bindinput="onPlayerInput"
+        bindconfirm="searchPlayer"
+      />
+      <view wx:if="{{playerSuggestions.length > 0}}" class="player-suggestions">
+        <view 
+          wx:for="{{playerSuggestions}}" 
+          wx:key="id"
+          class="player-suggestion"
+          bindtap="selectPlayer"
+          data-player="{{item.name}}"
+        >
+          <image class="player-avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill"/>
+          <view class="player-info">
+            <text class="player-name">{{item.name}}</text>
+            <text class="player-rank">排名: {{item.ranking || 'N/A'}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 应用筛选按钮 -->
+  <view class="filter-footer">
+    <view class="results-count">
+      <text class="count-text">找到 {{filteredCount}} 场比赛</text>
+    </view>
+    <button class="apply-filter-btn" bindtap="applyFilters">
+      <text class="btn-text">应用筛选</text>
+    </button>
+  </view>
+</view>
+
+<!-- 遮罩层 -->
+<view wx:if="{{showFilter}}" class="filter-mask" bindtap="closeFilter"></view>

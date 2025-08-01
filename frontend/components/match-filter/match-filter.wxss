@@ -1,0 +1,400 @@
+/* match-filter.wxss - 比赛筛选组件样式 */
+
+.match-filter-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100vh;
+  background: #ffffff;
+  z-index: 1000;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+
+.match-filter-container.show {
+  transform: translateX(0);
+}
+
+.filter-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* 筛选头部 */
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.filter-title {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.title-icon {
+  font-size: 40rpx;
+}
+
+.title-text {
+  font-size: 36rpx;
+  font-weight: 600;
+}
+
+.filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 30rpx;
+}
+
+.reset-btn {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 10rpx 20rpx;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20rpx;
+}
+
+.close-btn {
+  font-size: 40rpx;
+  color: white;
+  padding: 10rpx;
+}
+
+/* 筛选区块 */
+.filter-section {
+  padding: 40rpx 30rpx;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+  margin-bottom: 30rpx;
+}
+
+.section-icon {
+  font-size: 32rpx;
+}
+
+.section-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 赛事项目网格 */
+.event-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.event-type-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30rpx 20rpx;
+  background: #f8f9fa;
+  border-radius: 16rpx;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.event-type-item.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+}
+
+.event-icon {
+  font-size: 40rpx;
+  margin-bottom: 10rpx;
+}
+
+.event-name {
+  font-size: 28rpx;
+  font-weight: 500;
+  margin-bottom: 5rpx;
+}
+
+.event-count {
+  font-size: 24rpx;
+  opacity: 0.7;
+}
+
+/* 状态筛选 */
+.status-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15rpx;
+}
+
+.status-chip {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 15rpx 25rpx;
+  background: #f8f9fa;
+  border-radius: 25rpx;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.status-chip.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.chip-icon {
+  font-size: 24rpx;
+}
+
+.chip-text {
+  font-size: 26rpx;
+  font-weight: 500;
+}
+
+/* 地区搜索 */
+.region-search {
+  position: relative;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #f8f9fa;
+  border-radius: 25rpx;
+  padding: 0 20rpx;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+.search-input-wrapper:focus-within {
+  border-color: #667eea;
+}
+
+.region-input {
+  flex: 1;
+  padding: 20rpx 15rpx;
+  font-size: 28rpx;
+  background: transparent;
+  border: none;
+}
+
+.search-icon {
+  font-size: 32rpx;
+  color: #666;
+  padding: 10rpx;
+}
+
+.region-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 16rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  max-height: 400rpx;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+  padding: 20rpx 25rpx;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-icon {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.suggestion-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.suggestion-count {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 时间选择 */
+.time-selector {
+  margin-bottom: 20rpx;
+}
+
+.time-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  background: #f8f9fa;
+  border: 2rpx solid transparent;
+  border-radius: 12rpx;
+  transition: all 0.3s ease;
+}
+
+.time-display:active {
+  background: #e3f2fd;
+  border-color: #667eea;
+}
+
+.time-text {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.time-icon {
+  font-size: 24rpx;
+  color: #666;
+}
+
+
+
+/* 选手搜索 */
+.player-search {
+  position: relative;
+}
+
+.player-input {
+  width: 100%;
+  padding: 20rpx 25rpx;
+  background: #f8f9fa;
+  border-radius: 25rpx;
+  border: 2px solid transparent;
+  font-size: 28rpx;
+  transition: border-color 0.3s ease;
+}
+
+.player-input:focus {
+  border-color: #667eea;
+}
+
+.player-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 16rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  max-height: 400rpx;
+  overflow-y: auto;
+}
+
+.player-suggestion {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 20rpx 25rpx;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.player-suggestion:last-child {
+  border-bottom: none;
+}
+
+.player-avatar {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+}
+
+.player-info {
+  flex: 1;
+}
+
+.player-name {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.player-rank {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 5rpx;
+}
+
+/* 底部按钮 */
+.filter-footer {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 30rpx;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.results-count {
+  flex: 1;
+}
+
+.count-text {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.apply-filter-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 25rpx;
+  padding: 20rpx 40rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.btn-text {
+  color: white;
+}
+
+/* 响应式设计 */
+@media (max-width: 750rpx) {
+  .event-type-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .date-picker-row {
+    flex-direction: column;
+  }
+
+  .filter-footer {
+    flex-direction: column;
+    gap: 20rpx;
+  }
+
+  .apply-filter-btn {
+    width: 100%;
+  }
+}

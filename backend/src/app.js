@@ -17,6 +17,8 @@ const Match = require('./models/Match');
 const authRoutes = require('./routes/auth');
 const eventRoutes = require('./routes/events');
 const matchRoutes = require('./routes/matches');
+const gameRoutes = require('./routes/games');
+const regionRoutes = require('./routes/regions');
 const paymentRoutes = require('./routes/payments');
 const websocketRoutes = require('./routes/websocket');
 const notificationRoutes = require('./routes/notifications');
@@ -54,6 +56,8 @@ app.use(ensureUtf8Encoding);
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/matches', matchRoutes);
+app.use('/api/games', gameRoutes);
+app.use('/api/regions', regionRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/websocket', websocketRoutes);
 app.use('/api/notifications', notificationRoutes);
@@ -62,7 +66,7 @@ app.use('/api/notifications', notificationRoutes);
 app.get('/health', async (req, res) => {
   try {
     const dbStats = await getDBStats();
-    
+
     res.json({
       success: true,
       message: 'Tennis Heat API is running',
@@ -86,6 +90,69 @@ app.get('/health', async (req, res) => {
       timestamp: new Date().toISOString()
     });
   }
+});
+
+// API健康检查（用于部署脚本）
+app.get('/api/health', async (req, res) => {
+  try {
+    const healthCheck = {
+      status: 'OK',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      message: '网球小程序后端服务运行正常',
+      version: '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      services: {
+        database: checkConnection() ? 'connected' : 'disconnected',
+        api: 'operational',
+        websocket: !!app.locals.socketService ? 'ready' : 'not_ready'
+      }
+    };
+
+    res.status(200).json(healthCheck);
+  } catch (error) {
+    res.status(503).json({
+      status: 'ERROR',
+      message: '服务异常',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// API信息端点
+app.get('/api/info', (req, res) => {
+  res.json({
+    name: '网球小程序API',
+    version: '1.0.0',
+    description: '网球比赛数据管理系统API',
+    features: [
+      '比赛数据管理',
+      '状态管理系统',
+      '分离式布局支持',
+      '火热报名功能',
+      '用户权限控制',
+      '实时数据同步'
+    ],
+    endpoints: {
+      health: '/api/health',
+      info: '/api/info',
+      auth: '/api/auth/*',
+      events: '/api/events/*',
+      matches: '/api/matches/*',
+      games: '/api/games/*',
+      regions: '/api/regions/*',
+      payments: '/api/payments/*',
+      websocket: '/api/websocket/*',
+      notifications: '/api/notifications/*'
+    },
+    newFeatures: {
+      separatedLayout: '分离式布局 - 比赛数据与报名入口分离',
+      statusManagement: '状态管理 - 完整的比赛状态管理系统',
+      hotRegistrations: '火热报名 - 热门报名机会展示',
+      realTimeUpdates: '实时更新 - WebSocket实时数据同步'
+    }
+  });
 });
 
 // 测试路由

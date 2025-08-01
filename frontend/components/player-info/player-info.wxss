@@ -1,0 +1,307 @@
+/* player-info.wxss - 选手信息组件样式 */
+
+.player-info-container {
+  width: 100%;
+}
+
+/* 单打布局 */
+.singles-layout {
+  width: 100%;
+}
+
+.player-card {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 20rpx;
+  background: var(--card-background);
+  border-radius: 16rpx;
+  border: 1px solid var(--border-color);
+}
+
+.player-avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.player-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+}
+
+.player-avatar.small {
+  width: 60rpx;
+  height: 60rpx;
+}
+
+.ranking-badge {
+  position: absolute;
+  bottom: -5rpx;
+  right: -5rpx;
+  background: var(--primary-color);
+  color: var(--text-on-primary);
+  border-radius: 12rpx;
+  padding: 2rpx 8rpx;
+  font-size: 18rpx;
+  font-weight: 600;
+  border: 2px solid white;
+}
+
+.ranking-badge.small {
+  padding: 1rpx 6rpx;
+  font-size: 16rpx;
+}
+
+.ranking-text {
+  color: inherit;
+}
+
+.player-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.player-name {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-meta {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+  margin-bottom: 10rpx;
+}
+
+.player-country {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  background: var(--background-color);
+  padding: 4rpx 10rpx;
+  border-radius: 8rpx;
+}
+
+.player-age {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+}
+
+.player-stats {
+  display: flex;
+  gap: 20rpx;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.stat-label {
+  font-size: 20rpx;
+  color: var(--text-secondary);
+}
+
+.stat-value {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+/* 双打布局 */
+.doubles-layout {
+  width: 100%;
+}
+
+.doubles-team {
+  display: flex;
+  gap: 15rpx;
+  padding: 20rpx;
+  background: var(--card-background);
+  border-radius: 16rpx;
+  border: 1px solid var(--border-color);
+}
+
+.doubles-player {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.doubles-player .player-details {
+  flex: 1;
+}
+
+.doubles-player .player-name {
+  font-size: 28rpx;
+  margin-bottom: 4rpx;
+}
+
+.doubles-player .player-country {
+  font-size: 22rpx;
+  padding: 2rpx 8rpx;
+}
+
+.team-stats {
+  display: flex;
+  justify-content: center;
+  gap: 30rpx;
+  margin-top: 15rpx;
+  padding: 15rpx;
+  background: var(--background-color);
+  border-radius: 12rpx;
+}
+
+/* 紧凑布局 */
+.compact-layout {
+  width: 100%;
+}
+
+.compact-team {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.team-avatars {
+  flex-shrink: 0;
+}
+
+.avatar-compact {
+  width: 50rpx;
+  height: 50rpx;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+}
+
+.doubles-avatars {
+  display: flex;
+  gap: 5rpx;
+}
+
+.doubles-avatars .avatar-compact {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+.team-names {
+  flex: 1;
+  min-width: 0;
+}
+
+.name-compact {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.doubles-names {
+  display: flex;
+  flex-direction: column;
+  gap: 2rpx;
+}
+
+.doubles-names .name-compact {
+  font-size: 24rpx;
+}
+
+.team-ranking {
+  flex-shrink: 0;
+}
+
+.ranking-compact {
+  font-size: 20rpx;
+  color: var(--text-secondary);
+  background: var(--background-color);
+  padding: 4rpx 8rpx;
+  border-radius: 8rpx;
+}
+
+.doubles-ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 2rpx;
+}
+
+/* 头像列表布局 */
+.avatar-list-layout {
+  width: 100%;
+}
+
+.avatar-list {
+  display: flex;
+  gap: 20rpx;
+}
+
+.doubles-avatar-group {
+  display: flex;
+  gap: 15rpx;
+}
+
+.avatar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  padding: 15rpx;
+  border-radius: 12rpx;
+  transition: all 0.3s ease;
+}
+
+.avatar-item:active {
+  background: var(--background-color);
+  transform: scale(0.95);
+}
+
+.avatar-list-img {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+}
+
+.avatar-list-name {
+  font-size: 22rpx;
+  color: var(--text-primary);
+  text-align: center;
+  max-width: 80rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 响应式设计 */
+@media (max-width: 750rpx) {
+  .doubles-team {
+    flex-direction: column;
+    gap: 10rpx;
+  }
+  
+  .doubles-player {
+    justify-content: center;
+  }
+  
+  .team-stats {
+    flex-direction: column;
+    gap: 15rpx;
+  }
+  
+  .stat-item {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}

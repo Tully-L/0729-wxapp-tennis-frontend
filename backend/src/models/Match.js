@@ -39,6 +39,27 @@ const matchSchema = new mongoose.Schema({
     required: true,
     enum: ['男子单打', '女子单打', '男子双打', '女子双打', '混合双打']
   },
+
+  // 英文类型标识（用于API和筛选）
+  eventTypeId: {
+    type: String,
+    required: true,
+    enum: ['mens_singles', 'womens_singles', 'mens_doubles', 'womens_doubles', 'mixed_doubles']
+  },
+
+  // 性别分类（用于快速筛选）
+  gender: {
+    type: String,
+    required: true,
+    enum: ['men', 'women', 'mixed']
+  },
+
+  // 比赛形式
+  format: {
+    type: String,
+    required: true,
+    enum: ['singles', 'doubles']
+  },
   
   // 比赛状态和阶段
   status: {
@@ -104,8 +125,14 @@ const matchSchema = new mongoose.Schema({
     default: 3 // 3盘制或5盘制
   },
   
-  // 比分统计
-  score: {
+  // 比分统计 - 引用Set模型
+  sets: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Set'
+  }],
+
+  // 当前比分摘要（用于快速显示）
+  scoreSummary: {
     sets: [{
       setNumber: Number,
       team1Score: Number,
@@ -120,6 +147,15 @@ const matchSchema = new mongoose.Schema({
       type: String,
       enum: ['team1', 'team2', null],
       default: null
+    },
+    currentSet: {
+      type: Number,
+      default: 1
+    },
+    currentGame: {
+      team1Score: { type: String, default: '0' },
+      team2Score: { type: String, default: '0' },
+      server: { type: String, enum: ['team1', 'team2'], default: 'team1' }
     }
   },
   
@@ -388,22 +424,106 @@ matchSchema.methods.updateStatusBasedOnTime = function() {
 
 // 方法：获取当前比分摘要
 matchSchema.methods.getScoreSummary = function() {
-  const sets = this.score.sets.map(set => ({
+  // 如果有scoreSummary字段，直接返回
+  if (this.scoreSummary && this.scoreSummary.sets.length > 0) {
+    return {
+      sets: this.scoreSummary.sets,
+      winner: this.scoreSummary.winner,
+      isCompleted: this.status === '已结束',
+      currentSet: this.scoreSummary.currentSet,
+      currentGame: this.scoreSummary.currentGame,
+      setsWon: {
+        team1: this.scoreSummary.sets.filter(set => set.team1Score > set.team2Score).length,
+        team2: this.scoreSummary.sets.filter(set => set.team2Score > set.team1Score).length
+      },
+      scoreString: this.scoreString
+    };
+  }
+
+  // 兼容旧的score.sets格式
+  const sets = this.score?.sets?.map(set => ({
     setNumber: set.setNumber,
     team1Score: set.team1Score,
     team2Score: set.team2Score,
-    tiebreak: set.tiebreak.played ? {
+    tiebreak: set.tiebreak?.played ? {
       team1Score: set.tiebreak.team1Score,
       team2Score: set.tiebreak.team2Score
     } : null
-  }));
-  
+  })) || [];
+
   return {
     sets: sets,
-    winner: this.score.winner,
+    winner: this.score?.winner || null,
     isCompleted: this.status === '已结束',
+    currentSet: sets.length > 0 ? sets.length : 1,
+    currentGame: {
+      team1Score: '0',
+      team2Score: '0',
+      server: 'team1'
+    },
+    setsWon: {
+      team1: sets.filter(set => set.team1Score > set.team2Score).length,
+      team2: sets.filter(set => set.team2Score > set.team1Score).length
+    },
     scoreString: this.scoreString
   };
+};
+
+// 方法：创建新的盘
+matchSchema.methods.createNewSet = async function(setNumber) {
+  const Set = require('./Set');
+
+  const newSet = new Set({
+    matchId: this._id,
+    setNumber: setNumber || (this.sets.length + 1),
+    status: '进行中'
+  });
+
+  await newSet.save();
+  this.sets.push(newSet._id);
+
+  // 更新scoreSummary
+  if (!this.scoreSummary) {
+    this.scoreSummary = { sets: [], currentSet: 1, currentGame: { team1Score: '0', team2Score: '0', server: 'team1' } };
+  }
+  this.scoreSummary.currentSet = setNumber || (this.sets.length);
+
+  return this.save();
+};
+
+// 方法：更新当前局比分
+matchSchema.methods.updateCurrentGame = function(team1Score, team2Score, server) {
+  if (!this.scoreSummary) {
+    this.scoreSummary = { sets: [], currentSet: 1, currentGame: { team1Score: '0', team2Score: '0', server: 'team1' } };
+  }
+
+  this.scoreSummary.currentGame = {
+    team1Score: team1Score || '0',
+    team2Score: team2Score || '0',
+    server: server || 'team1'
+  };
+
+  return this.save();
+};
+
+// 方法：设置赛事分类
+matchSchema.methods.setEventClassification = function() {
+  const typeMapping = {
+    '男子单打': { id: 'mens_singles', gender: 'men', format: 'singles' },
+    '女子单打': { id: 'womens_singles', gender: 'women', format: 'singles' },
+    '男子双打': { id: 'mens_doubles', gender: 'men', format: 'doubles' },
+    '女子双打': { id: 'womens_doubles', gender: 'women', format: 'doubles' },
+    '混合双打': { id: 'mixed_doubles', gender: 'mixed', format: 'doubles' }
+  };
+
+  const mapping = typeMapping[this.eventType];
+  if (mapping) {
+    this.eventTypeId = mapping.id;
+    this.gender = mapping.gender;
+    this.format = mapping.format;
+  }
+
+  return this;
 };
 
 // 方法：添加观众
@@ -927,5 +1047,25 @@ matchSchema.statics.getRecommendedMatches = async function(userId, options = {})
     total: recommendedMatches.length
   };
 };
+
+// Pre-save钩子：自动设置赛事分类
+matchSchema.pre('save', function(next) {
+  if (this.isModified('eventType') || this.isNew) {
+    this.setEventClassification();
+  }
+  next();
+});
+
+// 索引
+matchSchema.index({ eventId: 1, scheduledTime: 1 });
+matchSchema.index({ status: 1, scheduledTime: 1 });
+matchSchema.index({ 'organizer.id': 1 });
+matchSchema.index({ region: 1 });
+matchSchema.index({ eventType: 1 });
+matchSchema.index({ eventTypeId: 1 });
+matchSchema.index({ gender: 1 });
+matchSchema.index({ format: 1 });
+matchSchema.index({ tags: 1 });
+matchSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model('Match', matchSchema);

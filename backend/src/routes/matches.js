@@ -3,11 +3,17 @@ const router = express.Router();
 const matchController = require('../controllers/matchController');
 const { auth, optionalAuth } = require('../middleware/auth');
 
+// 引入状态管理路由
+const matchStatusRoutes = require('./matchStatus');
+
 // 获取比赛列表（可选认证）
 router.get('/', optionalAuth, matchController.getMatches);
 
 // 获取比赛统计概览（可选认证）
 router.get('/stats', optionalAuth, matchController.getMatchStats);
+
+// 获取赛事分类统计（可选认证）
+router.get('/event-type-stats', optionalAuth, matchController.getEventTypeStats);
 
 // 获取实时比赛列表（可选认证）
 router.get('/live', optionalAuth, matchController.getLiveMatches);
@@ -54,4 +60,7 @@ router.post('/:matchId/spectators', auth, matchController.addSpectator);
 // 移除观众（需要认证）
 router.delete('/:matchId/spectators', auth, matchController.removeSpectator);
 
-module.exports = router; 
+// 使用状态管理路由
+router.use('/', matchStatusRoutes);
+
+module.exports = router;

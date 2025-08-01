@@ -1,0 +1,94 @@
+<!-- region-search.wxml - 地区搜索组件 -->
+<view class="region-search-container">
+  <!-- 搜索输入框 -->
+  <view class="search-input-wrapper">
+    <view class="search-icon">🔍</view>
+    <input 
+      class="search-input"
+      placeholder="{{placeholder}}"
+      value="{{searchValue}}"
+      bindinput="onSearchInput"
+      bindfocus="onSearchFocus"
+      bindblur="onSearchBlur"
+      bindconfirm="onSearchConfirm"
+    />
+    <view wx:if="{{searchValue}}" class="clear-btn" bindtap="clearSearch">
+      <text class="clear-icon">✕</text>
+    </view>
+  </view>
+
+  <!-- 搜索建议列表 -->
+  <view wx:if="{{showSuggestions && suggestions.length > 0}}" class="suggestions-container">
+    <scroll-view class="suggestions-list" scroll-y="{{true}}" style="max-height: 400rpx;">
+      <view 
+        wx:for="{{suggestions}}" 
+        wx:key="id"
+        class="suggestion-item {{item.type}}"
+        bindtap="onSuggestionTap"
+        data-suggestion="{{item}}"
+      >
+        <view class="suggestion-icon">
+          <text class="location-icon">{{getSuggestionIcon(item.type)}}</text>
+        </view>
+        <view class="suggestion-content">
+          <text class="suggestion-name">{{item.name}}</text>
+          <text class="suggestion-path">{{item.fullPath}}</text>
+        </view>
+        <view wx:if="{{item.matchCount}}" class="match-count">
+          <text class="count-text">{{item.matchCount}}场</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 热门地区 -->
+  <view wx:if="{{showHotRegions && hotRegions.length > 0}}" class="hot-regions-container">
+    <view class="hot-regions-title">
+      <text class="title-text">热门地区</text>
+    </view>
+    <view class="hot-regions-grid">
+      <view 
+        wx:for="{{hotRegions}}" 
+        wx:key="id"
+        class="hot-region-item"
+        bindtap="onHotRegionTap"
+        data-region="{{item}}"
+      >
+        <text class="hot-region-name">{{item.name}}</text>
+        <text class="hot-region-count">{{item.matchCount}}场</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最近搜索 -->
+  <view wx:if="{{showRecentSearches && recentSearches.length > 0}}" class="recent-searches-container">
+    <view class="recent-searches-header">
+      <text class="recent-title">最近搜索</text>
+      <text class="clear-recent" bindtap="clearRecentSearches">清除</text>
+    </view>
+    <view class="recent-searches-list">
+      <view 
+        wx:for="{{recentSearches}}" 
+        wx:key="index"
+        class="recent-search-item"
+        bindtap="onRecentSearchTap"
+        data-search="{{item}}"
+      >
+        <text class="recent-search-text">{{item.name}}</text>
+        <text class="recent-search-time">{{formatTime(item.timestamp)}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{showEmptyState}}" class="empty-state">
+    <view class="empty-icon">📍</view>
+    <text class="empty-text">{{emptyText}}</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-state">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">搜索中...</text>
+  </view>
+</view>

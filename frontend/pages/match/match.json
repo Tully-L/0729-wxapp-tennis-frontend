@@ -1,7 +1,11 @@
 {
   "navigationBarTitleText": "比赛",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 50,
   "usingComponents": {
     "fixed-tab-bar": "../../components/fixed-tab-bar/fixed-tab-bar",
-    "tab-content": "../../components/tab-content/tab-content"
+    "tab-content": "../../components/tab-content/tab-content",
+    "match-filter": "../../components/match-filter/match-filter",
+    "player-info": "../../components/player-info/player-info"
   }
 }

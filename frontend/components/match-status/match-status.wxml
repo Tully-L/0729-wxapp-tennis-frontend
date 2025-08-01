@@ -1,0 +1,161 @@
+<!-- match-status.wxml - 比赛状态管理组件 -->
+<view class="match-status-container">
+  <!-- 状态显示区域 -->
+  <view class="status-display">
+    <view class="status-badge {{getStatusClass(currentStatus)}}">
+      <text class="status-icon">{{getStatusIcon(currentStatus)}}</text>
+      <text class="status-text">{{getStatusDisplayText(currentStatus)}}</text>
+      <view wx:if="{{currentStatus === '比赛中'}}" class="live-indicator">
+        <text class="live-dot"></text>
+        <text class="live-text">LIVE</text>
+      </view>
+    </view>
+    
+    <!-- 状态时间信息 -->
+    <view class="status-time-info" wx:if="{{showTimeInfo}}">
+      <text class="time-label">{{getTimeLabel(currentStatus)}}</text>
+      <text class="time-value">{{getTimeValue(currentStatus)}}</text>
+    </view>
+  </view>
+
+  <!-- 状态操作按钮（仅有权限用户可见） -->
+  <view class="status-actions" wx:if="{{canManageStatus}}">
+    <view class="action-buttons">
+      <!-- 开始比赛 -->
+      <button 
+        wx:if="{{currentStatus === '报名中' && canStart}}"
+        class="action-btn start-btn"
+        bindtap="startMatch"
+      >
+        <text class="btn-icon">▶️</text>
+        <text class="btn-text">开始比赛</text>
+      </button>
+
+      <!-- 暂停比赛 -->
+      <button 
+        wx:if="{{currentStatus === '比赛中'}}"
+        class="action-btn pause-btn"
+        bindtap="pauseMatch"
+      >
+        <text class="btn-icon">⏸️</text>
+        <text class="btn-text">暂停比赛</text>
+      </button>
+
+      <!-- 恢复比赛 -->
+      <button 
+        wx:if="{{currentStatus === '已暂停'}}"
+        class="action-btn resume-btn"
+        bindtap="resumeMatch"
+      >
+        <text class="btn-icon">▶️</text>
+        <text class="btn-text">恢复比赛</text>
+      </button>
+
+      <!-- 结束比赛 -->
+      <button 
+        wx:if="{{currentStatus === '比赛中' || currentStatus === '已暂停'}}"
+        class="action-btn end-btn"
+        bindtap="endMatch"
+      >
+        <text class="btn-icon">🏁</text>
+        <text class="btn-text">结束比赛</text>
+      </button>
+
+      <!-- 取消比赛 -->
+      <button 
+        wx:if="{{currentStatus !== '已结束' && currentStatus !== '已取消'}}"
+        class="action-btn cancel-btn"
+        bindtap="cancelMatch"
+      >
+        <text class="btn-icon">❌</text>
+        <text class="btn-text">取消比赛</text>
+      </button>
+
+      <!-- 重新开放报名 -->
+      <button 
+        wx:if="{{currentStatus === '已取消' && canReopen}}"
+        class="action-btn reopen-btn"
+        bindtap="reopenRegistration"
+      >
+        <text class="btn-icon">🔄</text>
+        <text class="btn-text">重新开放</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 状态历史记录 -->
+  <view class="status-history" wx:if="{{showHistory && statusHistory.length > 0}}">
+    <view class="history-header">
+      <text class="history-title">状态变更记录</text>
+      <text class="history-toggle" bindtap="toggleHistory">
+        {{historyExpanded ? '收起' : '展开'}}
+      </text>
+    </view>
+    
+    <view class="history-list" wx:if="{{historyExpanded}}">
+      <view 
+        wx:for="{{statusHistory}}" 
+        wx:key="index" 
+        class="history-item"
+      >
+        <view class="history-status-change">
+          <text class="from-status">{{getStatusDisplayText(item.fromStatus)}}</text>
+          <text class="arrow">→</text>
+          <text class="to-status">{{getStatusDisplayText(item.toStatus)}}</text>
+        </view>
+        <view class="history-details">
+          <text class="history-time">{{formatTime(item.changedAt)}}</text>
+          <text class="history-user" wx:if="{{item.changedBy}}">{{item.changedBy.name}}</text>
+        </view>
+        <view class="history-reason" wx:if="{{item.reason}}">
+          <text class="reason-text">原因: {{item.reason}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 状态确认对话框 -->
+  <view class="status-modal" wx:if="{{showConfirmModal}}">
+    <view class="modal-overlay" bindtap="hideConfirmModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">确认{{pendingAction.title}}</text>
+      </view>
+      
+      <view class="modal-body">
+        <text class="modal-message">{{pendingAction.message}}</text>
+        
+        <!-- 原因输入 -->
+        <view class="reason-input" wx:if="{{pendingAction.needReason}}">
+          <text class="input-label">请输入原因（可选）:</text>
+          <textarea 
+            class="reason-textarea"
+            placeholder="请输入{{pendingAction.title}}的原因..."
+            value="{{reasonText}}"
+            bindinput="onReasonInput"
+            maxlength="200"
+          />
+          <text class="char-count">{{reasonText.length}}/200</text>
+        </view>
+      </view>
+      
+      <view class="modal-actions">
+        <button class="modal-btn cancel-btn" bindtap="hideConfirmModal">
+          取消
+        </button>
+        <button
+          class="modal-btn confirm-btn {{pendingAction.type}}-confirm"
+          bindtap="confirmAction"
+        >
+          确认{{pendingAction.title}}
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-overlay" wx:if="{{updating}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">更新状态中...</text>
+  </view>
+</view>

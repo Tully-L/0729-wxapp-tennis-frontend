@@ -1,0 +1,7 @@
+{
+  "component": true,
+  "usingComponents": {
+    "region-search": "../region-search/region-search",
+    "time-picker": "../time-picker/time-picker"
+  }
+}

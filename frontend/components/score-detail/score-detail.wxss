@@ -1,0 +1,404 @@
+/* score-detail.wxss - 详细比分显示组件样式 */
+
+.score-detail-container {
+  background: white;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+}
+
+/* 比赛状态头部 */
+.match-status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.status-indicator.live .status-dot {
+  width: 12rpx;
+  height: 12rpx;
+  background: #ff4757;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+.status-text {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.match-format {
+  font-size: 24rpx;
+  opacity: 0.9;
+}
+
+/* 选手信息区域 */
+.players-section {
+  display: flex;
+  align-items: center;
+  padding: 30rpx 24rpx;
+  background: #f8f9fa;
+}
+
+.team-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.team-info.winner {
+  background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin: -10rpx;
+}
+
+.team-players {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  width: 100%;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.player-avatar {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  border: 2rpx solid #e0e0e0;
+}
+
+.player-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.player-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.player-ranking {
+  font-size: 22rpx;
+  color: #666;
+}
+
+.team-label {
+  font-size: 22rpx;
+  color: #999;
+  text-align: center;
+}
+
+.vs-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 20rpx;
+}
+
+.vs-text {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #667eea;
+  background: white;
+  padding: 12rpx 20rpx;
+  border-radius: 20rpx;
+  border: 2rpx solid #667eea;
+}
+
+/* 比分表格 */
+.score-table {
+  margin: 20rpx 24rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  border: 1rpx solid #e0e0e0;
+}
+
+.score-header {
+  display: flex;
+  background: #667eea;
+  color: white;
+  font-weight: 600;
+}
+
+.score-row {
+  display: flex;
+  border-bottom: 1rpx solid #e0e0e0;
+}
+
+.score-row:last-child {
+  border-bottom: none;
+}
+
+.score-row.winner-row {
+  background: linear-gradient(90deg, #ffeaa7 0%, #fab1a0 100%);
+}
+
+.player-column {
+  flex: 2;
+  padding: 20rpx 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1rpx solid #e0e0e0;
+  font-size: 26rpx;
+}
+
+.set-column {
+  flex: 1;
+  padding: 20rpx 12rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 1rpx solid #e0e0e0;
+  min-width: 100rpx;
+}
+
+.total-column {
+  flex: 1;
+  padding: 20rpx 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 28rpx;
+}
+
+.set-label {
+  font-size: 22rpx;
+  text-align: center;
+}
+
+.set-score-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.set-score-cell.set-winner {
+  background: #e3f2fd;
+  border-radius: 8rpx;
+  padding: 8rpx;
+  margin: -8rpx;
+}
+
+.games-score {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.tiebreak-score {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  font-size: 20rpx;
+  color: #666;
+}
+
+.tiebreak-label {
+  font-size: 18rpx;
+}
+
+.tiebreak-value {
+  font-weight: 600;
+  color: #ff6b6b;
+}
+
+.team-name {
+  font-size: 24rpx;
+  font-weight: 500;
+  text-align: center;
+}
+
+.sets-won {
+  color: #667eea;
+}
+
+/* 当前局比分 */
+.current-game-score {
+  margin: 20rpx 24rpx;
+  padding: 24rpx;
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+  border-radius: 12rpx;
+  color: white;
+}
+
+.current-game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.current-game-title {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.current-set-info {
+  font-size: 22rpx;
+  opacity: 0.9;
+}
+
+.current-game-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30rpx;
+  margin-bottom: 15rpx;
+}
+
+.current-score-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.current-player {
+  font-size: 22rpx;
+  opacity: 0.9;
+}
+
+.current-points {
+  font-size: 48rpx;
+  font-weight: bold;
+}
+
+.current-score-separator {
+  font-size: 36rpx;
+  font-weight: bold;
+  opacity: 0.7;
+}
+
+.serving-indicator {
+  text-align: center;
+  font-size: 22rpx;
+  opacity: 0.9;
+}
+
+/* 无比分状态 */
+.no-score-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 24rpx;
+  gap: 20rpx;
+}
+
+.no-score-icon {
+  font-size: 80rpx;
+  opacity: 0.6;
+}
+
+.no-score-text {
+  font-size: 28rpx;
+  color: #666;
+  text-align: center;
+}
+
+.match-time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  padding: 16rpx 24rpx;
+  background: #f8f9fa;
+  border-radius: 8rpx;
+}
+
+.time-label {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.time-value {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+/* 比赛统计 */
+.match-stats-summary {
+  margin: 20rpx 24rpx;
+  padding: 24rpx;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+}
+
+.stats-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.stats-grid {
+  display: flex;
+  justify-content: space-around;
+  gap: 20rpx;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  flex: 1;
+}
+
+.stat-icon {
+  font-size: 32rpx;
+}
+
+.stat-label {
+  font-size: 22rpx;
+  color: #666;
+}
+
+.stat-value {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.stat-value.intensity-high {
+  color: #ff6b6b;
+}
+
+.stat-value.intensity-medium {
+  color: #ffa726;
+}
+
+.stat-value.intensity-low {
+  color: #66bb6a;
+}

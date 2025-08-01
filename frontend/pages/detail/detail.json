@@ -1,4 +1,7 @@
 {
   "navigationBarTitleText": "比赛详情",
-  "usingComponents": {}
-} 
+  "usingComponents": {
+    "score-detail": "../../components/score-detail/score-detail",
+    "match-status": "../../components/match-status/match-status"
+  }
+}

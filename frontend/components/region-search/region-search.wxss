@@ -1,0 +1,315 @@
+/* region-search.wxss - 地区搜索组件样式 */
+
+.region-search-container {
+  width: 100%;
+  background: var(--card-background);
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+/* 搜索输入框 */
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--background-color);
+  border-radius: 12rpx;
+  padding: 0 20rpx;
+  margin: 20rpx;
+  border: 2rpx solid var(--border-color);
+  transition: border-color 0.3s ease;
+}
+
+.search-input-wrapper:focus-within {
+  border-color: var(--primary-color);
+}
+
+.search-icon {
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  margin-right: 15rpx;
+}
+
+.search-input {
+  flex: 1;
+  height: 80rpx;
+  font-size: 28rpx;
+  color: var(--text-primary);
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.clear-btn {
+  padding: 10rpx;
+  margin-left: 10rpx;
+}
+
+.clear-icon {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+}
+
+/* 搜索建议列表 */
+.suggestions-container {
+  border-top: 1rpx solid var(--border-color);
+  background: var(--card-background);
+}
+
+.suggestions-list {
+  max-height: 400rpx;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  border-bottom: 1rpx solid var(--border-light);
+  transition: background-color 0.3s ease;
+}
+
+.suggestion-item:active {
+  background: var(--background-color);
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-icon {
+  flex-shrink: 0;
+  margin-right: 15rpx;
+}
+
+.location-icon {
+  font-size: 32rpx;
+}
+
+.suggestion-item.province .location-icon {
+  color: #FF6B35;
+}
+
+.suggestion-item.city .location-icon {
+  color: #4ECDC4;
+}
+
+.suggestion-item.district .location-icon {
+  color: #45B7D1;
+}
+
+.suggestion-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.suggestion-name {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 4rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestion-path {
+  font-size: 22rpx;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.match-count {
+  flex-shrink: 0;
+  margin-left: 15rpx;
+}
+
+.count-text {
+  font-size: 20rpx;
+  color: var(--primary-color);
+  background: var(--primary-light);
+  padding: 4rpx 10rpx;
+  border-radius: 8rpx;
+}
+
+/* 热门地区 */
+.hot-regions-container {
+  padding: 20rpx;
+  border-top: 1rpx solid var(--border-color);
+}
+
+.hot-regions-title {
+  margin-bottom: 20rpx;
+}
+
+.title-text {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.hot-regions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200rpx, 1fr));
+  gap: 15rpx;
+}
+
+.hot-region-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx;
+  background: var(--background-color);
+  border-radius: 12rpx;
+  border: 1rpx solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.hot-region-item:active {
+  transform: scale(0.95);
+  background: var(--primary-light);
+}
+
+.hot-region-name {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 8rpx;
+}
+
+.hot-region-count {
+  font-size: 20rpx;
+  color: var(--text-secondary);
+}
+
+/* 最近搜索 */
+.recent-searches-container {
+  padding: 20rpx;
+  border-top: 1rpx solid var(--border-color);
+}
+
+.recent-searches-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.recent-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.clear-recent {
+  font-size: 22rpx;
+  color: var(--text-secondary);
+  padding: 8rpx 15rpx;
+  border-radius: 8rpx;
+  transition: background-color 0.3s ease;
+}
+
+.clear-recent:active {
+  background: var(--background-color);
+}
+
+.recent-searches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.recent-search-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15rpx;
+  background: var(--background-color);
+  border-radius: 10rpx;
+  transition: background-color 0.3s ease;
+}
+
+.recent-search-item:active {
+  background: var(--border-light);
+}
+
+.recent-search-text {
+  font-size: 26rpx;
+  color: var(--text-primary);
+}
+
+.recent-search-time {
+  font-size: 20rpx;
+  color: var(--text-secondary);
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx 20rpx;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 20rpx;
+}
+
+.loading-spinner {
+  width: 40rpx;
+  height: 40rpx;
+  border: 4rpx solid var(--border-color);
+  border-top: 4rpx solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15rpx;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+}
+
+/* 响应式设计 */
+@media (max-width: 750rpx) {
+  .hot-regions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .suggestion-item {
+    padding: 15rpx;
+  }
+  
+  .suggestion-name {
+    font-size: 26rpx;
+  }
+  
+  .suggestion-path {
+    font-size: 20rpx;
+  }
+}

@@ -1,16 +1,242 @@
 <!-- match.wxml - 比赛页面 -->
 <view class="container">
-  <!-- Fixed Tab Bar -->
-  <fixed-tab-bar 
-    tabs="{{tabs}}"
-    activeTab="{{activeTab}}"
-    bindtabchange="onTabChange"
-    className="match-tab-bar"
-  ></fixed-tab-bar>
-  
-  <!-- Tab Content Container -->
-  <view 
-    class="tab-content-container"
+  <!-- 页面头部导航 -->
+  <view class="page-header">
+    <view class="header-title">
+      <text class="title-text">网球比赛</text>
+      <text class="subtitle-text">Tennis Matches</text>
+    </view>
+    <view class="header-actions">
+      <view class="search-btn" bindtap="showSearch">
+        <text class="search-icon">🔍</text>
+      </view>
+      <view class="filter-btn" bindtap="showAdvancedFilter">
+        <text class="filter-icon">⚙️</text>
+        <view wx:if="{{activeFiltersCount > 0}}" class="filter-badge">{{activeFiltersCount}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 主要内容区域 - 左右分离布局 -->
+  <view class="main-content">
+    <!-- 左侧：比赛数据区域 -->
+    <view class="match-data-section">
+      <view class="section-header">
+        <text class="section-title">比赛数据</text>
+        <text class="section-subtitle">Match Data</text>
+      </view>
+
+      <!-- 比赛状态标签页 -->
+      <view class="match-status-tabs">
+        <view
+          wx:for="{{matchStatusTabs}}"
+          wx:key="id"
+          class="status-tab {{activeMatchTab === item.id ? 'active' : ''}}"
+          bindtap="switchMatchTab"
+          data-tab="{{item.id}}"
+        >
+          <text class="tab-icon">{{item.icon}}</text>
+          <text class="tab-text">{{item.name}}</text>
+          <text wx:if="{{item.count > 0}}" class="tab-count">{{item.count}}</text>
+        </view>
+      </view>
+
+      <!-- 比赛数据内容 -->
+      <view class="match-data-content">
+        <!-- 已比赛和进行中的比赛 -->
+        <view wx:if="{{activeMatchTab === 'completed-ongoing'}}" class="completed-ongoing-matches">
+          <!-- 进行中的比赛 -->
+          <view wx:if="{{ongoingMatches.length > 0}}" class="ongoing-section">
+            <view class="subsection-header">
+              <text class="subsection-title">🔴 进行中</text>
+              <text class="subsection-count">{{ongoingMatches.length}}</text>
+            </view>
+            <view class="matches-grid">
+              <view
+                wx:for="{{ongoingMatches}}"
+                wx:key="id"
+                class="match-card ongoing"
+                bindtap="goToMatchDetail"
+                data-id="{{item._id}}"
+              >
+                <view class="match-card-header">
+                  <text class="match-type">{{item.eventType}}</text>
+                  <view class="live-indicator">
+                    <text class="live-dot"></text>
+                    <text class="live-text">LIVE</text>
+                  </view>
+                </view>
+                <view class="match-players">
+                  <view class="player-row">
+                    <text class="player-name">{{item.players.team1[0].name}}</text>
+                    <text class="player-score">{{getTeamScore(item, 'team1')}}</text>
+                  </view>
+                  <view class="player-row">
+                    <text class="player-name">{{item.players.team2[0].name}}</text>
+                    <text class="player-score">{{getTeamScore(item, 'team2')}}</text>
+                  </view>
+                </view>
+                <view class="match-info">
+                  <text class="venue">{{item.venue}}</text>
+                  <text class="time">{{formatMatchTime(item.scheduledTime)}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+
+          <!-- 已完成的比赛 -->
+          <view wx:if="{{completedMatches.length > 0}}" class="completed-section">
+            <view class="subsection-header">
+              <text class="subsection-title">🏆 已完成</text>
+              <text class="subsection-count">{{completedMatches.length}}</text>
+            </view>
+            <view class="matches-list">
+              <view
+                wx:for="{{completedMatches}}"
+                wx:key="id"
+                class="match-card completed"
+                bindtap="goToMatchDetail"
+                data-id="{{item._id}}"
+              >
+                <view class="match-card-header">
+                  <text class="match-type">{{item.eventType}}</text>
+                  <text class="match-duration">{{item.duration}}</text>
+                </view>
+                <view class="match-players">
+                  <view class="player-row {{item.winnerId === item.players.team1[0].name ? 'winner' : ''}}">
+                    <text class="player-name">{{item.players.team1[0].name}}</text>
+                    <text class="player-score">{{getTeamScore(item, 'team1')}}</text>
+                  </view>
+                  <view class="player-row {{item.winnerId === item.players.team2[0].name ? 'winner' : ''}}">
+                    <text class="player-name">{{item.players.team2[0].name}}</text>
+                    <text class="player-score">{{getTeamScore(item, 'team2')}}</text>
+                  </view>
+                </view>
+                <view class="match-info">
+                  <text class="venue">{{item.venue}}</text>
+                  <text class="date">{{formatMatchDate(item.scheduledTime)}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 未来的比赛 -->
+        <view wx:elif="{{activeMatchTab === 'upcoming'}}" class="upcoming-matches">
+          <view wx:if="{{upcomingMatches.length > 0}}" class="upcoming-section">
+            <view class="subsection-header">
+              <text class="subsection-title">📅 即将开始</text>
+              <text class="subsection-count">{{upcomingMatches.length}}</text>
+            </view>
+            <view class="matches-list">
+              <view
+                wx:for="{{upcomingMatches}}"
+                wx:key="id"
+                class="match-card upcoming"
+                bindtap="goToMatchDetail"
+                data-id="{{item._id}}"
+              >
+                <view class="match-card-header">
+                  <text class="match-type">{{item.eventType}}</text>
+                  <text class="match-stage">{{item.stage}}</text>
+                </view>
+                <view class="match-players">
+                  <view class="player-row">
+                    <text class="player-name">{{item.players.team1[0].name}}</text>
+                    <text class="player-ranking">{{item.players.team1[0].ranking ? '#' + item.players.team1[0].ranking : ''}}</text>
+                  </view>
+                  <view class="vs-divider">VS</view>
+                  <view class="player-row">
+                    <text class="player-name">{{item.players.team2[0].name}}</text>
+                    <text class="player-ranking">{{item.players.team2[0].ranking ? '#' + item.players.team2[0].ranking : ''}}</text>
+                  </view>
+                </view>
+                <view class="match-info">
+                  <text class="venue">{{item.venue}}</text>
+                  <text class="time">{{formatMatchTime(item.scheduledTime)}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 右侧：火热报名入口区域 -->
+    <view class="hot-registration-section">
+      <view class="section-header">
+        <text class="section-title">火热报名</text>
+        <text class="section-subtitle">Hot Registration</text>
+      </view>
+
+      <!-- 报名入口卡片 -->
+      <view class="registration-cards">
+        <view
+          wx:for="{{hotRegistrations}}"
+          wx:key="id"
+          class="registration-card"
+          bindtap="goToEventDetail"
+          data-id="{{item._id}}"
+        >
+          <view class="card-header">
+            <view class="event-badge {{item.priority}}">
+              <text class="badge-text">{{item.badgeText}}</text>
+            </view>
+            <view class="registration-status">
+              <text class="status-text">{{item.registrationStatus}}</text>
+            </view>
+          </view>
+
+          <view class="card-content">
+            <text class="event-title">{{item.name}}</text>
+            <text class="event-type">{{item.eventType}}</text>
+
+            <view class="event-details">
+              <view class="detail-row">
+                <text class="detail-icon">📍</text>
+                <text class="detail-text">{{item.venue}}</text>
+              </view>
+              <view class="detail-row">
+                <text class="detail-icon">📅</text>
+                <text class="detail-text">{{formatEventDate(item.eventDate)}}</text>
+              </view>
+              <view class="detail-row">
+                <text class="detail-icon">👥</text>
+                <text class="detail-text">{{item.participantCount}}/{{item.maxParticipants}}人</text>
+              </view>
+            </view>
+
+            <view class="registration-info">
+              <view class="deadline-info">
+                <text class="deadline-label">报名截止:</text>
+                <text class="deadline-date">{{formatDeadline(item.registrationDeadline)}}</text>
+              </view>
+              <view class="price-info" wx:if="{{item.price}}">
+                <text class="price-label">费用:</text>
+                <text class="price-amount">¥{{item.price}}</text>
+              </view>
+            </view>
+          </view>
+
+          <view class="card-footer">
+            <button class="register-btn {{item.canRegister ? 'active' : 'disabled'}}">
+              {{item.registerButtonText}}
+            </button>
+          </view>
+        </view>
+      </view>
+
+      <!-- 查看更多报名机会 -->
+      <view class="more-registrations" bindtap="showMoreRegistrations">
+        <text class="more-text">查看更多报名机会</text>
+        <text class="more-icon">→</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Tab Content Container (保留原有的tab内容作为备用) -->
+  <view
+    class="tab-content-container hidden"
     bindtouchstart="onTouchStart"
     bindtouchmove="onTouchMove"
     bindtouchend="onTouchEnd"
@@ -54,22 +280,51 @@
           </view>
         </view>
 
-        <!-- Filter Bar -->
-        <view class="filter-bar">
-          <scroll-view class="filter-scroll" scroll-x="true">
-            <view class="filter-items">
-              <view 
-                wx:for="{{matchFilters}}" 
+        <!-- Enhanced Filter Bar -->
+        <view class="enhanced-filter-bar">
+          <!-- Quick Filters -->
+          <scroll-view class="quick-filters" scroll-x="true">
+            <view class="quick-filter-items">
+              <view
+                wx:for="{{quickFilters}}"
                 wx:key="id"
-                class="filter-item {{currentFilter === item.id ? 'active' : ''}}"
-                bindtap="switchFilter"
+                class="quick-filter-item {{currentFilter === item.id ? 'active' : ''}}"
+                bindtap="switchQuickFilter"
                 data-filter="{{item.id}}"
               >
                 <text class="filter-icon">{{item.icon}}</text>
                 <text class="filter-text">{{item.name}}</text>
+                <text wx:if="{{item.count}}" class="filter-count">{{item.count}}</text>
               </view>
             </view>
           </scroll-view>
+
+          <!-- Advanced Filter Button -->
+          <view class="advanced-filter-btn" bindtap="showAdvancedFilter">
+            <text class="filter-icon">🔍</text>
+            <text class="filter-text">筛选</text>
+            <view wx:if="{{activeFiltersCount > 0}}" class="filter-badge">{{activeFiltersCount}}</view>
+          </view>
+        </view>
+
+        <!-- Active Filters Display -->
+        <view wx:if="{{activeFilters.length > 0}}" class="active-filters">
+          <view class="active-filters-title">
+            <text class="title-text">当前筛选</text>
+            <text class="clear-all" bindtap="clearAllFilters">清除全部</text>
+          </view>
+          <view class="active-filter-tags">
+            <view
+              wx:for="{{activeFilters}}"
+              wx:key="key"
+              class="active-filter-tag"
+              bindtap="removeFilter"
+              data-key="{{item.key}}"
+            >
+              <text class="tag-text">{{item.label}}</text>
+              <text class="tag-remove">✕</text>
+            </view>
+          </view>
         </view>
 
         <!-- Matches List -->
@@ -92,55 +347,59 @@
               </view>
             </view>
 
-            <!-- Players Section -->
-            <view class="players-section">
-              <!-- Player 1 / Team 1 -->
-              <view class="player-info">
-                <view class="player-avatar">
-                  <image 
-                    class="avatar-img" 
-                    src="{{item.player1.avatar || '/images/default-avatar.png'}}"
-                    mode="aspectFill"
-                  />
-                </view>
-                <view class="player-details">
-                  <text class="player-name">{{item.player1.name}}</text>
-                  <text class="player-rank" wx:if="{{item.player1.rank}}">排名: {{item.player1.rank}}</text>
-                </view>
+            <!-- Enhanced Players Section -->
+            <view class="enhanced-players-section">
+              <!-- Team 1 -->
+              <view class="team-container team-left">
+                <player-info
+                  format="{{item.format || 'singles'}}"
+                  layout="compact"
+                  player="{{item.players.team1[0]}}"
+                  players="{{item.players.team1}}"
+                  showRanking="{{true}}"
+                  bindplayertap="onPlayerTap"
+                />
               </view>
 
-              <!-- VS or Score -->
-              <view class="match-center">
-                <view wx:if="{{item.status === 'scheduled' || item.status === 'upcoming'}}" class="vs-section">
+              <!-- Match Center -->
+              <view class="match-center-enhanced">
+                <view wx:if="{{item.status === '报名中'}}" class="vs-section">
                   <text class="vs-text">VS</text>
                   <text class="match-time">{{formatMatchTime(item.scheduledTime)}}</text>
+                  <text class="event-type">{{item.eventType}}</text>
                 </view>
-                <view wx:else class="score-section">
-                  <view class="score-display">
-                    <text class="score-p1">{{item.score.player1 || 0}}</text>
+                <view wx:else class="score-section-enhanced">
+                  <view class="current-score">
+                    <text class="score-team1">{{getTeamScore(item, 'team1')}}</text>
                     <text class="score-separator">:</text>
-                    <text class="score-p2">{{item.score.player2 || 0}}</text>
+                    <text class="score-team2">{{getTeamScore(item, 'team2')}}</text>
                   </view>
-                  <view wx:if="{{item.status === 'live'}}" class="live-indicator">
+                  <view wx:if="{{item.status === '比赛中'}}" class="live-indicator">
                     <text class="live-dot"></text>
                     <text class="live-text">LIVE</text>
                   </view>
+                  <view wx:if="{{item.scoreSummary && item.scoreSummary.sets.length > 0}}" class="sets-summary">
+                    <text
+                      wx:for="{{item.scoreSummary.sets}}"
+                      wx:key="setNumber"
+                      class="set-score"
+                    >
+                      {{item.team1Score}}-{{item.team2Score}}
+                    </text>
+                  </view>
                 </view>
               </view>
 
-              <!-- Player 2 / Team 2 -->
-              <view class="player-info player-right">
-                <view class="player-details">
-                  <text class="player-name">{{item.player2.name}}</text>
-                  <text class="player-rank" wx:if="{{item.player2.rank}}">排名: {{item.player2.rank}}</text>
-                </view>
-                <view class="player-avatar">
-                  <image 
-                    class="avatar-img" 
-                    src="{{item.player2.avatar || '/images/default-avatar.png'}}"
-                    mode="aspectFill"
-                  />
-                </view>
+              <!-- Team 2 -->
+              <view class="team-container team-right">
+                <player-info
+                  format="{{item.format || 'singles'}}"
+                  layout="compact"
+                  player="{{item.players.team2[0]}}"
+                  players="{{item.players.team2}}"
+                  showRanking="{{true}}"
+                  bindplayertap="onPlayerTap"
+                />
               </view>
             </view>
 
@@ -192,16 +451,35 @@
           </view>
         </view>
 
-        <!-- Load More -->
-        <view wx:if="{{hasMore && !loading}}" class="load-more" bindtap="loadMoreMatches">
+        <!-- Loading More -->
+        <view wx:if="{{tabData['all-matches'].loading && tabData['all-matches'].matches.length > 0}}" class="loading-more">
+          <view class="loading-spinner"></view>
+          <text class="loading-text">加载中...</text>
+        </view>
+
+        <!-- Load More Button -->
+        <view wx:if="{{tabData['all-matches'].hasMore && !tabData['all-matches'].loading}}" class="load-more" bindtap="loadMoreMatches">
           <text class="load-more-text">加载更多比赛</text>
+          <text class="load-more-icon">⬇️</text>
+        </view>
+
+        <!-- No More Data -->
+        <view wx:if="{{!tabData['all-matches'].hasMore && tabData['all-matches'].matches.length > 0}}" class="no-more-data">
+          <text class="no-more-text">已加载全部比赛</text>
+          <text class="total-count">共 {{tabData['all-matches'].total || tabData['all-matches'].matches.length}} 场</text>
         </view>
 
         <!-- Empty State -->
-        <view wx:if="{{!loading && matches.length === 0}}" class="empty-state">
+        <view wx:if="{{!tabData['all-matches'].loading && tabData['all-matches'].matches.length === 0}}" class="empty-state">
           <text class="empty-icon">🎾</text>
           <view class="empty-text">暂无比赛数据</view>
           <button class="empty-action" bindtap="refreshMatches">刷新</button>
+        </view>
+
+        <!-- Initial Loading -->
+        <view wx:if="{{tabData['all-matches'].loading && tabData['all-matches'].matches.length === 0}}" class="initial-loading">
+          <view class="loading-spinner large"></view>
+          <text class="loading-text">正在加载比赛数据...</text>
         </view>
       </view>
       
@@ -606,6 +884,14 @@
       </view>
       
     </tab-content>
-    
+
   </view> <!-- End of tab-content-container -->
+
+  <!-- Advanced Match Filter Component -->
+  <match-filter
+    showFilter="{{showAdvancedFilter}}"
+    initialFilters="{{currentFilters}}"
+    bindfilterchange="onFilterChange"
+    bindclose="hideAdvancedFilter"
+  ></match-filter>
 </view>

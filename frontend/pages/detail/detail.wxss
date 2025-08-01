@@ -5,6 +5,42 @@
   padding: 20rpx;
 }
 
+/* 比分更新按钮 */
+.score-actions {
+  margin: 30rpx 24rpx;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-update-score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 25rpx;
+  padding: 20rpx 40rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  box-shadow: 0 8rpx 20rpx rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-update-score:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.4);
+}
+
+.btn-icon {
+  font-size: 32rpx;
+}
+
+.btn-text {
+  font-size: 28rpx;
+}
+
 /* Back Button */
 .back-btn {
   display: flex;

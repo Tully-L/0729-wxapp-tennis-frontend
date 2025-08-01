@@ -1,0 +1,152 @@
+<!-- time-picker.wxml - 时间选择器组件 -->
+<view class="time-picker-container">
+  <!-- 遮罩层 -->
+  <view 
+    wx:if="{{visible}}" 
+    class="picker-mask" 
+    bindtap="onMaskTap"
+    catchtouchmove="preventTouchMove"
+  ></view>
+
+  <!-- 选择器面板 -->
+  <view class="picker-panel {{visible ? 'show' : ''}}">
+    <!-- 头部 -->
+    <view class="picker-header">
+      <text class="cancel-btn" bindtap="onCancel">取消</text>
+      <text class="title">选择时间</text>
+      <text class="confirm-btn" bindtap="onConfirm">确定</text>
+    </view>
+
+    <!-- 快速选择 -->
+    <view class="quick-select-section">
+      <text class="section-title">快速选择</text>
+      <view class="quick-options">
+        <view 
+          wx:for="{{quickOptions}}" 
+          wx:key="id"
+          class="quick-option {{selectedQuick === item.id ? 'active' : ''}}"
+          bindtap="onQuickSelect"
+          data-option="{{item}}"
+        >
+          <text class="option-text">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 自定义日期范围 -->
+    <view class="custom-date-section">
+      <text class="section-title">自定义日期</text>
+      
+      <!-- 开始日期 -->
+      <view class="date-row">
+        <text class="date-label">开始日期</text>
+        <picker 
+          mode="date" 
+          value="{{startDate}}" 
+          start="{{minDate}}"
+          end="{{maxDate}}"
+          bindchange="onStartDateChange"
+        >
+          <view class="date-picker">
+            <text class="date-text">{{formatDisplayDate(startDate)}}</text>
+            <text class="picker-arrow">📅</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 结束日期 -->
+      <view class="date-row">
+        <text class="date-label">结束日期</text>
+        <picker 
+          mode="date" 
+          value="{{endDate}}" 
+          start="{{startDate || minDate}}"
+          end="{{maxDate}}"
+          bindchange="onEndDateChange"
+        >
+          <view class="date-picker">
+            <text class="date-text">{{formatDisplayDate(endDate)}}</text>
+            <text class="picker-arrow">📅</text>
+          </view>
+        </picker>
+      </view>
+    </view>
+
+    <!-- 时间段选择 -->
+    <view wx:if="{{showTimeRange}}" class="time-range-section">
+      <text class="section-title">时间段</text>
+      <view class="time-range-options">
+        <view 
+          wx:for="{{timeRanges}}" 
+          wx:key="id"
+          class="time-range-option {{selectedTimeRange === item.id ? 'active' : ''}}"
+          bindtap="onTimeRangeSelect"
+          data-range="{{item}}"
+        >
+          <text class="range-text">{{item.name}}</text>
+          <text class="range-time">{{item.time}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 数字时间表达 -->
+    <view wx:if="{{showDigitalTime}}" class="digital-time-section">
+      <text class="section-title">数字时间</text>
+      <view class="digital-inputs">
+        <view class="input-group">
+          <text class="input-label">天数</text>
+          <input 
+            class="digital-input"
+            type="number"
+            placeholder="0"
+            value="{{digitalTime.days}}"
+            bindinput="onDigitalDaysInput"
+          />
+          <text class="input-unit">天</text>
+        </view>
+        <view class="input-group">
+          <text class="input-label">小时</text>
+          <input 
+            class="digital-input"
+            type="number"
+            placeholder="0"
+            value="{{digitalTime.hours}}"
+            bindinput="onDigitalHoursInput"
+          />
+          <text class="input-unit">小时</text>
+        </view>
+      </view>
+      <view class="digital-preview">
+        <text class="preview-text">{{getDigitalPreview()}}</text>
+      </view>
+    </view>
+
+    <!-- 预设时间范围 -->
+    <view class="preset-section">
+      <text class="section-title">常用范围</text>
+      <view class="preset-grid">
+        <view 
+          wx:for="{{presetRanges}}" 
+          wx:key="id"
+          class="preset-item {{selectedPreset === item.id ? 'active' : ''}}"
+          bindtap="onPresetSelect"
+          data-preset="{{item}}"
+        >
+          <text class="preset-name">{{item.name}}</text>
+          <text class="preset-desc">{{item.description}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部操作区 -->
+    <view class="picker-footer">
+      <view class="selected-info">
+        <text class="info-text">{{getSelectedInfo()}}</text>
+      </view>
+      <view class="footer-buttons">
+        <button class="reset-btn" bindtap="onReset">重置</button>
+        <button class="apply-btn" bindtap="onConfirm">应用</button>
+      </view>
+    </view>
+  </view>
+</view>

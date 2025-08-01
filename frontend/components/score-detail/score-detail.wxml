@@ -1,0 +1,150 @@
+<!-- score-detail.wxml - 详细比分显示组件 -->
+<view class="score-detail-container">
+  <!-- 比赛状态头部 -->
+  <view class="match-status-header">
+    <view class="status-indicator {{match.status === '比赛中' ? 'live' : match.status === '已结束' ? 'completed' : 'upcoming'}}">
+      <text class="status-dot" wx:if="{{match.status === '比赛中'}}"></text>
+      <text class="status-text">{{getStatusText(match.status)}}</text>
+    </view>
+    <view class="match-format">{{match.format || '三盘两胜制'}}</view>
+  </view>
+
+  <!-- 选手信息 -->
+  <view class="players-section">
+    <!-- Team 1 -->
+    <view class="team-info team1 {{scoreSummary && scoreSummary.winner === 'team1' ? 'winner' : ''}}">
+      <view class="team-players">
+        <view wx:for="{{match.players.team1}}" wx:key="name" class="player-item">
+          <image class="player-avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill" />
+          <view class="player-details">
+            <text class="player-name">{{item.name}}</text>
+            <text class="player-ranking" wx:if="{{item.ranking}}">排名: {{item.ranking}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="team-label">{{getTeamLabel('team1')}}</view>
+    </view>
+
+    <!-- VS 分隔符 -->
+    <view class="vs-separator">
+      <text class="vs-text">VS</text>
+    </view>
+
+    <!-- Team 2 -->
+    <view class="team-info team2 {{scoreSummary && scoreSummary.winner === 'team2' ? 'winner' : ''}}">
+      <view class="team-players">
+        <view wx:for="{{match.players.team2}}" wx:key="name" class="player-item">
+          <image class="player-avatar" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill" />
+          <view class="player-details">
+            <text class="player-name">{{item.name}}</text>
+            <text class="player-ranking" wx:if="{{item.ranking}}">排名: {{item.ranking}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="team-label">{{getTeamLabel('team2')}}</view>
+    </view>
+  </view>
+
+  <!-- 详细比分表格 -->
+  <view class="score-table" wx:if="{{scoreSummary && scoreSummary.sets.length > 0}}">
+    <view class="score-header">
+      <view class="player-column">选手</view>
+      <view wx:for="{{scoreSummary.sets}}" wx:key="setNumber" class="set-column">
+        <text class="set-label">第{{item.setNumber}}盘</text>
+      </view>
+      <view class="total-column">总盘数</view>
+    </view>
+
+    <!-- Team 1 比分行 -->
+    <view class="score-row team1-row {{scoreSummary.winner === 'team1' ? 'winner-row' : ''}}">
+      <view class="player-column">
+        <text class="team-name">{{getTeamDisplayName('team1')}}</text>
+      </view>
+      <view wx:for="{{scoreSummary.sets}}" wx:key="setNumber" class="set-column">
+        <view class="set-score-cell {{item.team1Score > item.team2Score ? 'set-winner' : ''}}">
+          <text class="games-score">{{item.team1Score}}</text>
+          <view wx:if="{{item.tiebreak && item.tiebreak.played}}" class="tiebreak-score">
+            <text class="tiebreak-label">抢七:</text>
+            <text class="tiebreak-value">{{item.tiebreak.team1Score}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="total-column">
+        <text class="sets-won">{{getSetsWon('team1')}}</text>
+      </view>
+    </view>
+
+    <!-- Team 2 比分行 -->
+    <view class="score-row team2-row {{scoreSummary.winner === 'team2' ? 'winner-row' : ''}}">
+      <view class="player-column">
+        <text class="team-name">{{getTeamDisplayName('team2')}}</text>
+      </view>
+      <view wx:for="{{scoreSummary.sets}}" wx:key="setNumber" class="set-column">
+        <view class="set-score-cell {{item.team2Score > item.team1Score ? 'set-winner' : ''}}">
+          <text class="games-score">{{item.team2Score}}</text>
+          <view wx:if="{{item.tiebreak && item.tiebreak.played}}" class="tiebreak-score">
+            <text class="tiebreak-label">抢七:</text>
+            <text class="tiebreak-value">{{item.tiebreak.team2Score}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="total-column">
+        <text class="sets-won">{{getSetsWon('team2')}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 当前局比分（进行中的比赛） -->
+  <view class="current-game-score" wx:if="{{match.status === '比赛中' && currentGameScore}}">
+    <view class="current-game-header">
+      <text class="current-game-title">当前局比分</text>
+      <text class="current-set-info">第{{currentGameScore.currentSet}}盘 第{{currentGameScore.currentGame}}局</text>
+    </view>
+    <view class="current-game-display">
+      <view class="current-score-item">
+        <text class="current-player">{{getTeamDisplayName('team1')}}</text>
+        <text class="current-points">{{formatGameScore(currentGameScore.team1Points)}}</text>
+      </view>
+      <view class="current-score-separator">:</view>
+      <view class="current-score-item">
+        <text class="current-player">{{getTeamDisplayName('team2')}}</text>
+        <text class="current-points">{{formatGameScore(currentGameScore.team2Points)}}</text>
+      </view>
+    </view>
+    <view class="serving-indicator" wx:if="{{currentGameScore.servingTeam}}">
+      <text class="serving-text">{{getTeamDisplayName(currentGameScore.servingTeam)}} 发球</text>
+    </view>
+  </view>
+
+  <!-- 比赛未开始状态 -->
+  <view class="no-score-state" wx:if="{{!scoreSummary || scoreSummary.sets.length === 0}}">
+    <view class="no-score-icon">🎾</view>
+    <text class="no-score-text">{{match.status === '报名中' ? '比赛尚未开始' : '暂无比分数据'}}</text>
+    <view class="match-time" wx:if="{{match.scheduledTime}}">
+      <text class="time-label">预计开始时间:</text>
+      <text class="time-value">{{formatDateTime(match.scheduledTime)}}</text>
+    </view>
+  </view>
+
+  <!-- 比赛统计信息 -->
+  <view class="match-stats-summary" wx:if="{{matchStats}}">
+    <view class="stats-title">比赛统计</view>
+    <view class="stats-grid">
+      <view class="stat-item" wx:if="{{matchStats.duration}}">
+        <text class="stat-icon">⏱️</text>
+        <text class="stat-label">比赛时长</text>
+        <text class="stat-value">{{matchStats.duration}}</text>
+      </view>
+      <view class="stat-item" wx:if="{{matchStats.totalGames}}">
+        <text class="stat-icon">🎯</text>
+        <text class="stat-label">总局数</text>
+        <text class="stat-value">{{matchStats.totalGames}}</text>
+      </view>
+      <view class="stat-item" wx:if="{{matchStats.intensity}}">
+        <text class="stat-icon">🔥</text>
+        <text class="stat-label">比赛强度</text>
+        <text class="stat-value intensity-{{matchStats.intensity}}">{{getIntensityText(matchStats.intensity)}}</text>
+      </view>
+    </view>
+  </view>
+</view>

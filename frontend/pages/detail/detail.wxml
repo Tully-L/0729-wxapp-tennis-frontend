@@ -47,7 +47,19 @@
         <text class="time-text">{{formatMatchTime(match.scheduledTime)}}</text>
       </view>
     </view>
-    
+
+    <!-- 比赛状态管理组件 -->
+    <match-status
+      wx:if="{{match}}"
+      match="{{match}}"
+      currentStatus="{{match.status}}"
+      canManageStatus="{{canManageStatus}}"
+      showTimeInfo="{{true}}"
+      showHistory="{{false}}"
+      statusHistory="{{statusHistory}}"
+      bindstatusupdated="onStatusUpdated"
+    />
+
     <!-- Real-time Connection Status -->
     <view class="connection-status" wx:if="{{match.isLive}}">
       <text class="connection-icon {{isConnected ? 'connected' : 'disconnected'}}">●</text>
@@ -68,83 +80,23 @@
       订阅比赛通知
     </button>
     
-    <!-- Enhanced Players & Score Section -->
-    <view class="match-content">
-      <!-- Team 1 -->
-      <view class="team-section {{scoreSummary && scoreSummary.winner === 'team1' ? 'winner' : ''}}">
-        <view class="team-info">
-          <view wx:for="{{match.players.team1}}" wx:key="name" class="player-info">
-            <text class="player-avatar">👤</text>
-            <view class="player-details">
-              <view class="player-name">{{item.name}}</view>
-              <view class="player-ranking">排名: {{item.ranking || 'N/A'}}</view>
-            </view>
-          </view>
-        </view>
-      </view>
-      
-      <!-- Enhanced Score Section -->
-      <view class="score-section">
-        <view class="vs-text">VS</view>
-        
-        <!-- Set Scores Display -->
-        <view class="sets-container" wx:if="{{scoreSummary && scoreSummary.sets.length > 0}}">
-          <view class="set-header">
-            <view class="set-label" wx:for="{{scoreSummary.sets}}" wx:key="setNumber">
-              Set {{item.setNumber}}
-            </view>
-          </view>
-          
-          <!-- Team 1 Scores -->
-          <view class="set-row team1-row">
-            <block wx:for="{{scoreSummary.sets}}" wx:key="setNumber">
-              <view class="set-score {{item.team1Score > item.team2Score ? 'winner' : ''}}">
-                {{item.team1Score}}
-                <view wx:if="{{item.tiebreak && item.tiebreak.team1Score}}" class="tiebreak-score">
-                  ({{item.tiebreak.team1Score}})
-                </view>
-              </view>
-            </block>
-          </view>
-          
-          <!-- Team 2 Scores -->
-          <view class="set-row team2-row">
-            <block wx:for="{{scoreSummary.sets}}" wx:key="setNumber">
-              <view class="set-score {{item.team2Score > item.team1Score ? 'winner' : ''}}">
-                {{item.team2Score}}
-                <view wx:if="{{item.tiebreak && item.tiebreak.team2Score}}" class="tiebreak-score">
-                  ({{item.tiebreak.team2Score}})
-                </view>
-              </view>
-            </block>
-          </view>
-        </view>
-        
-        <!-- No Score Display -->
-        <view wx:else class="no-score">
-          <text class="no-score-text">比赛尚未开始</text>
-        </view>
-        
-        <!-- Score Update Button -->
-        <view class="score-actions" wx:if="{{canUpdateScore && match.isLive}}">
-          <button class="btn-update-score" bindtap="showScoreUpdateDialog">
-            更新比分
-          </button>
-        </view>
-      </view>
-      
-      <!-- Team 2 -->
-      <view class="team-section {{scoreSummary && scoreSummary.winner === 'team2' ? 'winner' : ''}}">
-        <view class="team-info">
-          <view wx:for="{{match.players.team2}}" wx:key="name" class="player-info">
-            <text class="player-avatar">👤</text>
-            <view class="player-details">
-              <view class="player-name">{{item.name}}</view>
-              <view class="player-ranking">排名: {{item.ranking || 'N/A'}}</view>
-            </view>
-          </view>
-        </view>
-      </view>
+    <!-- 详细比分显示组件 -->
+    <score-detail
+      match="{{match}}"
+      scoreSummary="{{scoreSummary}}"
+      matchStats="{{matchStats}}"
+      currentGameScore="{{currentGameScore}}"
+      displayMode="full"
+      bindscoreclick="onScoreClick"
+      bindplayerclick="onPlayerClick"
+    />
+
+    <!-- 比分更新按钮 -->
+    <view class="score-actions" wx:if="{{canUpdateScore && match.isLive}}">
+      <button class="btn-update-score" bindtap="showScoreUpdateDialog">
+        <text class="btn-icon">📝</text>
+        <text class="btn-text">更新比分</text>
+      </button>
     </view>
     
     <!-- Match Statistics -->

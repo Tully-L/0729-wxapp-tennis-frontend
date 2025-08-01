@@ -484,13 +484,71 @@ const handleMockFallback = (url, method, data, resolve, reject, needHideLoading 
         // 按日期分组并格式化
         const groupedData = groupTennisMatchesByDate(paginatedMatches);
         
-        resolve({ 
+        resolve({
           data: groupedData,
           pagination: {
             page: page,
             limit: pageSize,
             total: filteredMatches.length,
             pages: Math.ceil(filteredMatches.length / pageSize)
+          }
+        });
+      } else if (url.includes('/matches/') && url.includes('/status') && method === 'PUT') {
+        // 更新比赛状态
+        const matchId = url.split('/')[2];
+        const { status, reason } = data;
+
+        console.log(`模拟更新比赛状态: ${matchId} -> ${status}, 原因: ${reason}`);
+
+        resolve({
+          success: true,
+          message: '状态更新成功',
+          data: {
+            matchId: matchId,
+            oldStatus: '比赛中',
+            newStatus: status,
+            reason: reason,
+            updatedAt: new Date().toISOString()
+          }
+        });
+      } else if (url.includes('/matches/') && url.includes('/status/history') && method === 'GET') {
+        // 获取状态历史
+        const matchId = url.split('/')[2];
+
+        resolve({
+          success: true,
+          data: [
+            {
+              fromStatus: '报名中',
+              toStatus: '比赛中',
+              changedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+              changedBy: { name: '主办方' },
+              reason: '比赛开始'
+            },
+            {
+              fromStatus: '比赛中',
+              toStatus: '已暂停',
+              changedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+              changedBy: { name: '裁判' },
+              reason: '天气原因'
+            }
+          ]
+        });
+      } else if (url.includes('/matches/batch/status') && method === 'PUT') {
+        // 批量更新状态
+        const { matchIds, status, reason } = data;
+
+        resolve({
+          success: true,
+          message: '批量状态更新成功',
+          data: {
+            updated: matchIds.length,
+            failed: 0,
+            results: matchIds.map(id => ({
+              matchId: id,
+              success: true,
+              newStatus: status
+            }))
           }
         });
       } else if (url.includes('/events/search')) {
@@ -522,6 +580,57 @@ const handleMockFallback = (url, method, data, resolve, reject, needHideLoading 
         resolve({ 
           success: true,
           data: { events: userEvents }
+        });
+      } else if (url.includes('/events/hot-registrations')) {
+        // 获取火热报名数据
+        const hotRegistrations = [
+          {
+            _id: 'hot_reg_1',
+            name: '2024年春季网球公开赛',
+            eventType: '男子单打',
+            venue: '国家网球中心',
+            region: '北京',
+            eventDate: '2024-04-15',
+            registrationDeadline: '2024-04-01',
+            participantCount: 24,
+            maxParticipants: 32,
+            price: 200,
+            featured: true,
+            organizer: { name: '中国网球协会' }
+          },
+          {
+            _id: 'hot_reg_2',
+            name: '城市业余网球联赛',
+            eventType: '女子双打',
+            venue: '市体育中心',
+            region: '上海',
+            eventDate: '2024-04-20',
+            registrationDeadline: '2024-03-30',
+            participantCount: 16,
+            maxParticipants: 24,
+            price: 150,
+            featured: false,
+            organizer: { name: '上海网球俱乐部' }
+          },
+          {
+            _id: 'hot_reg_3',
+            name: '青少年网球训练营',
+            eventType: '青少年组',
+            venue: '网球热体育中心',
+            region: '深圳',
+            eventDate: '2024-04-25',
+            registrationDeadline: '2024-04-05',
+            participantCount: 8,
+            maxParticipants: 16,
+            price: 300,
+            featured: true,
+            organizer: { name: '网球热' }
+          }
+        ];
+
+        resolve({
+          success: true,
+          data: hotRegistrations
         });
       } else if (url.includes('/events/stats')) {
         // 获取赛事统计
@@ -1024,6 +1133,14 @@ const API = {
     return Promise.resolve(mockMatches[0]);
   },
   getMatchStats: (params) => request('/matches/stats', 'GET', params),
+
+  // 比赛状态管理
+  updateMatchStatus: (matchId, statusData) => request(`/matches/${matchId}/status`, 'PUT', statusData),
+  getMatchStatusHistory: (matchId) => request(`/matches/${matchId}/status/history`, 'GET'),
+  batchUpdateMatchStatus: (data) => request('/matches/batch/status', 'PUT', data),
+
+  // 火热报名相关
+  getHotRegistrations: (params) => request('/events/hot-registrations', 'GET', params),
   getLiveMatches: (params) => request('/matches/live', 'GET', params),
   searchMatches: (params) => request('/matches/search', 'GET', params),
   getUserMatches: (params) => request('/matches/user/matches', 'GET', params),

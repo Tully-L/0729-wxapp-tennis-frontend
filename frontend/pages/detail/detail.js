@@ -24,6 +24,10 @@ Page({
     isSpectator: false,
     isOrganizer: false,
     canUpdateScore: false,
+    canManageStatus: false,
+
+    // Status management
+    statusHistory: [],
     
     // Score update
     showScoreUpdate: false,
@@ -98,10 +102,23 @@ Page({
         match.statusText = this.getMatchStatusText(match.status);
         match.statusClass = this.getMatchStatusClass(match.status);
         
+        // 处理当前局比分数据
+        let currentGameScore = null;
+        if (match.status === '比赛中' && match.score && match.score.currentGame) {
+          currentGameScore = {
+            currentSet: match.score.currentSet || 1,
+            currentGame: match.score.currentGame || 1,
+            team1Points: match.score.team1Points || 0,
+            team2Points: match.score.team2Points || 0,
+            servingTeam: match.score.servingTeam || 'team1'
+          };
+        }
+
         this.setData({
           match: match,
           scoreSummary: match.scoreSummary || null,
           matchStats: match.matchStats || null,
+          currentGameScore: currentGameScore,
           spectators: match.spectators || [],
           isSpectator: match.userRelation?.isSpectator || false,
           isOrganizer: match.userRelation?.isOrganizer || false,
@@ -109,6 +126,12 @@ Page({
           loading: false,
           lastUpdate: new Date().toLocaleTimeString()
         });
+
+        // 检查用户权限
+        this.checkUserPermissions();
+
+        // 加载状态历史
+        this.loadStatusHistory();
 
         // If match is ongoing, establish WebSocket connection for real-time updates
         if (match.status === '比赛中' || match.isLive) {
@@ -864,7 +887,118 @@ Page({
       icon: 'loading'
     });
   },
-  
+
+  // 处理比分详情组件事件
+  onScoreClick: function(e) {
+    const { setNumber, match } = e.detail;
+    console.log('点击了第', setNumber, '盘比分');
+
+    // 可以显示该盘的详细局分信息
+    if (this.data.canUpdateScore && match.isLive) {
+      this.showSetDetailDialog(setNumber);
+    }
+  },
+
+  onPlayerClick: function(e) {
+    const { player, teamKey, playerIndex } = e.detail;
+    console.log('点击了选手:', player.name);
+
+    // 可以跳转到选手详情页面或显示选手信息
+    wx.showModal({
+      title: '选手信息',
+      content: `姓名: ${player.name}\n排名: ${player.ranking || 'N/A'}`,
+      showCancel: false
+    });
+  },
+
+  // 显示盘分详情对话框
+  showSetDetailDialog: function(setNumber) {
+    const { scoreSummary } = this.data;
+    if (!scoreSummary || !scoreSummary.sets) return;
+
+    const setData = scoreSummary.sets.find(set => set.setNumber === setNumber);
+    if (!setData) return;
+
+    let content = `第${setNumber}盘详情:\n`;
+    content += `比分: ${setData.team1Score} - ${setData.team2Score}\n`;
+
+    if (setData.tiebreak && setData.tiebreak.played) {
+      content += `抢七: ${setData.tiebreak.team1Score} - ${setData.tiebreak.team2Score}\n`;
+    }
+
+    if (setData.games && setData.games.length > 0) {
+      content += `\n局分详情:\n`;
+      setData.games.forEach((game, index) => {
+        content += `第${index + 1}局: ${game.team1Points} - ${game.team2Points}\n`;
+      });
+    }
+
+    wx.showModal({
+      title: `第${setNumber}盘`,
+      content: content,
+      showCancel: false
+    });
+  },
+
+  // 状态管理相关方法
+
+  // 处理状态更新事件
+  onStatusUpdated: function(e) {
+    const { oldStatus, newStatus, reason } = e.detail;
+    console.log('比赛状态已更新:', { oldStatus, newStatus, reason });
+
+    // 更新本地状态
+    this.setData({
+      'match.status': newStatus
+    });
+
+    // 重新加载比赛详情以获取最新数据
+    this.loadMatchDetail();
+
+    // 显示成功提示
+    wx.showToast({
+      title: '状态更新成功',
+      icon: 'success'
+    });
+  },
+
+  // 检查用户权限
+  checkUserPermissions: function() {
+    const { match, userInfo } = this.data;
+    if (!match || !userInfo) {
+      return;
+    }
+
+    // 检查是否是主办方
+    const isOrganizer = match.organizer && match.organizer.id === userInfo.id;
+
+    // 检查是否是参赛选手
+    const isPlayer = match.players.team1.some(p => p.userId === userInfo.id) ||
+                     match.players.team2.some(p => p.userId === userInfo.id);
+
+    // 检查是否可以管理状态
+    const canManageStatus = isOrganizer || isPlayer;
+
+    this.setData({
+      isOrganizer: isOrganizer,
+      canManageStatus: canManageStatus
+    });
+  },
+
+  // 加载状态历史
+  loadStatusHistory: async function() {
+    try {
+      const response = await API.getMatchStatusHistory(this.data.matchId);
+      if (response.success) {
+        this.setData({
+          statusHistory: response.data || []
+        });
+      }
+    } catch (error) {
+      console.error('加载状态历史失败:', error);
+    }
+  },
+
   // Page lifecycle
   onUnload: function() {
     this.disconnectWebSocket();

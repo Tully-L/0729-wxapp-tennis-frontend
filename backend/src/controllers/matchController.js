@@ -49,7 +49,13 @@ const getMatches = async (req, res, next) => {
       }
       
       if (eventType) {
-        allMatches = allMatches.filter(match => match.eventType === eventType);
+        // 支持中文和英文eventType筛选
+        allMatches = allMatches.filter(match =>
+          match.eventType === eventType ||
+          match.eventTypeId === eventType ||
+          match.gender === eventType ||
+          match.format === eventType
+        );
       }
       
       if (player) {
@@ -193,7 +199,17 @@ const getMatches = async (req, res, next) => {
 
     // 应用筛选条件
     if (filters.status) query.status = filters.status;
-    if (filters.eventType) query.eventType = filters.eventType;
+
+    // 赛事类型筛选 - 支持多种筛选方式
+    if (filters.eventType) {
+      query.$or = [
+        { eventType: filters.eventType },
+        { eventTypeId: filters.eventType },
+        { gender: filters.eventType },
+        { format: filters.eventType }
+      ];
+    }
+
     if (filters.region) query.region = new RegExp(filters.region, 'i');
     if (filters.isLive !== undefined) query.isLive = filters.isLive;
     if (filters.organizer) query['organizer.id'] = filters.organizer;
@@ -1267,6 +1283,75 @@ const exportMatchData = async (req, res, next) => {
   }
 };
 
+// 获取赛事分类统计
+const getEventTypeStats = async (req, res, next) => {
+  try {
+    const { region, status } = req.query;
+
+    // 构建基础查询条件
+    const baseQuery = {};
+    if (region) baseQuery.region = new RegExp(region, 'i');
+    if (status) baseQuery.status = status;
+
+    // 检查MongoDB连接状态
+    const mongoose = require('mongoose');
+
+    if (mongoose.connection.readyState !== 1) {
+      // 返回模拟统计数据
+      const mockStats = {
+        mens_singles: { count: 45, name: '男子单打', icon: '🎾' },
+        womens_singles: { count: 38, name: '女子单打', icon: '🎾' },
+        mens_doubles: { count: 22, name: '男子双打', icon: '👥' },
+        womens_doubles: { count: 18, name: '女子双打', icon: '👥' },
+        mixed_doubles: { count: 15, name: '混合双打', icon: '👫' }
+      };
+
+      return res.json({
+        success: true,
+        data: mockStats
+      });
+    }
+
+    // 使用聚合查询获取统计数据
+    const stats = await Match.aggregate([
+      { $match: baseQuery },
+      {
+        $group: {
+          _id: '$eventTypeId',
+          count: { $sum: 1 },
+          eventType: { $first: '$eventType' }
+        }
+      }
+    ]);
+
+    // 格式化统计结果
+    const eventTypeMapping = {
+      mens_singles: { name: '男子单打', icon: '🎾' },
+      womens_singles: { name: '女子单打', icon: '🎾' },
+      mens_doubles: { name: '男子双打', icon: '👥' },
+      womens_doubles: { name: '女子双打', icon: '👥' },
+      mixed_doubles: { name: '混合双打', icon: '👫' }
+    };
+
+    const formattedStats = {};
+    Object.keys(eventTypeMapping).forEach(key => {
+      const stat = stats.find(s => s._id === key);
+      formattedStats[key] = {
+        count: stat ? stat.count : 0,
+        name: eventTypeMapping[key].name,
+        icon: eventTypeMapping[key].icon
+      };
+    });
+
+    res.json({
+      success: true,
+      data: formattedStats
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getMatches,
   getMatchDetail,
@@ -1284,5 +1369,6 @@ module.exports = {
   advancedSearchMatches,
   batchUpdateMatches,
   getMatchTimeline,
-  exportMatchData
-}; 
+  exportMatchData,
+  getEventTypeStats
+};
