@@ -458,9 +458,7 @@
   background: #0A4A39;
 }
 
-.action-btn.share {
-  background: #0A4A39;
-}
+/* 分享按钮样式已移除 */
 
 .my-events-empty {
   display: flex;

@@ -230,11 +230,5 @@ Page({
     wx.navigateBack();
   },
   
-  // 分享
-  onShareAppMessage: function() {
-    return {
-      title: this.data.event ? `${this.data.event.name} - 网球赛事` : '网球赛事',
-      path: `/pages/event/detail?id=${this.data.eventId}`
-    };
-  }
+  // 分享功能已移除
 });

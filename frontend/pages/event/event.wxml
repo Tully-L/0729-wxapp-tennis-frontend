@@ -169,9 +169,7 @@
           <view class="event-header">
             <view class="event-title">{{item.name}}</view>
             <view class="event-actions">
-              <button class="action-btn share" catchtap="shareEvent" data-id="{{item._id}}">
-                分享
-              </button>
+              <!-- 分享按钮已移除 -->
             </view>
           </view>
           
@@ -472,9 +470,7 @@
                   <button wx:if="{{item.userRole === 'organizer'}}" class="action-btn edit" catchtap="editEvent" data-id="{{item._id}}">
                     编辑
                   </button>
-                  <button class="action-btn share" catchtap="shareEvent" data-id="{{item._id}}">
-                    分享
-                  </button>
+                  <!-- 分享按钮已移除 -->
                 </view>
               </view>
             </view>

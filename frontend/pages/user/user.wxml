@@ -21,7 +21,7 @@
   <view class="welcome-section">
     <!-- 欢迎语 -->
     <view class="welcome-bar">
-      <text class="welcome-text">嗨，欢迎加入运动纪，记录努力和精彩</text>
+      <text class="welcome-text">嗨，欢迎加入LJ网球社，记录努力和精彩</text>
     </view>
     <!-- 功能快捷入口 -->
     <view class="quick-actions">

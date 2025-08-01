@@ -573,40 +573,9 @@ Page({
     });
   },
 
-  // 分享赛事
-  shareEvent: function(e) {
-    const eventId = e.currentTarget.dataset.id;
-    const event = this.data.events.find(ev => ev._id === eventId);
+  // 分享赛事功能已移除
 
-    if (!event) return;
-
-    wx.showShareMenu({
-      withShareTicket: true,
-      menus: ['shareAppMessage', 'shareTimeline']
-    });
-  },
-
-  // 页面分享
-  onShareAppMessage: function(res) {
-    if (res.from === 'button') {
-      const eventId = res.target.dataset.id;
-      const event = this.data.events.find(ev => ev._id === eventId);
-      
-      if (event) {
-        return {
-          title: `${event.name} - 网球赛事报名`,
-          path: `/pages/event/detail?id=${eventId}`,
-          imageUrl: event.coverImage || '../../images/logo.png'
-        };
-      }
-    }
-    
-    return {
-      title: '网球热 - 发现精彩赛事',
-      path: '/pages/event/event',
-      imageUrl: '../../images/logo.png'
-    };
-  },
+  // 页面分享功能已移除
 
   // Tab system methods
   initTabSystem: function() {
@@ -2027,51 +1996,7 @@ Page({
     });
   },
 
-  shareMyEvent: function(e) {
-    const eventId = e.currentTarget.dataset.id;
-    const event = this.data.tabData.my.events.find(ev => ev._id === eventId);
-    
-    if (!event) return;
-    
-    // Set up sharing data
-    this.shareEventData = {
-      title: `${event.name} - 网球赛事`,
-      path: `/pages/event/detail?id=${eventId}`,
-      imageUrl: event.coverImage || '../../images/logo.png'
-    };
-    
-    wx.showShareMenu({
-      withShareTicket: true,
-      menus: ['shareAppMessage', 'shareTimeline']
-    });
-    
-    // Also show share options
-    wx.showActionSheet({
-      itemList: ['分享给朋友', '分享到朋友圈', '复制链接'],
-      success: (res) => {
-        switch (res.tapIndex) {
-          case 0:
-            // Share to friend - handled by onShareAppMessage
-            break;
-          case 1:
-            // Share to timeline - handled by WeChat
-            break;
-          case 2:
-            // Copy link
-            wx.setClipboardData({
-              data: `https://your-domain.com/pages/event/detail?id=${eventId}`,
-              success: () => {
-                wx.showToast({
-                  title: '链接已复制',
-                  icon: 'success'
-                });
-              }
-            });
-            break;
-        }
-      }
-    });
-  },
+  // 我的赛事分享功能已移除
 
   loadMoreMyEvents: function() {
     const tabData = this.data.tabData.my;
