@@ -5,7 +5,7 @@
   <!-- 顶部横幅区域 -->
   <view class="banner">
     <view class="banner-bg"></view> <!-- 深绿色背景块 -->
-    <view class="tennis-banner-bg"></view>
+    <image class="tennis-banner-image" src="/images/icon/tennis0.png" mode="aspectFill"></image>
     <view class="banner-content">
       <text class="club-title">LJ网球社</text>
       <text class="slogan">热爱网球 · 享受运动</text>

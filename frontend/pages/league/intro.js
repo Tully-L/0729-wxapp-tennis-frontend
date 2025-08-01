@@ -87,7 +87,7 @@ Page({
     return {
       title: 'LJ网球联盟 - 专业网球运动平台',
       path: '/pages/league/intro',
-      imageUrl: '../../images/logo.png'
+      imageUrl: '../../images/icon/logo.png'
     };
   },
 

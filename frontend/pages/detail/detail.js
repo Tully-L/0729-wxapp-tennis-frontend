@@ -1018,7 +1018,7 @@ Page({
     return {
       title: match ? `${match.players.team1[0].name} vs ${match.players.team2[0].name} 比分详情` : '网球比赛详情',
       path: `/pages/detail/detail?id=${this.data.matchId}`,
-      imageUrl: match && match.coverImage ? match.coverImage : '../../images/logo.png' // Use event cover image if available
+      imageUrl: match && match.coverImage ? match.coverImage : '../../images/icon/logo.png' // Use event cover image if available
     };
   }
 }); 
