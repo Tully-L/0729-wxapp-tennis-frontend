@@ -682,6 +682,72 @@ Page({
       }
       return scoreStr;
     }).join(' ');
+  },
+
+  // 新增的事件处理函数
+  // 功能导航事件
+  goToLeagueIntro() {
+    wx.showToast({
+      title: '联盟介绍功能开发中',
+      icon: 'none'
+    });
+  },
+
+  goToBrandEvents() {
+    wx.showToast({
+      title: '品牌赛事功能开发中',
+      icon: 'none'
+    });
+  },
+
+  goToPlayerRanking() {
+    wx.showToast({
+      title: '球员排名功能开发中',
+      icon: 'none'
+    });
+  },
+
+  goToPointsRanking() {
+    wx.showToast({
+      title: '积分榜功能开发中',
+      icon: 'none'
+    });
+  },
+
+  // 通知栏事件
+  closeNotice() {
+    wx.showToast({
+      title: '通知已关闭',
+      icon: 'success'
+    });
+  },
+
+  // 赛事卡片点击事件
+  goToEventDetail(e) {
+    const id = e.currentTarget.dataset.id;
+    wx.showToast({
+      title: `查看赛事详情 ${id}`,
+      icon: 'none'
+    });
+  },
+
+  // 筛选事件
+  filterByType(e) {
+    const type = e.currentTarget.dataset.type;
+    wx.showToast({
+      title: `筛选类型: ${type}`,
+      icon: 'none'
+    });
+  },
+
+  confirmFilter() {
+    this.setData({
+      showFilter: false
+    });
+    wx.showToast({
+      title: '筛选条件已应用',
+      icon: 'success'
+    });
   }
-}); 
+});
  

@@ -1,270 +1,93 @@
 <!-- user.wxml -->
-<view class="container">
-  <!-- Not Logged In -->
-  <view wx:if="{{!isLoggedIn}}" class="not-logged-in">
-    <image class="login-banner" src="../../images/icon/赛事icon.png" mode="aspectFit"/>
-    <view class="login-text">请登录查看您的个人资料</view>
-    <button class="btn-login" bindtap="login">登录 / 注册</button>
-  </view>
-  
-  <!-- Logged In -->
-  <block wx:else>
-    <!-- Loading State -->
-    <view wx:if="{{loading}}" class="loading-state">
-      <view class="loading-spinner"></view>
-      <view class="loading-text">加载个人资料中...</view>
+<view class="page-container">
+  <!-- 顶部背景与头像信息区 -->
+  <view class="top-info-section">
+    <view class="top-bg"></view>
+    <view class="user-profile">
+      <!-- 头像 -->
+      <view class="user-avatar"></view>
+      <!-- 用户信息 -->
+      <view class="user-details">
+        <text class="user-name">{{profile.nickname || '球员88662'}}</text>
+        <text class="user-uid">UID: {{profile.customId || profile.id || '86594010'}}</text>
+        <text class="user-info">{{profile.age || 22}}岁 | 体重{{profile.weight || '-'}} | 球龄{{profile.experience || '-'}} | 持拍手{{profile.hand || '-'}}</text>
+      </view>
+      <!-- 编辑图标 -->
+      <view class="edit-icon" bindtap="editProfile"></view>
     </view>
-    
-    <!-- Profile Content -->
-    <block wx:elif="{{profile}}">
-      <!-- Profile Header -->
-      <view class="profile-header">
-        <!-- Background Image -->
-        <image
-          class="profile-background"
-          src="{{profile.backgroundImage || '../../images/default-bg.jpg'}}"
-          mode="aspectFill"
-        />
-        <view class="profile-header-overlay"></view>
+  </view>
 
-        <view class="profile-header-content">
-          <image
-            class="profile-avatar"
-            src="{{profile.avatar || '../../images/icon/我的icon.png'}}"
-            mode="aspectFill"
-          />
-          <view class="profile-info">
-            <view class="profile-name">{{profile.nickname || '网球选手'}}</view>
-            <view class="profile-id">ID: {{profile.customId || profile.id || 'N/A'}}</view>
-            <view wx:if="{{profile.signature}}" class="profile-signature">{{profile.signature}}</view>
-          </view>
-          <view class="profile-actions">
-            <view class="profile-edit" bindtap="editProfile">
-              <image class="edit-icon" src="../../images/icon/编辑.png" mode="aspectFit"/>
-            </view>
-            <view class="profile-logout" bindtap="logout">
-              <image class="logout-icon" src="../../images/icon/设置.png" mode="aspectFit"/>
-            </view>
-          </view>
+  <!-- 欢迎语与功能快捷入口区 -->
+  <view class="welcome-section">
+    <!-- 欢迎语 -->
+    <view class="welcome-bar">
+      <text class="welcome-text">嗨，欢迎加入运动纪，记录努力和精彩</text>
+    </view>
+    <!-- 功能快捷入口 -->
+    <view class="quick-actions">
+      <view class="action-item" bindtap="goToOrders">
+        <view class="action-icon order-icon"></view>
+        <text class="action-text">订单</text>
+      </view>
+      <view class="action-item" bindtap="goToMessages">
+        <view class="action-icon message-icon"></view>
+        <text class="action-text">消息</text>
+      </view>
+      <view class="action-item" bindtap="goToCustomerService">
+        <view class="action-icon service-icon"></view>
+        <text class="action-text">客服</text>
+      </view>
+      <view class="action-item" bindtap="goToSettings">
+        <view class="action-icon settings-icon"></view>
+        <text class="action-text">设置</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 业务模块区 -->
+  <view class="business-modules">
+    <view class="module-row">
+      <view class="module-item mdou-module" bindtap="goToMDou">
+        <view class="module-icon mdou-icon"></view>
+        <view class="module-content">
+          <text class="module-title">M豆</text>
+          <text class="module-value">{{userStats.mDou || 2500}}</text>
         </view>
       </view>
-      
-      <!-- Enhanced Stats Summary -->
-      <view class="stats-summary">
-        <view class="stat-item" bindtap="viewDetailedStats">
-          <view class="stat-value">{{userStats ? userStats.basic.participationCount : (profile.stats.participationCount || 0)}}</view>
-          <view class="stat-label">比赛</view>
-        </view>
-        <view class="stat-item" bindtap="viewDetailedStats">
-          <view class="stat-value">{{userStats ? userStats.basic.wins : (profile.stats.wins || 0)}}</view>
-          <view class="stat-label">胜场</view>
-        </view>
-        <view class="stat-item" bindtap="viewDetailedStats">
-          <view class="stat-value">{{userStats ? userStats.basic.winRate : (profile.stats.winRate || '0%')}}</view>
-          <view class="stat-label">胜率</view>
-        </view>
-        <view class="stat-item" bindtap="viewDetailedStats">
-          <view class="stat-value">{{userStats ? userStats.basic.etaPoints : (profile.stats.etaPoints || 0)}}</view>
-          <view class="stat-label">积分</view>
+      <view class="module-item coupon-module" bindtap="goToCoupons">
+        <view class="module-icon coupon-icon"></view>
+        <view class="module-content">
+          <text class="module-title">优惠券</text>
+          <text class="module-value">{{userStats.coupons || 3}}张</text>
         </view>
       </view>
-      
-      <!-- User Level and Achievements -->
-      <view class="level-achievements-section">
-        <view class="level-info">
-          <view class="level-badge">
-            <text class="level-name">{{userStats ? userStats.level.name : '新手'}}</text>
-          </view>
-          <view class="achievements-info" bindtap="viewAchievements">
-            <text class="achievements-count">🏆 {{achievements.length}} 个成就</text>
-            <text class="achievements-hint">点击查看</text>
-          </view>
+    </view>
+    <view class="module-row">
+      <view class="module-item events-module" bindtap="goToMyEvents">
+        <view class="module-icon events-icon"></view>
+        <view class="module-content">
+          <text class="module-title">我的赛事</text>
+          <text class="module-value">{{userStats.events || 5}}场</text>
         </view>
       </view>
-      
-      <!-- Quick Actions -->
-      <view class="quick-actions">
-        <view class="action-item" bindtap="searchUsers">
-          <image class="action-icon" src="../../images/icon/搜索.png" mode="aspectFit"/>
-          <text class="action-text">搜索用户</text>
-        </view>
-        <view class="action-item" bindtap="editProfile">
-          <image class="action-icon" src="../../images/icon/编辑.png" mode="aspectFit"/>
-          <text class="action-text">编辑资料</text>
+      <view class="module-item member-module" bindtap="goToMemberCenter">
+        <view class="module-icon member-icon"></view>
+        <view class="module-content">
+          <text class="module-title">会员中心</text>
+          <text class="module-value">{{userStats.memberLevel || 'VIP'}}</text>
         </view>
       </view>
-      
-      <!-- Leaderboard Section -->
-      <view class="section leaderboard-section">
-        <view class="section-header">
-          <view class="section-title">排行榜</view>
-          <view class="leaderboard-tabs">
-            <view 
-              class="tab-item {{leaderboardType === 'points' ? 'active' : ''}}"
-              bindtap="switchLeaderboardType"
-              data-type="points"
-            >积分</view>
-            <view 
-              class="tab-item {{leaderboardType === 'wins' ? 'active' : ''}}"
-              bindtap="switchLeaderboardType"
-              data-type="wins"
-            >胜场</view>
-            <view 
-              class="tab-item {{leaderboardType === 'participation' ? 'active' : ''}}"
-              bindtap="switchLeaderboardType"
-              data-type="participation"
-            >参与</view>
-          </view>
-        </view>
-        
-        <view class="section-content">
-          <view wx:if="{{leaderboard.length === 0}}" class="empty-text">排行榜加载中...</view>
-          <view wx:else class="leaderboard-list">
-            <view 
-              wx:for="{{leaderboard}}" 
-              wx:key="id" 
-              class="leaderboard-item {{index < 3 ? 'top-three' : ''}}"
-            >
-              <view class="rank-badge rank-{{index + 1}}">{{item.rank}}</view>
-              <image class="user-avatar" src="../../images/icon/我的icon.png" mode="aspectFit"/>
-              <view class="user-info">
-                <view class="user-name">{{item.nickname}}</view>
-                <view class="user-level">{{item.level.name}}</view>
-              </view>
-              <view class="user-score">
-                <text wx:if="{{leaderboardType === 'points'}}">{{item.stats.etaPoints}}</text>
-                <text wx:elif="{{leaderboardType === 'wins'}}">{{item.stats.wins}}</text>
-                <text wx:else>{{item.stats.participationCount}}</text>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-      
-      <!-- Clubs Section -->
-      <view class="section clubs-section">
-        <view class="section-header">
-          <view class="section-title">我的俱乐部</view>
-        </view>
-        
-        <view class="section-content">
-          <view wx:if="{{clubsLoading}}" class="loading-mini">加载俱乐部中...</view>
-          <view wx:elif="{{clubs.length === 0}}" class="empty-text">您还没有加入任何俱乐部，快去探索或创建您的俱乐部吧！</view>
-          <view wx:else class="clubs-list">
-            <view 
-              wx:for="{{clubs}}" 
-              wx:key="id" 
-              class="club-item"
-              bindtap="goToClubDetail"
-              data-id="{{item.id}}"
-            >
-              <image class="club-logo" src="../../images/icon/场馆icon.png" mode="aspectFit"/>
-              <view class="club-info">
-                <view class="club-name">{{item.name}}</view>
-                <view class="club-points">{{item.points || 0}} 积分</view>
-              </view>
-              <image class="arrow-icon" src="../../images/icon/订单.png" mode="aspectFit"/>
-            </view>
-          </view>
-        </view>
-      </view>
-      
-      <!-- Match History Section -->
-      <view class="section match-section">
-        <view class="section-header">
-          <view class="section-title">比赛记录</view>
-        </view>
-        
-        <!-- Match Filters -->
-        <view class="match-filters">
-          <view class="filter-group">
-            <view 
-              class="filter-item {{matchFilters.type === 'all' ? 'active' : ''}}"
-              bindtap="applyMatchFilter"
-              data-field="type"
-              data-value="all"
-            >全部类型</view>
-            <view 
-              class="filter-item {{matchFilters.type === 'singles' ? 'active' : ''}}"
-              bindtap="applyMatchFilter"
-              data-field="type"
-              data-value="singles"
-            >单打</view>
-            <view 
-              class="filter-item {{matchFilters.type === 'doubles' ? 'active' : ''}}"
-              bindtap="applyMatchFilter"
-              data-field="type"
-              data-value="doubles"
-            >双打</view>
-          </view>
-          
-          <view class="filter-group">
-            <view 
-              class="filter-item {{matchFilters.status === 'all' ? 'active' : ''}}"
-              bindtap="applyMatchFilter"
-              data-field="status"
-              data-value="all"
-            >全部状态</view>
-            <view 
-              class="filter-item {{matchFilters.status === 'completed' ? 'active' : ''}}"
-              bindtap="applyMatchFilter"
-              data-field="status"
-              data-value="completed"
-            >已完成</view>
-            <view 
-              class="filter-item {{matchFilters.status === 'upcoming' ? 'active' : ''}}"
-              bindtap="applyMatchFilter"
-              data-field="status"
-              data-value="upcoming"
-            >即将开始</view>
-          </view>
-        </view>
-        
-        <!-- Match List -->
-        <view class="section-content">
-          <view wx:if="{{matchesLoading && matches.length === 0}}" class="loading-mini">加载比赛中...</view>
-          <view wx:elif="{{matches.length === 0}}" class="empty-text">暂无比赛记录，快去报名参加一场比赛吧！</view>
-          <view wx:else class="match-list">
-            <view 
-              wx:for="{{matches}}" 
-              wx:key="id" 
-              class="match-item"
-              bindtap="goToMatchDetail"
-              data-id="{{item._id}}"
-            >
-              <view class="match-item-header">
-                <text>{{item.eventType}}</text>
-                <text class="status-label {{item.status ? 'status-' + item.status : ''}}">
-                  {{item.stage || 'Match'}}
-                </text>
-              </view>
-              
-              <view class="match-item-content">
-                <view class="match-players">
-                  <view class="match-player">{{item.players[0].name}}</view>
-                  <view class="match-vs">VS</view>
-                  <view class="match-player">{{item.players[1].name}}</view>
-                </view>
-                
-                <view class="match-info">
-                  <view class="match-date">{{item.date || 'N/A'}}</view>
-                  <view class="match-venue">{{item.venue || 'N/A'}}</view>
-                </view>
-              </view>
-            </view>
-          </view>
-          
-          <!-- Load More -->
-          <view wx:if="{{hasMoreMatches && !matchesLoading && matches.length > 0}}" class="load-more" bindtap="loadMoreMatches">
-            加载更多
-          </view>
-          
-          <!-- Loading More -->
-          <view wx:if="{{matchesLoading && matches.length > 0}}" class="loading-mini">
-            加载更多中...
-          </view>
-        </view>
-      </view>
-    </block>
-  </block>
+    </view>
+  </view>
+
+  <!-- 我的赛事记录区 -->
+  <view class="events-record-section">
+    <view class="section-title">我的赛事记录</view>
+    <view class="events-list">
+      <!-- 这里可以添加赛事记录列表 -->
+      <view class="empty-events">暂无赛事记录</view>
+      <!-- 下方白色区域 -->
+      <view class="bottom-white-space"></view>
+    </view>
+  </view>
 </view>

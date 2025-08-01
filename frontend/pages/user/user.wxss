@@ -1,549 +1,331 @@
 /* user.wxss */
 
-/* Not Logged In */
-.not-logged-in {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 60rpx 40rpx;
+/* 全局样式 */
+page {
+  background-color: #f5f5f5;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-.login-banner {
-  width: 120rpx;
-  height: 120rpx;
-  text-align: center;
-  margin-bottom: 40rpx;
-}
-
-.login-text {
-  font-size: 32rpx;
-  color: var(--text-secondary);
-  margin-bottom: 40rpx;
-  text-align: center;
-}
-
-.btn-login {
-  width: 80%;
-  height: 88rpx;
-  background-color: var(--primary-color);
-  color: var(--text-on-primary);
-  font-size: 30rpx;
-  border-radius: 4rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-}
-
-/* Loading State */
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 100rpx 0;
-}
-
-.loading-spinner {
-  width: 60rpx;
-  height: 60rpx;
-  border: 4rpx solid rgba(0, 0, 0, 0.1);
-  border-top-color: var(--primary-color);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16rpx;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.loading-text {
-  font-size: 28rpx;
-  color: var(--text-tertiary);
-}
-
-.loading-mini {
-  text-align: center;
-  padding: 20rpx 0;
-  font-size: 26rpx;
-  color: var(--text-tertiary);
-}
-
-/* Profile Header */
-.profile-header {
-  height: 300rpx;
-  position: relative;
-  overflow: hidden;
-}
-
-.profile-background {
-  position: absolute;
-  top: 0;
-  left: 0;
+/* 页面容器 */
+.page-container {
   width: 100%;
+  min-height: 100vh;
+  padding-bottom: 120rpx; /* 为TabBar留空间 */
+}
+
+/* 顶部背景与头像信息区 */
+.top-info-section {
+  position: relative;
+  height: 300rpx;
+  margin-bottom: 20rpx;
+}
+
+.top-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg,
+    rgba(10, 74, 57, 0.05) 0%,
+    rgba(10, 74, 57, 0.17) 30%,
+    rgba(10, 74, 57, 0.30) 50%,
+    rgba(10, 74, 57, 0.55) 70%,
+    rgba(10, 74, 57, 0.75) 100%);
+}
+
+.user-profile {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  padding: 60rpx 40rpx 0;
   height: 100%;
 }
 
-.profile-header-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6));
-}
-
-.profile-header-content {
-  position: absolute;
-  bottom: 30rpx;
-  left: 30rpx;
-  right: 30rpx;
-  display: flex;
-  align-items: flex-end;
-}
-
-.profile-avatar {
-  width: 100rpx;
-  height: 100rpx;
-  margin-right: 20rpx;
-  border-radius: 50%;
-  border: 3rpx solid rgba(255, 255, 255, 0.8);
-}
-
-.profile-info {
-  flex: 1;
-}
-
-.profile-name {
-  color: #fff;
-  font-size: 36rpx;
-  font-weight: 500;
-  margin-bottom: 6rpx;
-}
-
-.profile-id {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 24rpx;
-  margin-bottom: 4rpx;
-}
-
-.profile-signature {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 26rpx;
-  font-style: italic;
-  opacity: 0.9;
-}
-
-.profile-edit {
-  width: 60rpx;
-  height: 60rpx;
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.edit-icon {
-  width: 24rpx;
-  height: 24rpx;
-}
-
-.profile-actions {
-  display: flex;
-  align-items: center;
-}
-
-.profile-logout {
-  width: 60rpx;
-  height: 60rpx;
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 16rpx;
-}
-
-.logout-icon {
-  width: 24rpx;
-  height: 24rpx;
-}
-
-/* Stats Summary */
-.stats-summary {
-  display: flex;
-  background-color: var(--card-background);
-  padding: 30rpx 0;
-  margin-bottom: 20rpx;
-}
-
-.stat-item {
-  flex: 1;
-  text-align: center;
-  border-right: 1rpx solid var(--border-color);
-}
-
-.stat-item:last-child {
-  border-right: none;
-}
-
-.stat-value {
-  font-size: 36rpx;
-  font-weight: 500;
-  color: var(--primary-color);
-  margin-bottom: 6rpx;
-}
-
-.stat-label {
-  font-size: 24rpx;
-  color: var(--text-secondary);
-}
-
-/* Section Styles */
-.section {
-  background-color: var(--card-background);
-  margin-bottom: 20rpx;
-  border-radius: 8rpx;
-  overflow: hidden;
-}
-
-.section-header {
-  padding: 20rpx;
-  border-bottom: 1rpx solid var(--border-color);
-}
-
-.section-title {
-  font-size: 30rpx;
-  font-weight: 500;
-}
-
-.section-content {
-  padding: 20rpx;
-}
-
-.empty-text {
-  text-align: center;
-  padding: 40rpx 0;
-  color: var(--text-tertiary);
-  font-size: 28rpx;
-}
-
-/* Clubs List */
-.clubs-list {
-  margin: 0 -20rpx;
-}
-
-.club-item {
-  display: flex;
-  align-items: center;
-  padding: 20rpx;
-  border-bottom: 1rpx solid var(--border-color);
-}
-
-.club-item:last-child {
-  border-bottom: none;
-}
-
-.club-logo {
-  width: 32rpx;
-  height: 32rpx;
-  margin-right: 20rpx;
-}
-
-.club-info {
-  flex: 1;
-}
-
-.club-name {
-  font-size: 28rpx;
-  font-weight: 500;
-  margin-bottom: 6rpx;
-}
-
-.club-points {
-  font-size: 24rpx;
-  color: var(--primary-color);
-}
-
-.arrow-icon {
-  width: 20rpx;
-  height: 20rpx;
-}
-
-/* Match Filters */
-.match-filters {
-  padding: 20rpx;
-  border-bottom: 1rpx solid var(--border-color);
-}
-
-.filter-group {
-  display: flex;
-  margin-bottom: 16rpx;
-}
-
-.filter-group:last-child {
-  margin-bottom: 0;
-}
-
-.filter-item {
-  padding: 10rpx 20rpx;
-  font-size: 24rpx;
-  border: 1rpx solid var(--border-color);
-  border-radius: 4rpx;
-  margin-right: 16rpx;
-}
-
-.filter-item.active {
-  background-color: var(--primary-color);
-  color: var(--text-on-primary);
-  border-color: var(--primary-color);
-}
-
-/* Match List */
-.match-item {
-  background-color: #fff;
-  border-radius: 8rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-}
-
-.match-item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: var(--primary-color);
-  color: var(--text-on-primary);
-  padding: 16rpx 20rpx;
-  font-size: 26rpx;
-}
-
-.status-label {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 4rpx;
-  background-color: rgba(255, 255, 255, 0.2);
-  line-height: 1;
-}
-
-.match-item-content {
-  padding: 20rpx;
-}
-
-.match-players {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16rpx;
-}
-
-.match-player {
-  flex: 1;
-  font-size: 28rpx;
-  font-weight: 500;
-}
-
-.match-vs {
-  padding: 0 20rpx;
-  font-size: 24rpx;
-  color: var(--text-tertiary);
-}
-
-.match-info {
-  display: flex;
-  font-size: 24rpx;
-  color: var(--text-tertiary);
-}
-
-.match-date {
-  margin-right: 20rpx;
-}
-
-/* Load More */
-.load-more {
-  text-align: center;
-  padding: 20rpx 0;
-  font-size: 26rpx;
-  color: var(--text-secondary);
-}
-
-/* Level and Achievements */
-.level-achievements-section {
-  background-color: var(--card-background);
-  padding: 20rpx;
-  margin-bottom: 20rpx;
-  border-radius: 8rpx;
-}
-
-.level-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.level-badge {
-  background-color: var(--primary-color);
-  color: var(--text-on-primary);
-  padding: 8rpx 16rpx;
-  border-radius: 20rpx;
-  font-size: 24rpx;
-}
-
-.achievements-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.achievements-count {
-  font-size: 26rpx;
-  color: var(--text-primary);
-  margin-bottom: 4rpx;
-}
-
-.achievements-hint {
-  font-size: 22rpx;
-  color: var(--text-tertiary);
-}
-
-/* Quick Actions */
-.quick-actions {
-  display: flex;
-  background-color: var(--card-background);
-  padding: 20rpx;
-  margin-bottom: 20rpx;
-  border-radius: 8rpx;
-  gap: 20rpx;
-}
-
-.action-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20rpx;
-  border-radius: 8rpx;
-  background-color: var(--background-color);
-}
-
-.action-icon {
-  width: 40rpx;
-  height: 40rpx;
-  margin-bottom: 8rpx;
-}
-
-.action-text {
-  font-size: 24rpx;
-  color: var(--text-secondary);
-}
-
-/* Leaderboard Section */
-.leaderboard-section .section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20rpx;
-}
-
-.leaderboard-tabs {
-  display: flex;
-  gap: 8rpx;
-}
-
-.tab-item {
-  padding: 8rpx 16rpx;
-  font-size: 24rpx;
-  color: var(--text-secondary);
-  border: 1rpx solid var(--border-color);
-  border-radius: 20rpx;
-  background-color: var(--background-color);
-  transition: all 0.3s ease;
-}
-
-.tab-item.active {
-  background-color: var(--primary-color);
-  color: var(--text-on-primary);
-  border-color: var(--primary-color);
-}
-
-.leaderboard-list {
-  margin: 0 -20rpx;
-}
-
-.leaderboard-item {
-  display: flex;
-  align-items: center;
-  padding: 16rpx 20rpx;
-  border-bottom: 1rpx solid var(--border-color);
-}
-
-.leaderboard-item:last-child {
-  border-bottom: none;
-}
-
-.leaderboard-item.top-three {
-  background-color: rgba(255, 215, 0, 0.1);
-}
-
-.rank-badge {
-  width: 40rpx;
-  height: 40rpx;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20rpx;
-  font-weight: bold;
-  margin-right: 16rpx;
-  background-color: var(--text-tertiary);
-  color: white;
-}
-
-.rank-badge.rank-1 {
-  background-color: #FFD700;
-  color: #333;
-}
-
-.rank-badge.rank-2 {
-  background-color: #C0C0C0;
-  color: #333;
-}
-
-.rank-badge.rank-3 {
-  background-color: #CD7F32;
-  color: white;
-}
-
 .user-avatar {
-  width: 48rpx;
-  height: 48rpx;
+  width: 120rpx;
+  height: 120rpx;
+  background-color: #0A4A39;
   border-radius: 50%;
-  margin-right: 16rpx;
+  margin-right: 20rpx;
 }
 
-.user-info {
+.user-details {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .user-name {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #FFFFFF;
+  margin-bottom: 8rpx;
+}
+
+.user-uid {
   font-size: 28rpx;
-  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 12rpx;
+}
+
+.user-info {
+  font-size: 26rpx;
+  color: #FFFFFF;
+}
+
+.edit-icon {
+  width: 30rpx;
+  height: 30rpx;
+  background-color: #0A4A39;
+  border-radius: 4rpx;
+  position: relative;
+  margin-top: 80rpx;
+}
+
+.edit-icon::after {
+  content: '✎';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #FFFFFF;
+  font-size: 16rpx;
+}
+
+/* 欢迎语与功能快捷入口区 */
+.welcome-section {
+  margin-bottom: 20rpx;
+  background-color: #ffffff;
+  border-radius: 10rpx;
+  padding: 20rpx;
+}
+
+.welcome-bar {
+  height: 60rpx;
+  background-color: #ffffff;
+  border-radius: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20rpx;
+}
+
+.welcome-text {
+  font-size: 28rpx;
+  color: #0A4A39;
+  text-align: center;
+}
+
+.quick-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.action-icon {
+  width: 50rpx;
+  height: 50rpx;
+  background-color: transparent;
+  border-radius: 8rpx;
+  margin-bottom: 8rpx;
+  position: relative;
+}
+
+/* 不同功能图标的形状示意 */
+.order-icon::after {
+  content: '📋';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24rpx;
+}
+
+.message-icon::after {
+  content: '💬';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24rpx;
+}
+
+.service-icon::after {
+  content: '🎧';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24rpx;
+}
+
+.settings-icon::after {
+  content: '⚙️';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24rpx;
+}
+
+.action-text {
+  font-size: 26rpx;
+  color: #0A4A39;
+}
+
+/* 业务模块区 */
+.business-modules {
+  background-color: #ffffff;
+  border: 1rpx solid #0A4A39;
+  border-radius: 10rpx;
+  margin: 0 30rpx 20rpx;
+  padding: 20rpx;
+}
+
+.module-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.module-row:last-child {
+  margin-bottom: 0;
+}
+
+.module-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  border-radius: 10rpx;
+  margin: 0 10rpx;
+}
+
+.module-item:first-child {
+  margin-left: 0;
+}
+
+.module-item:last-child {
+  margin-right: 0;
+}
+
+/* M豆模块 */
+.mdou-module {
+  background: linear-gradient(to right, rgba(10, 74, 57, 0.1), #FFFFFF);
+}
+
+/* 优惠券模块 */
+.coupon-module {
+  background: linear-gradient(to right, rgba(10, 74, 57, 0.05), #FFFFFF);
+}
+
+/* 我的赛事模块 */
+.events-module {
+  background: linear-gradient(to right, rgba(10, 74, 57, 0.05), #FFFFFF);
+}
+
+/* 会员中心模块 */
+.member-module {
+  background: linear-gradient(to right, rgba(10, 74, 57, 0.1), #FFFFFF);
+}
+
+.module-icon {
+  width: 40rpx;
+  height: 40rpx;
+  background-color: #0A4A39;
+  border-radius: 8rpx;
+  margin-right: 15rpx;
+  position: relative;
+}
+
+/* 不同模块图标 */
+.mdou-icon::after {
+  content: '💰';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20rpx;
+}
+
+.coupon-icon::after {
+  content: '🎫';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20rpx;
+}
+
+.events-icon::after {
+  content: '🏆';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20rpx;
+}
+
+.member-icon::after {
+  content: '👑';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20rpx;
+}
+
+.module-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.module-title {
+  font-size: 28rpx;
+  color: #0A4A39;
   margin-bottom: 4rpx;
 }
 
-.user-level {
-  font-size: 22rpx;
-  color: var(--text-tertiary);
+.module-value {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #0A4A39;
 }
 
-.user-score {
-  font-size: 26rpx;
-  font-weight: 500;
-  color: var(--primary-color);
+/* 我的赛事记录区 */
+.events-record-section {
+  background-color: #ffffff;
+  border-radius: 10rpx;
+  margin-bottom: 20rpx;
+  padding: 20rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #0A4A39;
+  margin-bottom: 15rpx;
+}
+
+.events-list {
+  min-height: 200rpx;
+}
+
+.empty-events {
+  text-align: center;
+  color: rgba(10, 74, 57, 0.6);
+  font-size: 28rpx;
+  padding: 80rpx 0;
+}
+
+.bottom-white-space {
+  height: 150rpx;
+  background-color: #ffffff;
 }

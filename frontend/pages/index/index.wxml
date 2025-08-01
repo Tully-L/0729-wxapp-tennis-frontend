@@ -1,349 +1,143 @@
-<!-- index.wxml -->
-<view class="container">
-  <!-- Header -->
-  <view class="header">
-    <view class="header-content">
-      <view class="title-section">
-        <text class="app-title">🎾 网球热</text>
-        <text class="app-subtitle">专业网球赛事平台</text>
-      </view>
-      <view class="header-actions">
-        <view class="action-btn stats-btn" bindtap="viewMatchStats">
-          <text class="action-icon">📊</text>
-        </view>
-        <view class="action-btn search-btn" bindtap="toggleSearch">
-          <text class="action-icon">🔍</text>
-        </view>
-      </view>
+<!-- 页面最外层容器 -->
+<view class="page-container">
+  <!-- 顶部导航栏（微信原生导航栏已设置标题为"LJ网球社"） -->
+
+  <!-- 顶部横幅区域 -->
+  <view class="banner">
+    <view class="banner-bg"></view> <!-- 深绿色背景块 -->
+    <image class="tennis-banner-image" src="/images/tennis0.png" mode="aspectFill"></image>
+    <view class="banner-content">
+      <text class="club-title">LJ网球社</text>
+      <text class="slogan">热爱网球 · 享受运动</text>
     </view>
   </view>
 
-  <!-- Search Bar -->
-  <view class="search-container {{showSearch ? 'show' : ''}}">
-    <view class="search-bar">
-      <view class="search-input-wrapper">
-        <text class="search-prefix-icon">🔍</text>
-        <input
-          class="search-input"
-          placeholder="搜索比赛、选手或场地"
-          value="{{searchQuery}}"
-          bindinput="onSearchInput"
-          bindconfirm="onSearch"
-        />
-        <view class="search-clear" bindtap="onClearSearch" wx:if="{{searchQuery}}">
-          <text class="clear-icon">✕</text>
-        </view>
-      </view>
-      <view class="search-action" bindtap="onSearch">
-        <text class="search-action-text">搜索</text>
-      </view>
+  <!-- 功能导航区域 -->
+  <view class="func-nav">
+    <view class="nav-item" bindtap="goToLeagueIntro">
+      <view class="nav-icon"></view> <!-- 功能图标色块 -->
+      <text class="nav-text">联盟介绍</text>
     </view>
-  </view>
-  
-  <!-- Search Results -->
-  <view class="search-results" wx:if="{{showSearch && searchQuery}}">
-    <view wx:if="{{searchLoading}}" class="search-loading">
-      <view class="loading-spinner"></view>
-      <text>搜索中...</text>
+    <view class="nav-item" bindtap="goToBrandEvents">
+      <view class="nav-icon"></view>
+      <text class="nav-text">品牌赛事</text>
     </view>
-    <view wx:elif="{{searchResults.length > 0}}" class="search-list">
-      <view 
-        wx:for="{{searchResults}}" 
-        wx:key="_id" 
-        class="search-item"
-        bindtap="goToDetail"
-        data-id="{{item._id}}"
-      >
-        <view class="search-item-title">{{item.matchName || item.eventType}}</view>
-        <view class="search-item-info">
-          <text class="search-item-venue">{{item.venue}}</text>
-          <text class="search-item-time">{{formatMatchTime(item.scheduledTime)}}</text>
-        </view>
-      </view>
+    <view class="nav-item" bindtap="goToPlayerRanking">
+      <view class="nav-icon"></view>
+      <text class="nav-text">球员排名</text>
     </view>
-    <view wx:elif="{{searchQuery.length >= 2}}" class="search-empty">
-      <text>未找到相关比赛</text>
+    <view class="nav-item" bindtap="goToPointsRanking">
+      <view class="nav-icon"></view>
+      <text class="nav-text">积分榜</text>
     </view>
   </view>
 
-  <!-- Top Tab Navigation -->
-  <view class="tab-nav">
-    <view 
-      wx:for="{{tabs}}" 
-      wx:key="index" 
-      class="tab-item {{activeTab === index ? 'active' : ''}}"
-      bindtap="switchTab"
-      data-index="{{index}}"
-    >
-      {{item}}
-    </view>
+  <!-- 通知栏区域 -->
+  <view class="notice-bar">
+    <view class="notice-icon"></view> <!-- 通知图标色块 -->
+    <text class="notice-text">本周六下午2点将举行月度积分赛，请各位成员踊跃报名！</text>
+    <view class="close-icon" bindtap="closeNotice"></view> <!-- 关闭按钮色块 -->
   </view>
-  
-  <!-- Enhanced Filter Bar -->
-  <view class="filter-bar">
-    <view class="filter-title">比赛筛选</view>
-    <view class="filter-btn" bindtap="toggleFilter">
-      <text>筛选</text>
-      <text class="filter-icon">🔍</text>
-    </view>
+
+  <!-- 赛事列表标题及筛选区域 -->
+  <view class="event-list-header">
+    <view class="title-icon"></view> <!-- 标题图标色块 -->
+    <text class="list-title">近期赛事</text>
+    <view class="search-icon" bindtap="toggleSearch"></view> <!-- 搜索图标色块 -->
+    <view class="filter-icon" bindtap="toggleFilter"></view> <!-- 筛选图标色块 -->
   </view>
-  
-  <!-- Filter Panel (Hidden by default) -->
-  <view class="filter-panel {{showFilter ? 'show' : ''}}">
-    <view class="filter-section">
-      <view class="filter-section-title">赛事类型</view>
-      <view class="filter-options">
-        <view 
-          wx:for="{{eventTypes}}" 
-          wx:key="id" 
-          class="filter-option {{filters.eventType === item.id ? 'active' : ''}}"
-          bindtap="applyFilter"
-          data-field="eventType"
-          data-value="{{item.id}}"
-        >
-          {{item.name}}
+  <!-- 赛事卡片列表区域 -->
+  <view class="event-cards">
+    <!-- 赛事卡片1 -->
+    <view class="event-card" bindtap="goToEventDetail" data-id="1">
+      <view class="card-img"></view> <!-- 赛事图片色块 -->
+      <view class="card-info">
+        <text class="card-title">[广州]白马杯Vol2-LOT(Love On Tennis)</text>
+        <view class="tags">
+          <text class="tag">ETA 200</text>
+          <text class="tag">双打8</text>
+          <text class="tag">20/20</text>
+        </view>
+        <view class="status">
+          <text class="status-tag">报名中</text>
+          <text class="time">7月26日(周六)19:00-8月2日(周六)22:00</text>
         </view>
       </view>
     </view>
-    
-    <view class="filter-section">
-      <view class="filter-section-title">选手搜索</view>
-      <input 
-        class="filter-input" 
-        placeholder="按选手姓名搜索" 
-        value="{{filters.player}}"
-        bindinput="inputPlayer"
-      />
+
+    <!-- 赛事卡片2 -->
+    <view class="event-card" bindtap="goToEventDetail" data-id="2">
+      <view class="card-img"></view>
+      <view class="card-info">
+        <text class="card-title">[深圳]夏季精英挑战赛-ATP(Association of Tennis Professionals)</text>
+        <view class="tags">
+          <text class="tag">ETA 300</text>
+          <text class="tag">单打16</text>
+          <text class="tag">15/16</text>
+        </view>
+        <view class="status">
+          <text class="status-tag">即将开始</text>
+          <text class="time">8月5日(周六)09:00-8月6日(周日)18:00</text>
+        </view>
+      </view>
     </view>
-    
-    <view class="filter-section">
-      <view class="filter-section-title">地区</view>
-      <input 
-        class="filter-input" 
-        placeholder="按地区搜索" 
-        value="{{filters.region}}"
-        bindinput="inputRegion"
-      />
+
+    <!-- 赛事卡片3 -->
+    <view class="event-card" bindtap="goToEventDetail" data-id="3">
+      <view class="card-img"></view>
+      <view class="card-info">
+        <text class="card-title">[上海]都市网球公开赛-WTA(Women's Tennis Association)</text>
+        <view class="tags">
+          <text class="tag">ETA 150</text>
+          <text class="tag">混双12</text>
+          <text class="tag">8/12</text>
+        </view>
+        <view class="status">
+          <text class="status-tag">报名中</text>
+          <text class="time">8月12日(周六)14:00-8月13日(周日)17:00</text>
+        </view>
+      </view>
     </view>
-    
-    <view class="filter-actions">
-      <button class="btn-reset" bindtap="resetFilter">重置</button>
-      <button class="btn-apply" bindtap="toggleFilter">应用</button>
-    </view>
-  </view>
-  
-  <!-- Match List -->
-  <view class="match-list">
+
+    <!-- 动态赛事卡片（如果有数据的话） -->
     <block wx:if="{{matches.length > 0}}">
-      <!-- 按日期分组显示比赛 -->
-      <view wx:for="{{matches}}" wx:for-item="dateGroup" wx:key="date" class="date-group">
-        <!-- 日期标题 -->
-        <view class="date-header">
-          <text class="date-display">{{dateGroup.dateDisplay}}</text>
-        </view>
-        
-        <!-- 该日期下的比赛列表 -->
-        <view wx:for="{{dateGroup.matches}}" wx:for-item="match" wx:key="_id" class="match-card" bindtap="goToDetail" data-id="{{match._id}}">
-          <!-- 比赛头部信息 -->
-          <view class="match-header">
-            <view class="match-title-section">
-              <text class="match-name">{{match.matchName || match.eventType}}</text>
-              <text class="match-stage">{{match.stage}}</text>
-            </view>
-            <view class="match-status">
-              <view class="status-badge {{match.status === '已结束' ? 'status-completed' : match.status === '比赛中' ? 'status-ongoing' : 'status-registration'}}">
-                <view wx:if="{{match.status === '比赛中'}}" class="status-dot-animated"></view>
-                <text class="status-text">{{match.status === '已结束' ? '已结束' : match.status === '比赛中' ? '进行中' : '报名中'}}</text>
-              </view>
-            </view>
+      <view wx:for="{{matches}}" wx:for-item="match" wx:key="_id" class="event-card" bindtap="goToDetail" data-id="{{match._id}}">
+        <view class="card-img"></view>
+        <view class="card-info">
+          <text class="card-title">{{match.matchName || match.eventType}}</text>
+          <view class="tags">
+            <text class="tag">{{match.eventType}}</text>
+            <text class="tag">{{match.stage}}</text>
+            <text class="tag">积分赛</text>
           </view>
-
-          <!-- 比赛基本信息 -->
-          <view class="match-meta">
-            <view class="meta-item">
-              <text class="meta-icon">📍</text>
-              <text class="meta-text">{{match.venue}}</text>
-            </view>
-            <view class="meta-item">
-              <text class="meta-icon">🕐</text>
-              <text class="meta-text">{{formatMatchTime(match.scheduledTime)}}</text>
-            </view>
-            <view class="meta-item">
-              <text class="meta-icon">🌍</text>
-              <text class="meta-text">{{match.region}}</text>
-            </view>
-          </view>
-          
-          <!-- 选手对战信息 -->
-          <view class="players-section">
-            <view class="match-players">
-              <!-- 队伍1 -->
-              <view class="team-container {{match.score && match.score.winner === 'team1' ? 'winner-team' : ''}}">
-                <view class="team-info">
-                  <view class="player-list">
-                    <view wx:for="{{match.players.team1}}" wx:for-item="player" wx:for-index="playerIndex" wx:key="playerIndex" class="player-item">
-                      <text class="player-name">{{player.name}}</text>
-                      <text class="player-ranking">排名 {{player.ranking}}</text>
-                    </view>
-                  </view>
-                  <view wx:if="{{match.score && match.score.winner === 'team1'}}" class="winner-badge">
-                    <text class="winner-icon">🏆</text>
-                  </view>
-                </view>
-
-                <!-- 队伍1比分 -->
-                <view class="score-display" wx:if="{{match.score && match.score.sets.length > 0}}">
-                  <view wx:for="{{match.score.sets}}" wx:for-item="set" wx:key="setNumber"
-                        class="set-score {{set.team1Score > set.team2Score ? 'set-winner' : ''}}">
-                    {{set.team1Score}}
-                  </view>
-                </view>
-              </view>
-
-              <!-- VS 分隔符 -->
-              <view class="vs-separator">
-                <text class="vs-text">VS</text>
-              </view>
-
-              <!-- 队伍2 -->
-              <view class="team-container {{match.score && match.score.winner === 'team2' ? 'winner-team' : ''}}">
-                <view class="team-info">
-                  <view class="player-list">
-                    <view wx:for="{{match.players.team2}}" wx:for-item="player" wx:for-index="playerIndex" wx:key="playerIndex" class="player-item">
-                      <text class="player-name">{{player.name}}</text>
-                      <text class="player-ranking">排名 {{player.ranking}}</text>
-                    </view>
-                  </view>
-                  <view wx:if="{{match.score && match.score.winner === 'team2'}}" class="winner-badge">
-                    <text class="winner-icon">🏆</text>
-                  </view>
-                </view>
-
-                <!-- 队伍2比分 -->
-                <view class="score-display" wx:if="{{match.score && match.score.sets.length > 0}}">
-                  <view wx:for="{{match.score.sets}}" wx:for-item="set" wx:key="setNumber"
-                        class="set-score {{set.team2Score > set.team1Score ? 'set-winner' : ''}}">
-                    {{set.team2Score}}
-                  </view>
-                </view>
-              </view>
-            </view>
-          </view>
-
-          <!-- 比赛统计和操作 -->
-          <view class="match-footer">
-            <!-- 比赛统计信息 -->
-            <view class="match-stats" wx:if="{{match.matchStats}}">
-              <view class="stat-item">
-                <text class="stat-icon">👥</text>
-                <text class="stat-label">观众</text>
-                <text class="stat-value">{{match.matchStats.spectatorCount || 0}}</text>
-              </view>
-              <view class="stat-item">
-                <text class="stat-icon">👁</text>
-                <text class="stat-label">观看</text>
-                <text class="stat-value">{{match.matchStats.viewCount || 0}}</text>
-              </view>
-              <view class="stat-item" wx:if="{{match.matchStats.duration}}">
-                <text class="stat-icon">⏱</text>
-                <text class="stat-label">时长</text>
-                <text class="stat-value">{{match.matchStats.duration}}</text>
-              </view>
-            </view>
-
-            <!-- 操作按钮 -->
-            <view class="match-actions">
-              <button wx:if="{{match.status === '报名中'}}"
-                      class="action-btn primary-btn"
-                      catchtap="registerMatch"
-                      data-id="{{match._id}}">
-                <text class="btn-icon">🎾</text>
-                <text class="btn-text">立即报名</text>
-              </button>
-              <view wx:elif="{{match.status === '比赛中'}}" class="action-group">
-                <button class="action-btn live-btn"
-                        catchtap="joinAsSpectator"
-                        data-id="{{match._id}}">
-                  <text class="btn-icon">👁</text>
-                  <text class="btn-text">观看直播</text>
-                </button>
-                <button class="action-btn secondary-btn"
-                        catchtap="goToDetail"
-                        data-id="{{match._id}}">
-                  <text class="btn-text">详情</text>
-                </button>
-              </view>
-              <button wx:else
-                      class="action-btn secondary-btn"
-                      catchtap="goToDetail"
-                      data-id="{{match._id}}">
-                <text class="btn-text">查看结果</text>
-              </button>
-            </view>
+          <view class="status">
+            <text class="status-tag">{{match.status === '已结束' ? '已结束' : match.status === '比赛中' ? '进行中' : '报名中'}}</text>
+            <text class="time">{{formatMatchTime(match.scheduledTime)}}</text>
           </view>
         </view>
       </view>
     </block>
-    
-    <!-- Skeleton Loader -->
-    <block wx:if="{{loading && matches.length === 0}}">
-      <view class="skeleton-card">
-        <view class="skeleton-header"></view>
-        <view class="skeleton-content">
-          <view class="skeleton-row">
-            <view class="skeleton-avatar"></view>
-            <view class="skeleton-text-group">
-              <view class="skeleton-text short"></view>
-              <view class="skeleton-text long"></view>
-            </view>
-          </view>
-          <view class="skeleton-row">
-            <view class="skeleton-avatar"></view>
-            <view class="skeleton-text-group">
-              <view class="skeleton-text short"></view>
-              <view class="skeleton-text long"></view>
-            </view>
-          </view>
-          <view class="skeleton-right-section"></view>
-        </view>
-      </view>
-      <view class="skeleton-card">
-        <view class="skeleton-header"></view>
-        <view class="skeleton-content">
-          <view class="skeleton-row">
-            <view class="skeleton-avatar"></view>
-            <view class="skeleton-text-group">
-              <view class="skeleton-text short"></view>
-              <view class="skeleton-text long"></view>
-            </view>
-          </view>
-          <view class="skeleton-row">
-            <view class="skeleton-avatar"></view>
-            <view class="skeleton-text-group">
-              <view class="skeleton-text short"></view>
-              <view class="skeleton-text long"></view>
-            </view>
-          </view>
-          <view class="skeleton-right-section"></view>
-        </view>
-      </view>
-    </block>
+  </view>
 
-    <!-- Empty State -->
-    <view wx:if="{{!loading && matches.length === 0}}" class="empty-state">
-      <text class="empty-icon">📭</text>
-      <view class="empty-text">暂无比赛数据，尝试调整筛选条件或稍后再试。</view>
-    </view>
-    
-    <!-- Loading State -->
-    <view wx:if="{{loading}}" class="loading-state">
-      <view class="loading-spinner"></view>
-      <view class="loading-text">加载中...</view>
-    </view>
-    
-    <!-- Load More -->
-    <view wx:if="{{hasMore && !loading && matches.length > 0}}" class="load-more" bindtap="loadMoreMatches">
-      加载更多
+
+  <!-- 搜索面板（隐藏状态） -->
+  <view class="search-panel {{showSearch ? 'show' : ''}}" wx:if="{{showSearch}}">
+    <view class="search-content">
+      <input class="search-input" placeholder="搜索赛事..." value="{{searchQuery}}" bindinput="onSearchInput" />
+      <button class="search-btn" bindtap="onSearch">搜索</button>
     </view>
   </view>
-</view> 
+
+  <!-- 筛选面板（隐藏状态） -->
+  <view class="filter-panel {{showFilter ? 'show' : ''}}" wx:if="{{showFilter}}">
+    <view class="filter-content">
+      <view class="filter-title">筛选条件</view>
+      <view class="filter-options">
+        <view class="filter-option" bindtap="filterByType" data-type="all">全部</view>
+        <view class="filter-option" bindtap="filterByType" data-type="single">单打</view>
+        <view class="filter-option" bindtap="filterByType" data-type="double">双打</view>
+      </view>
+      <button class="filter-confirm" bindtap="confirmFilter">确定</button>
+    </view>
+  </view>
+</view>

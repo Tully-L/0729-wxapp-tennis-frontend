@@ -9,7 +9,7 @@
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#0A4A39",
-    "navigationBarTitleText": "网球热",
+    "navigationBarTitleText": "LJ网球社",
     "navigationBarTextStyle": "white"
   },
 "tabBar": {
@@ -20,7 +20,7 @@
   "list": [
     {
       "pagePath": "pages/index/index",
-      "text": "比赛",
+      "text": "首页",
       "iconPath": "images/icon/赛事icon.png",
       "selectedIconPath": "images/icon/赛事222icon.png"
     },
