@@ -1,0 +1,77 @@
+<!-- 球员排名页面 -->
+<view class="rank-container">
+  <!-- 页面标题 -->
+  <view class="rank-header">
+    <text class="title">球员排名</text>
+  </view>
+
+  <!-- 筛选区：功能分层 + 标签化 -->
+  <view class="filter-bar">
+    <!-- 性别筛选标签组 -->
+    <view class="filter-group">
+      <text class="group-label">性别：</text>
+      <text
+        class="filter-tag {{genderFilter === 'all' ? 'active-tag' : ''}}"
+        bindtap="filterByGender"
+        data-gender="all"
+      >全部</text>
+      <text
+        class="filter-tag {{genderFilter === 'male' ? 'active-tag' : ''}}"
+        bindtap="filterByGender"
+        data-gender="male"
+      >男</text>
+      <text
+        class="filter-tag {{genderFilter === 'female' ? 'active-tag' : ''}}"
+        bindtap="filterByGender"
+        data-gender="female"
+      >女</text>
+    </view>
+
+    <!-- 赛制筛选标签组 -->
+    <view class="filter-group">
+      <text class="group-label">赛制：</text>
+      <text
+        class="filter-tag {{typeFilter === 'single' ? 'active-tag' : ''}}"
+        bindtap="filterByType"
+        data-type="single"
+      >单打</text>
+      <text
+        class="filter-tag {{typeFilter === 'double' ? 'active-tag' : ''}}"
+        bindtap="filterByType"
+        data-type="double"
+      >双打</text>
+    </view>
+
+    <!-- 搜索区：独立模块 + 紧凑对齐 -->
+    <view class="search-wrap">
+      <input
+        class="search-input"
+        placeholder="搜索球员姓名或等级"
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+      />
+    </view>
+  </view>
+  
+  <view class="rank-list">
+    <view class="rank-item" wx:for="{{filteredPlayerList}}" wx:key="index" bindtap="goToPlayerDetail" data-id="{{item.id}}">
+      <view class="rank-number">{{item.rank}}</view>
+      <image class="avatar" src="/images/icon/我的222icon.png" mode="aspectFill"></image>
+      <view class="info">
+        <view class="name">{{item.name}}</view>
+        <view class="level">{{item.type}}等级：{{item.level}}</view>
+        <view class="update-time">更新时间：{{item.updateTime}}</view>
+      </view>
+      <view class="score">{{item.score}}分</view>
+    </view>
+  </view>
+
+  <!-- 球员排名页面只包含球员排名内容 -->
+
+  <!-- 空状态 -->
+  <view wx:if="{{filteredPlayerList.length === 0 && searchKeyword}}" class="empty-state">
+    <view class="empty-icon"></view>
+    <text class="empty-text">未找到相关球员</text>
+    <text class="empty-hint">试试其他关键词</text>
+  </view>
+</view>

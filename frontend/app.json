@@ -4,7 +4,11 @@
     "pages/detail/detail",
     "pages/user/user",
     "pages/event/event",
-    "pages/event/detail"
+    "pages/event/detail",
+    "pages/league/intro",
+    "pages/brand-events/brand-events",
+    "pages/ranking/ranking",
+    "pages/points-ranking/points-ranking"
   ],
   "window": {
     "backgroundTextStyle": "light",

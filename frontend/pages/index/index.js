@@ -687,30 +687,26 @@ Page({
   // 新增的事件处理函数
   // 功能导航事件
   goToLeagueIntro() {
-    wx.showToast({
-      title: '联盟介绍功能开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/league/intro'
     });
   },
 
   goToBrandEvents() {
-    wx.showToast({
-      title: '品牌赛事功能开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/brand-events/brand-events'
     });
   },
 
   goToPlayerRanking() {
-    wx.showToast({
-      title: '球员排名功能开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/ranking/ranking'
     });
   },
 
   goToPointsRanking() {
-    wx.showToast({
-      title: '积分榜功能开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/points-ranking/points-ranking'
     });
   },
 

@@ -1,0 +1,316 @@
+/* 球员排名页面样式 */
+
+/* 重置默认样式 */
+page {
+  background-color: #f5f5f5;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 通用容器 */
+.rank-container {
+  background-color: #ffffff;
+  min-height: 100vh;
+}
+
+/* 页面标题栏 */
+.rank-header {
+  background-color: #0A4A39; /* 深绿背景，匹配LJ网球社风格 */
+  padding: 32rpx;
+  text-align: center;
+}
+
+.title {
+  font-size: 36rpx;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+/* 筛选栏：横向布局 + 分组 */
+.filter-bar {
+  display: flex;
+  flex-direction: column;
+  padding: 24rpx 32rpx;
+  background-color: #ffffff;
+  border-bottom: 2rpx solid #eeeeee;
+  gap: 20rpx;
+}
+
+/* 筛选分组：控制间距 + 对齐 */
+.filter-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+/* 分组标签 */
+.group-label {
+  font-size: 28rpx;
+  color: #333333;
+  font-weight: 500;
+  margin-right: 8rpx;
+  min-width: 80rpx;
+}
+
+/* 筛选标签：高亮交互 + 样式统一 */
+.filter-tag {
+  padding: 12rpx 24rpx;
+  color: #666666;
+  background-color: #f5f5f5;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  transition: all 0.3s ease;
+  border: 2rpx solid transparent;
+}
+
+/* 选中态强调 */
+.active-tag {
+  background-color: #0A4A39;
+  color: #ffffff;
+  border-color: #0A4A39;
+  transform: scale(1.02);
+}
+
+.filter-tag:active {
+  transform: scale(0.98);
+}
+
+/* 搜索框：独立模块 + 自适应 */
+.search-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  width: 100%;
+  padding: 16rpx 24rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  background-color: #f8f8f8;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: #0A4A39;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4rpx rgba(10, 74, 57, 0.1);
+}
+
+/* 球员排名列表 */
+.rank-list {
+  padding: 0 32rpx;
+  background-color: #ffffff;
+}
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.rank-item:last-child {
+  border-bottom: none;
+}
+
+.rank-item:active {
+  background-color: rgba(10, 74, 57, 0.05);
+  transform: translateX(8rpx);
+}
+
+.rank-number {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #0A4A39;
+  margin-right: 24rpx;
+  background-color: rgba(10, 74, 57, 0.1);
+  border-radius: 50%;
+  min-width: 56rpx;
+}
+
+.avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  margin-right: 24rpx;
+  background-color: #f0f0f0;
+  border: 2rpx solid #e0e0e0;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0; /* 防止文字溢出 */
+}
+
+.name {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 6rpx;
+  color: #333333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.level, .update-time {
+  font-size: 24rpx;
+  color: #666666;
+  margin-bottom: 2rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #0A4A39;
+  text-align: right;
+  min-width: 120rpx;
+}
+
+/* 球员排名页面专用样式 */
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 40rpx;
+  text-align: center;
+  background-color: #ffffff;
+  margin: 32rpx;
+  border-radius: 16rpx;
+}
+
+.empty-icon {
+  width: 120rpx;
+  height: 120rpx;
+  background-color: rgba(10, 74, 57, 0.1);
+  border-radius: 50%;
+  margin-bottom: 32rpx;
+  opacity: 0.8;
+  position: relative;
+}
+
+.empty-icon::after {
+  content: '🎾';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #666666;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.empty-hint {
+  font-size: 28rpx;
+  color: #999999;
+}
+
+/* 响应式调整 */
+@media (max-width: 600rpx) {
+  .rank-header {
+    padding: 24rpx;
+  }
+
+  .title {
+    font-size: 32rpx;
+  }
+
+  .filter-bar {
+    padding: 20rpx 24rpx;
+    gap: 16rpx;
+  }
+
+  .filter-group {
+    gap: 8rpx;
+  }
+
+  .group-label {
+    font-size: 26rpx;
+    min-width: 70rpx;
+  }
+
+  .filter-tag {
+    padding: 10rpx 20rpx;
+    font-size: 26rpx;
+  }
+
+  .search-input {
+    padding: 14rpx 20rpx;
+    font-size: 26rpx;
+  }
+
+  .rank-list {
+    padding: 0 24rpx;
+  }
+
+  .rank-item {
+    padding: 16rpx 0;
+  }
+
+  .rank-number {
+    width: 48rpx;
+    height: 48rpx;
+    font-size: 24rpx;
+    margin-right: 20rpx;
+  }
+
+  .avatar {
+    width: 72rpx;
+    height: 72rpx;
+    margin-right: 20rpx;
+  }
+
+  .name {
+    font-size: 28rpx;
+  }
+
+  .level, .update-time {
+    font-size: 22rpx;
+  }
+
+  .score {
+    font-size: 28rpx;
+    min-width: 100rpx;
+  }
+}
+
+/* 增强交互效果 */
+.filter-tag:hover {
+  background-color: rgba(10, 74, 57, 0.1);
+}
+
+.active-tag:hover {
+  background-color: #0A4A39;
+}
+
+/* 加载状态 */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* 滚动优化 */
+.rank-list {
+  scroll-behavior: smooth;
+}

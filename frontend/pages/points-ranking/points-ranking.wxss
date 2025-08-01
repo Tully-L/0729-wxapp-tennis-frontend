@@ -1,0 +1,318 @@
+/* 积分榜页面样式 */
+
+/* 重置默认样式 */
+page {
+  background: linear-gradient(135deg, rgba(10, 74, 57, 0.1) 0%, rgba(10, 74, 57, 0.05) 100%);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+}
+
+/* 积分榜容器 */
+.points-container {
+  padding: 32rpx;
+  min-height: 100vh;
+}
+
+/* 页面标题 */
+.page-title {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #0A4A39;
+  text-align: center;
+  margin-bottom: 32rpx;
+}
+
+/* Tab切换栏 */
+.tab-bar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 32rpx;
+}
+
+.tab {
+  padding: 20rpx 60rpx;
+  margin: 0 20rpx;
+  background-color: #ffffff;
+  border-radius: 50rpx;
+  text-align: center;
+  font-size: 32rpx;
+  color: #666666;
+  transition: all 0.3s ease;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.active-tab {
+  background-color: #0A4A39;
+  color: #ffffff;
+  transform: scale(1.05);
+  box-shadow: 0 6rpx 20rpx rgba(10, 74, 57, 0.3);
+}
+
+/* 筛选栏 */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40rpx;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.filter-item {
+  padding: 16rpx 32rpx;
+  background-color: #ffffff;
+  border-radius: 12rpx;
+  margin-right: 16rpx;
+  font-size: 28rpx;
+  color: #666666;
+  transition: all 0.3s ease;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.filter-item.active {
+  background-color: #0A4A39;
+  color: #ffffff;
+  transform: translateY(-2rpx);
+}
+
+.search-input {
+  flex: 1;
+  min-width: 200rpx;
+  padding: 16rpx 24rpx;
+  border: none;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  background-color: #ffffff;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.search-input:focus {
+  box-shadow: 0 4rpx 16rpx rgba(10, 74, 57, 0.2);
+}
+
+/* 领奖台样式 */
+.podium {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin-bottom: 48rpx;
+  padding: 40rpx 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 20rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.podium-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 40rpx;
+  position: relative;
+}
+
+.podium-rank {
+  width: 56rpx;
+  height: 56rpx;
+  background-color: #cccccc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.2);
+}
+
+.podium-rank.champion {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  width: 64rpx;
+  height: 64rpx;
+  font-size: 32rpx;
+  animation: pulse 2s infinite;
+}
+
+.second .podium-rank {
+  background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
+}
+
+.third .podium-rank {
+  background: linear-gradient(135deg, #CD7F32, #B8860B);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.podium-avatar {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  margin-bottom: 20rpx;
+  border: 6rpx solid #ffffff;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.15);
+}
+
+.champion-avatar {
+  width: 160rpx;
+  height: 160rpx;
+  border: 8rpx solid #FFD700;
+  box-shadow: 0 8rpx 24rpx rgba(255, 215, 0, 0.4);
+}
+
+.podium-name {
+  font-size: 32rpx;
+  margin-bottom: 12rpx;
+  color: #333333;
+  font-weight: bold;
+}
+
+.podium-score {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #0A4A39;
+}
+
+/* 积分排名列表 */
+.points-rank-list {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 20rpx;
+  padding: 32rpx;
+  backdrop-filter: blur(10rpx);
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+}
+
+.points-rank-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 2rpx solid rgba(238, 238, 238, 0.5);
+  transition: all 0.3s ease;
+}
+
+.points-rank-item:last-child {
+  border-bottom: none;
+}
+
+.points-rank-item:active {
+  background-color: rgba(10, 74, 57, 0.05);
+  transform: translateX(8rpx);
+}
+
+.rank-number {
+  width: 80rpx;
+  text-align: center;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #0A4A39;
+  margin-right: 24rpx;
+}
+
+.player-avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  margin-right: 24rpx;
+  background-color: #f0f0f0;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.player-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 8rpx;
+}
+
+.player-level {
+  font-size: 24rpx;
+  color: #666666;
+}
+
+.player-score {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ff9900;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 40rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  width: 120rpx;
+  height: 120rpx;
+  background-color: rgba(224, 224, 224, 0.5);
+  border-radius: 50%;
+  margin-bottom: 32rpx;
+  opacity: 0.6;
+}
+
+.empty-text {
+  font-size: 36rpx;
+  color: #666666;
+  margin-bottom: 16rpx;
+}
+
+.empty-hint {
+  font-size: 28rpx;
+  color: #999999;
+}
+
+/* 加载更多 */
+.load-more {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40rpx;
+  margin-top: 32rpx;
+}
+
+.load-more-text {
+  font-size: 28rpx;
+  color: #0A4A39;
+  padding: 16rpx 32rpx;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 12rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+/* 响应式调整 */
+@media (max-width: 600rpx) {
+  .points-container {
+    padding: 20rpx;
+  }
+  
+  .podium-item {
+    margin: 0 24rpx;
+  }
+  
+  .podium-avatar {
+    width: 120rpx;
+    height: 120rpx;
+  }
+  
+  .champion-avatar {
+    width: 140rpx;
+    height: 140rpx;
+  }
+  
+  .tab {
+    padding: 16rpx 40rpx;
+    font-size: 28rpx;
+  }
+}

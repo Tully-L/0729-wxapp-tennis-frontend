@@ -1,0 +1,97 @@
+<!-- 品牌赛事页面 -->
+<view class="page-container">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <input
+      type="text"
+      placeholder="搜索品牌赛事、主办方或关键词"
+      value="{{searchKeyword}}"
+      bindinput="onSearchInput"
+      confirm-type="search"
+      bindconfirm="onSearchConfirm"
+      class="search-input"
+    />
+  </view>
+
+  <!-- 赛事列表 -->
+  <view class="events-list">
+    <!-- 赛事卡片1 -->
+    <view class="event-card" bindtap="goToEventDetail" data-id="1">
+      <image class="event-image" src="/images/logo.png" mode="aspectFit" />
+      <view class="event-info">
+        <text class="event-title">运动纪杯网球积分系列赛</text>
+        <text class="event-description">运动纪杯大湾区网球积分系列赛，是由鸣世科技主办，面向全国网球爱好者开放的大众类体育赛事，为响应国家全民健身号召，创新性的将数字AI科技与网球赛事结合，在大湾区范围内持续举办业余网球比赛。</text>
+      </view>
+    </view>
+
+    <!-- 赛事卡片2 -->
+    <view class="event-card" bindtap="goToEventDetail" data-id="2">
+      <image class="event-image" src="/images/logo.png" mode="aspectFit" />
+      <view class="event-info">
+        <text class="event-title">泰尼斯杯</text>
+        <text class="event-description">泰尼斯杯双打白银赛是泰尼斯俱乐部面向各水平选手推出的双打比赛，于每周二、周六在福田区香蜜湖规律举办，旨在为不同水平阶段选手提供比赛交流、球技进步的平台。</text>
+      </view>
+    </view>
+
+    <!-- 赛事卡片3 -->
+    <view class="event-card" bindtap="goToEventDetail" data-id="3">
+      <image class="event-image" src="/images/logo.png" mode="aspectFit" />
+      <view class="event-info">
+        <text class="event-title">龙华杯挑战赛</text>
+        <text class="event-description">龙华区网球协会双打挑战赛黄金赛是深圳市龙华区网球协会主办，面向广大网球爱好者的双打比赛，赛事包含周赛、季赛、总决赛三种类型，周赛时间为每周二晚，季赛2-3月一次，总决赛每年一次。</text>
+      </view>
+    </view>
+
+    <!-- 赛事卡片4 -->
+    <view class="event-card" bindtap="goToEventDetail" data-id="4">
+      <image class="event-image" src="/images/logo.png" mode="aspectFit" />
+      <view class="event-info">
+        <text class="event-title">景田郑洁杯外卡赛</text>
+        <text class="event-description">景田杯网球积分赛由郑洁（深圳）国际网球俱乐部承办，俱乐部由郑洁女士（两届大满贯网球冠军）于2018年发起成立，是一家集全国高水平运动员选拔、培训、参赛为一体的组织。</text>
+      </view>
+    </view>
+
+    <!-- 赛事卡片5 -->
+    <view class="event-card" bindtap="goToEventDetail" data-id="5">
+      <image class="event-image" src="/images/logo.png" mode="aspectFit" />
+      <view class="event-info">
+        <text class="event-title">京花网球系列赛</text>
+        <text class="event-description">京花网球俱乐部是近年来用金银铜比赛模式的首创者，单双打比赛累计参赛选手数百人，好评如潮，现与ETA鸣世网球联盟强强联合，开设【京花杯网球积分赛】，让更多网球爱好者能够加入其中。</text>
+      </view>
+    </view>
+
+    <!-- 赛事卡片6 -->
+    <view class="event-card" bindtap="goToEventDetail" data-id="6">
+      <image class="event-image" src="/images/logo.png" mode="aspectFit" />
+      <view class="event-info">
+        <text class="event-title">LJ网球社月度挑战赛</text>
+        <text class="event-description">LJ网球社月度挑战赛是专为社员打造的高品质赛事，每月定期举办，采用瑞士轮赛制，确保每位参赛者都能获得充分的比赛机会。赛事设置多个级别，满足不同水平球员的需求。</text>
+      </view>
+    </view>
+
+    <!-- 赛事卡片7 -->
+    <view class="event-card" bindtap="goToEventDetail" data-id="7">
+      <image class="event-image" src="/images/logo.png" mode="aspectFit" />
+      <view class="event-info">
+        <text class="event-title">青少年网球培训营</text>
+        <text class="event-description">专为6-18岁青少年设计的网球培训项目，由专业教练团队执教，采用国际先进的教学理念和训练方法，培养青少年的网球技能和体育精神，为未来的网球之路奠定坚实基础。</text>
+      </view>
+    </view>
+
+    <!-- 赛事卡片8 -->
+    <view class="event-card" bindtap="goToEventDetail" data-id="8">
+      <image class="event-image" src="/images/logo.png" mode="aspectFit" />
+      <view class="event-info">
+        <text class="event-title">企业网球联赛</text>
+        <text class="event-description">面向企业团体的网球联赛，旨在促进企业间的体育交流与合作。赛事采用团体赛形式，包含男单、女单、男双、女双、混双等多个项目，为企业员工提供展示才华的舞台。</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{filteredEvents.length === 0 && searchKeyword}}" class="empty-state">
+    <view class="empty-icon">🔍</view>
+    <text class="empty-text">未找到相关品牌赛事</text>
+    <text class="empty-hint">试试其他关键词</text>
+  </view>
+</view>

@@ -1,0 +1,132 @@
+<!-- 联盟介绍页面 -->
+<view class="page-container">
+  <!-- 页面头部 -->
+  <view class="header-section">
+    <view class="header-bg"></view>
+    <view class="header-content">
+      <view class="league-logo"></view>
+      <view class="league-info">
+        <text class="league-name">LJ网球联盟</text>
+        <text class="league-slogan">专业 · 热情 · 卓越</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联盟简介 -->
+  <view class="intro-section">
+    <view class="section-title">联盟简介</view>
+    <view class="intro-content">
+      <text class="intro-text">
+        LJ网球联盟成立于2020年，是一个致力于推广网球运动、培养网球人才的专业体育组织。我们秉承"专业、热情、卓越"的理念，为广大网球爱好者提供高质量的赛事平台和训练机会。
+      </text>
+      <text class="intro-text">
+        联盟拥有完善的赛事体系，从业余爱好者到专业选手，都能在这里找到适合自己的比赛级别。我们定期举办各类网球赛事，包括单打、双打、团体赛等多种形式，为球员提供展示技艺、切磋球技的舞台。
+      </text>
+    </view>
+  </view>
+
+  <!-- 联盟特色 -->
+  <view class="features-section">
+    <view class="section-title">联盟特色</view>
+    <view class="features-grid">
+      <view class="feature-item">
+        <view class="feature-icon professional-icon"></view>
+        <view class="feature-content">
+          <text class="feature-title">专业赛事</text>
+          <text class="feature-desc">规范的赛事组织，专业的裁判团队</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon ranking-icon"></view>
+        <view class="feature-content">
+          <text class="feature-title">积分排名</text>
+          <text class="feature-desc">完善的积分体系，公正的排名机制</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon training-icon"></view>
+        <view class="feature-content">
+          <text class="feature-title">技术培训</text>
+          <text class="feature-desc">专业教练指导，提升球技水平</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon community-icon"></view>
+        <view class="feature-content">
+          <text class="feature-title">社区交流</text>
+          <text class="feature-desc">活跃的球友社区，丰富的交流活动</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联盟数据 -->
+  <view class="stats-section">
+    <view class="section-title">联盟数据</view>
+    <view class="stats-grid">
+      <view class="stat-item">
+        <text class="stat-number">500+</text>
+        <text class="stat-label">注册球员</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">50+</text>
+        <text class="stat-label">合作球场</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">200+</text>
+        <text class="stat-label">年度赛事</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">98%</text>
+        <text class="stat-label">满意度</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加入我们 -->
+  <view class="join-section">
+    <view class="section-title">加入我们</view>
+    <view class="join-content">
+      <text class="join-text">
+        无论您是网球新手还是资深球员，LJ网球联盟都欢迎您的加入。在这里，您将体验到专业的赛事组织、友好的竞技氛围，以及持续的技术提升机会。
+      </text>
+      <view class="join-benefits">
+        <view class="benefit-item">
+          <text class="benefit-icon">🏆</text>
+          <text class="benefit-text">参与专业赛事</text>
+        </view>
+        <view class="benefit-item">
+          <text class="benefit-icon">📈</text>
+          <text class="benefit-text">积分排名系统</text>
+        </view>
+        <view class="benefit-item">
+          <text class="benefit-icon">👥</text>
+          <text class="benefit-text">结识球友</text>
+        </view>
+        <view class="benefit-item">
+          <text class="benefit-icon">🎯</text>
+          <text class="benefit-text">技术提升</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联系我们 -->
+  <view class="contact-section">
+    <view class="section-title">联系我们</view>
+    <view class="contact-info">
+      <view class="contact-item" bindtap="makePhoneCall">
+        <view class="contact-icon phone-icon"></view>
+        <text class="contact-text">400-888-9999</text>
+      </view>
+      <view class="contact-item" bindtap="copyEmail">
+        <view class="contact-icon email-icon"></view>
+        <text class="contact-text">info@ljtennis.com</text>
+      </view>
+      <view class="contact-item" bindtap="viewLocation">
+        <view class="contact-icon location-icon"></view>
+        <text class="contact-text">广州市天河区体育中心</text>
+      </view>
+    </view>
+  </view>
+</view>

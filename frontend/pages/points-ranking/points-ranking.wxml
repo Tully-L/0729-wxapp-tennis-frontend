@@ -1,0 +1,67 @@
+<!-- 积分榜页面 -->
+<view class="points-container">
+  <!-- 积分榜标题 -->
+  <view class="page-title">积分榜</view>
+  
+  <!-- Tab切换 -->
+  <view class="tab-bar">
+    <view class="tab {{currentTab === 'single' ? 'active-tab' : ''}}" bindtap="switchTab" data-tab="single">单打</view>
+    <view class="tab {{currentTab === 'double' ? 'active-tab' : ''}}" bindtap="switchTab" data-tab="double">双打</view>
+  </view>
+  
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <view class="filter-item {{periodFilter === 'recent52' ? 'active' : ''}}" bindtap="filterByPeriod" data-period="recent52">最近52周</view>
+    <view class="filter-item {{periodFilter === 'natural' ? 'active' : ''}}" bindtap="showPeriodPicker">自然周期 ▼</view>
+    <input class="search-input" placeholder="搜索球员" value="{{searchKeyword}}" bindinput="onSearchInput" />
+  </view>
+  
+  <!-- 前三名领奖台 -->
+  <view class="podium">
+    <view class="podium-item second" wx:if="{{podiumList[1]}}">
+      <view class="podium-rank">2</view>
+      <image class="podium-avatar" src="/images/icon/我的222icon.png" mode="aspectFill"></image>
+      <view class="podium-name">{{podiumList[1].name}}</view>
+      <view class="podium-score">{{podiumList[1].score}}</view>
+    </view>
+    
+    <view class="podium-item first" wx:if="{{podiumList[0]}}">
+      <view class="podium-rank champion">1</view>
+      <image class="podium-avatar champion-avatar" src="/images/icon/我的222icon.png" mode="aspectFill"></image>
+      <view class="podium-name">{{podiumList[0].name}}</view>
+      <view class="podium-score">{{podiumList[0].score}}</view>
+    </view>
+    
+    <view class="podium-item third" wx:if="{{podiumList[2]}}">
+      <view class="podium-rank">3</view>
+      <image class="podium-avatar" src="/images/icon/我的222icon.png" mode="aspectFill"></image>
+      <view class="podium-name">{{podiumList[2].name}}</view>
+      <view class="podium-score">{{podiumList[2].score}}</view>
+    </view>
+  </view>
+  
+  <!-- 积分排名列表 -->
+  <view class="points-rank-list">
+    <view class="points-rank-item" wx:for="{{filteredPointsList}}" wx:key="index" bindtap="goToPlayerDetail" data-id="{{item.id}}">
+      <view class="rank-number">{{item.rank}}</view>
+      <image class="player-avatar" src="/images/icon/我的222icon.png" mode="aspectFill"></image>
+      <view class="player-info">
+        <view class="player-name">{{item.name}}</view>
+        <view class="player-level">等级：{{item.level}}</view>
+      </view>
+      <view class="player-score">{{item.score}}</view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{filteredPointsList.length === 0 && searchKeyword}}" class="empty-state">
+    <view class="empty-icon"></view>
+    <text class="empty-text">未找到相关球员</text>
+    <text class="empty-hint">试试其他关键词</text>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{hasMore}}" bindtap="loadMore">
+    <text class="load-more-text">加载更多</text>
+  </view>
+</view>
