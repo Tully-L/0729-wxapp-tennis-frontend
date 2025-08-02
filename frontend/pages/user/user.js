@@ -450,5 +450,65 @@ Page({
     wx.navigateTo({
       url: '/pages/user-related/profile-edit/profile-edit'
     });
+  },
+
+  // Navigate to orders page
+  goToOrders: function() {
+    wx.navigateTo({
+      url: '/pages/order/order'
+    });
+  },
+
+  // Navigate to messages page
+  goToMessages: function() {
+    wx.navigateTo({
+      url: '/pages/message/message'
+    });
+  },
+
+  // Navigate to settings page
+  goToSettings: function() {
+    wx.navigateTo({
+      url: '/pages/settings/settings'
+    });
+  },
+
+  // Navigate to customer service
+  goToCustomerService: function() {
+    wx.showModal({
+      title: '联系客服',
+      content: '是否要联系客服获取帮助？',
+      confirmText: '联系客服',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          this.openCustomerService();
+        }
+      }
+    });
+  },
+
+  // Open customer service
+  openCustomerService: function() {
+    // 方式1: 使用微信客服消息
+    wx.openCustomerServiceChat({
+      extInfo: {
+        url: 'https://work.weixin.qq.com/kfid/xxx' // 替换为实际的客服链接
+      },
+      corpId: 'xxx', // 替换为实际的企业ID
+      success(res) {
+        console.log('客服聊天打开成功', res);
+      },
+      fail(err) {
+        console.log('客服聊天打开失败', err);
+        // 降级方案：显示客服联系方式
+        wx.showModal({
+          title: '客服联系方式',
+          content: '客服电话：400-123-4567\n工作时间：9:00-18:00\n\n邮箱：service@ljtennis.com',
+          showCancel: false,
+          confirmText: '知道了'
+        });
+      }
+    });
   }
-}); 
+});

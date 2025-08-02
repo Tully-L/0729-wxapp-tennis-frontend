@@ -1,0 +1,59 @@
+<!-- 设置页面 -->
+<view class="page-container">
+  <!-- 顶部标题栏 -->
+  <view class="header">
+    <view class="back-btn" bindtap="onBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="title">设置</view>
+    <view class="placeholder"></view>
+  </view>
+
+  <!-- 内容区 -->
+  <view class="content-area">
+    <!-- 功能设置卡片 -->
+    <view class="settings-card">
+      <view class="setting-item" bindtap="goToAddress">
+        <text class="setting-text">我的收货地址</text>
+        <text class="setting-arrow">›</text>
+      </view>
+      <view class="setting-divider"></view>
+      
+      <view class="setting-item" bindtap="goToAuth">
+        <text class="setting-text">授权设置</text>
+        <text class="setting-arrow">›</text>
+      </view>
+      <view class="setting-divider"></view>
+      
+      <view class="setting-item" bindtap="goToUserAgreement">
+        <text class="setting-text">用户使用须知</text>
+        <text class="setting-arrow">›</text>
+      </view>
+      <view class="setting-divider"></view>
+      
+      <view class="setting-item" bindtap="goToAbout">
+        <text class="setting-text">关于LJ网球社</text>
+        <text class="setting-arrow">›</text>
+      </view>
+      <view class="setting-divider"></view>
+      
+      <view class="setting-item" bindtap="goToFeedback">
+        <text class="setting-text">意见反馈</text>
+        <text class="setting-arrow">›</text>
+      </view>
+    </view>
+
+    <!-- 应用信息区域 -->
+    <view class="app-info">
+      <view class="app-name">LJ网球社</view>
+      <view class="app-version">v2.11.5</view>
+      <view class="company-name">深圳市鸣世智能科技有限公司</view>
+      <view class="business-email">商务合作：business@ljtennis.com</view>
+    </view>
+  </view>
+
+  <!-- 底部场馆工作人员入口 -->
+  <view class="bottom-section">
+    <button class="venue-staff-btn" bindtap="goToVenueStaff">我是场馆工作人员</button>
+  </view>
+</view>

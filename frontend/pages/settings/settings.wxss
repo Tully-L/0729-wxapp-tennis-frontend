@@ -1,0 +1,167 @@
+/* 设置页面样式 - 适配Roland-Garros深绿色主题 */
+page {
+  background-color: var(--background-color, #F8F8F8);
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  height: 100vh;
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--background-color, #F8F8F8);
+}
+
+/* 顶部标题栏 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 88rpx;
+  background-color: var(--primary-color, #0A4A39);
+  color: var(--text-on-primary, #FFFFFF);
+  padding: 0 32rpx;
+  position: relative;
+  box-shadow: 0 2rpx 8rpx rgba(10, 74, 57, 0.15);
+}
+
+.back-btn {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.back-btn:active {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.back-icon {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.title {
+  flex: 1;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 500;
+}
+
+.placeholder {
+  width: 60rpx;
+}
+
+/* 内容区 */
+.content-area {
+  flex: 1;
+  padding: 32rpx;
+  overflow-y: auto;
+}
+
+/* 设置卡片 */
+.settings-card {
+  background-color: var(--card-background, #FFFFFF);
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-bottom: 40rpx;
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx 40rpx;
+  transition: background-color 0.2s ease;
+}
+
+.setting-item:active {
+  background-color: rgba(10, 74, 57, 0.05);
+}
+
+.setting-text {
+  font-size: 30rpx;
+  color: var(--text-primary, #333333);
+  font-weight: 400;
+}
+
+.setting-arrow {
+  font-size: 32rpx;
+  color: var(--text-tertiary, #999999);
+  font-weight: 300;
+}
+
+.setting-divider {
+  height: 1rpx;
+  background-color: var(--border-color, #EEEEEE);
+  margin: 0 40rpx;
+}
+
+/* 应用信息区域 */
+.app-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 32rpx;
+  text-align: center;
+}
+
+.app-name {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: var(--primary-color, #0A4A39);
+  margin-bottom: 16rpx;
+}
+
+.app-version {
+  font-size: 28rpx;
+  color: var(--text-secondary, #666666);
+  margin-bottom: 24rpx;
+}
+
+.company-name {
+  font-size: 26rpx;
+  color: var(--text-secondary, #666666);
+  margin-bottom: 12rpx;
+  line-height: 1.4;
+}
+
+.business-email {
+  font-size: 24rpx;
+  color: var(--text-tertiary, #999999);
+  line-height: 1.4;
+}
+
+/* 底部按钮区 */
+.bottom-section {
+  padding: 32rpx;
+  background-color: var(--card-background, #FFFFFF);
+  box-shadow: 0 -2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.venue-staff-btn {
+  width: 100%;
+  height: 88rpx;
+  background-color: transparent;
+  color: var(--primary-color, #0A4A39);
+  font-size: 30rpx;
+  border: 2rpx solid var(--primary-color, #0A4A39);
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.venue-staff-btn:active {
+  background-color: var(--primary-color, #0A4A39);
+  color: var(--text-on-primary, #FFFFFF);
+}
+
+.venue-staff-btn::after {
+  border: none;
+}

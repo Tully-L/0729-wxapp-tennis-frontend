@@ -8,7 +8,10 @@
     "pages/league/intro",
     "pages/brand-events/brand-events",
     "pages/ranking/ranking",
-    "pages/points-ranking/points-ranking"
+    "pages/points-ranking/points-ranking",
+    "pages/order/order",
+    "pages/settings/settings",
+    "pages/message/message"
   ],
   "window": {
     "backgroundTextStyle": "light",

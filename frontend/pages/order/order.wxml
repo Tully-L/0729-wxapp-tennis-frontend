@@ -1,0 +1,95 @@
+<!-- 订单页面 -->
+<view class="page-container">
+  <!-- 顶部标题栏 -->
+  <view class="header">
+    <view class="back-btn" bindtap="onBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="title">订单</view>
+    <view class="placeholder"></view>
+  </view>
+
+  <!-- 筛选区 -->
+  <view class="filter-section">
+    <view class="filter-btn" bindtap="onOrderTypeFilter">
+      <text class="filter-text">订单类型</text>
+      <text class="filter-arrow">▼</text>
+    </view>
+    <view class="filter-btn" bindtap="onOrderStatusFilter">
+      <text class="filter-text">订单状态</text>
+      <text class="filter-arrow">▼</text>
+    </view>
+  </view>
+
+  <!-- 内容区 - 空状态 -->
+  <view class="content-area">
+    <view class="empty-state">
+      <text class="empty-text">暂无订单</text>
+    </view>
+  </view>
+
+
+</view>
+
+<!-- 订单类型筛选弹窗 -->
+<view class="filter-popup {{showOrderTypeFilter ? 'show' : ''}}" bindtap="hideOrderTypeFilter">
+  <view class="filter-content" catchtap="stopPropagation">
+    <view class="filter-title">订单类型</view>
+    <view class="filter-options">
+      <view class="filter-option {{selectedOrderType === 'all' ? 'selected' : ''}}" 
+            bindtap="selectOrderType" data-type="all">
+        <text>全部</text>
+        <text class="check-icon" wx:if="{{selectedOrderType === 'all'}}">✓</text>
+      </view>
+      <view class="filter-option {{selectedOrderType === 'match' ? 'selected' : ''}}" 
+            bindtap="selectOrderType" data-type="match">
+        <text>比赛报名</text>
+        <text class="check-icon" wx:if="{{selectedOrderType === 'match'}}">✓</text>
+      </view>
+      <view class="filter-option {{selectedOrderType === 'training' ? 'selected' : ''}}" 
+            bindtap="selectOrderType" data-type="training">
+        <text>培训课程</text>
+        <text class="check-icon" wx:if="{{selectedOrderType === 'training'}}">✓</text>
+      </view>
+      <view class="filter-option {{selectedOrderType === 'equipment' ? 'selected' : ''}}" 
+            bindtap="selectOrderType" data-type="equipment">
+        <text>装备购买</text>
+        <text class="check-icon" wx:if="{{selectedOrderType === 'equipment'}}">✓</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 订单状态筛选弹窗 -->
+<view class="filter-popup {{showOrderStatusFilter ? 'show' : ''}}" bindtap="hideOrderStatusFilter">
+  <view class="filter-content" catchtap="stopPropagation">
+    <view class="filter-title">订单状态</view>
+    <view class="filter-options">
+      <view class="filter-option {{selectedOrderStatus === 'all' ? 'selected' : ''}}" 
+            bindtap="selectOrderStatus" data-status="all">
+        <text>全部</text>
+        <text class="check-icon" wx:if="{{selectedOrderStatus === 'all'}}">✓</text>
+      </view>
+      <view class="filter-option {{selectedOrderStatus === 'pending' ? 'selected' : ''}}" 
+            bindtap="selectOrderStatus" data-status="pending">
+        <text>待支付</text>
+        <text class="check-icon" wx:if="{{selectedOrderStatus === 'pending'}}">✓</text>
+      </view>
+      <view class="filter-option {{selectedOrderStatus === 'paid' ? 'selected' : ''}}" 
+            bindtap="selectOrderStatus" data-status="paid">
+        <text>已支付</text>
+        <text class="check-icon" wx:if="{{selectedOrderStatus === 'paid'}}">✓</text>
+      </view>
+      <view class="filter-option {{selectedOrderStatus === 'completed' ? 'selected' : ''}}" 
+            bindtap="selectOrderStatus" data-status="completed">
+        <text>已完成</text>
+        <text class="check-icon" wx:if="{{selectedOrderStatus === 'completed'}}">✓</text>
+      </view>
+      <view class="filter-option {{selectedOrderStatus === 'cancelled' ? 'selected' : ''}}" 
+            bindtap="selectOrderStatus" data-status="cancelled">
+        <text>已取消</text>
+        <text class="check-icon" wx:if="{{selectedOrderStatus === 'cancelled'}}">✓</text>
+      </view>
+    </view>
+  </view>
+</view>
