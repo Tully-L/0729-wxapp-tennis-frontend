@@ -1,20 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  wechatLogin, 
-  getUserProfile, 
+const {
+  wechatLogin,
+  getUserProfile,
   updateUserProfile,
   refreshToken,
   getUserStats,
   getLeaderboard,
   searchUsers,
   deactivateAccount,
-  getUserMatches,
-  getUserAchievements,
-  getSystemStats,
-  checkUserPermission,
-  updateUserActivity,
-  getUserDetailedMatches
+  getUserEvents,
+  getUserPointsHistory,
+  getSystemStats
 } = require('../controllers/authController');
 const { auth, optionalAuth } = require('../middleware/auth');
 
@@ -103,8 +100,11 @@ router.put('/profile', auth, updateUserProfile);
 // 获取用户统计数据
 router.get('/stats', auth, getUserStats);
 
-// 获取用户比赛记录
-router.get('/matches', auth, getUserMatches);
+// 获取用户赛事记录
+router.get('/events', auth, getUserEvents);
+
+// 获取用户积分记录
+router.get('/points', auth, getUserPointsHistory);
 
 // 停用账户
 router.delete('/account', auth, deactivateAccount);
@@ -115,19 +115,7 @@ router.get('/leaderboard', optionalAuth, getLeaderboard);
 // 搜索用户（需要认证）
 router.get('/search', auth, searchUsers);
 
-// 获取用户成就
-router.get('/achievements', auth, getUserAchievements);
-
 // 获取系统统计概览（可选认证）
 router.get('/system-stats', optionalAuth, getSystemStats);
-
-// 验证用户权限
-router.get('/permission/:permission', auth, checkUserPermission);
-
-// 更新用户活跃度
-router.post('/activity', auth, updateUserActivity);
-
-// 获取用户详细比赛历史
-router.get('/matches/detailed', auth, getUserDetailedMatches);
 
 module.exports = router; 
