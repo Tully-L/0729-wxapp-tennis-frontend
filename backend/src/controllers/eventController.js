@@ -476,6 +476,40 @@ const getEventParticipants = async (req, res, next) => {
     next(error);
   }
 };
+// 获取赛事统计
+const getEventStats = async (req, res, next) => {
+  try {
+    const Event = require('../models/Event');
+
+    // 获取总体统计
+    const totalEvents = await Event.countDocuments({ is_deleted: false });
+    const registrationEvents = await Event.countDocuments({
+      status: 'published',
+      is_deleted: false
+    });
+    const upcomingEvents = await Event.countDocuments({
+      status: 'upcoming',
+      is_deleted: false
+    });
+    const completedEvents = await Event.countDocuments({
+      status: 'completed',
+      is_deleted: false
+    });
+
+    res.json({
+      success: true,
+      data: {
+        total: totalEvents,
+        registration: registrationEvents,
+        upcoming: upcomingEvents,
+        completed: completedEvents
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getEvents,
   getEventDetail,
@@ -483,5 +517,6 @@ module.exports = {
   registerForEvent,
   updateEventStatus,
   checkinEvent,
-  getEventParticipants
+  getEventParticipants,
+  getEventStats
 };

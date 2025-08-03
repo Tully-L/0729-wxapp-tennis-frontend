@@ -7,9 +7,13 @@ const {
   registerForEvent,
   updateEventStatus,
   checkinEvent,
-  getEventParticipants
+  getEventParticipants,
+  getEventStats
 } = require('../controllers/eventController');
 const { auth, optionalAuth } = require('../middleware/auth');
+
+// 获取赛事统计（可选认证）
+router.get('/stats', optionalAuth, getEventStats);
 
 // 获取赛事列表（可选认证）
 router.get('/', optionalAuth, getEvents);
