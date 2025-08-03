@@ -51,19 +51,11 @@ app.use('/api/events', eventRoutes);
 // 临时管理员端点 - 创建测试数据
 app.post('/admin/create-test-data', async (req, res) => {
   try {
-    // 导入模型
-    const User = require('./models/User');
-    const UserAuth = require('./models/UserAuth');
-    const Event = require('./models/Event');
-    const UserEventRelation = require('./models/UserEventRelation');
-    const PointsRecord = require('./models/PointsRecord');
+    console.log('🚀 开始创建测试数据...');
 
-    // 清空现有数据
-    await User.deleteMany({});
-    await UserAuth.deleteMany({});
+    // 清空现有事件数据
     await Event.deleteMany({});
-    await UserEventRelation.deleteMany({});
-    await PointsRecord.deleteMany({});
+    console.log('🧹 已清空现有事件数据');
 
     // 创建测试事件
     const events = await Event.create([
@@ -159,86 +151,13 @@ app.post('/admin/create-test-data', async (req, res) => {
       }
     ]);
 
-    // 创建测试用户
-    const users = await User.create([
-      {
-        nickname: '网球爱好者小王',
-        avatar: 'https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKxrUx7SBp1xGcHebTXS1AiaVVKVibKt8h1XiaN6CIVGu2cj2GDcHBL4JIa1CJicQn7ZibGKOLd1CgC1TA/132',
-        total_points: 1500
-      },
-      {
-        nickname: '业余选手张三',
-        avatar: 'https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKxrUx7SBp1xGcHebTXS1AiaVVKVibKt8h1XiaN6CIVGu2cj2GDcHBL4JIa1CJicQn7ZibGKOLd1CgC1TA/132',
-        total_points: 2800
-      },
-      {
-        nickname: '网球新手李四',
-        avatar: 'https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKxrUx7SBp1xGcHebTXS1AiaVVKVibKt8h1XiaN6CIVGu2cj2GDcHBL4JIa1CJicQn7ZibGKOLd1CgC1TA/132',
-        total_points: 800
-      }
-    ]);
-
-    // 为每个用户创建认证记录
-    for (const user of users) {
-      await UserAuth.create({
-        user_id: user._id,
-        auth_type: 'wechat',
-        auth_id: `wx_test_${user._id.toString().slice(-8)}`,
-        is_primary: true
-      });
-    }
-
-    // 创建用户事件关系
-    await UserEventRelation.create([
-      {
-        user_id: users[0]._id,
-        event_id: events[0]._id,
-        signup_status: 'approved',
-        is_signin: true,
-        points: 100,
-        points_type: 'participation'
-      },
-      {
-        user_id: users[1]._id,
-        event_id: events[0]._id,
-        signup_status: 'approved',
-        is_signin: true,
-        points: 150,
-        points_type: 'participation',
-        rank: 1
-      }
-    ]);
-
-    // 创建积分记录
-    await PointsRecord.create([
-      {
-        user_id: users[0]._id,
-        amount: 100,
-        reason: '参与温布尔登锦标赛',
-        balance_after: 1500
-      },
-      {
-        user_id: users[1]._id,
-        amount: 150,
-        reason: '温布尔登锦标赛第一名',
-        balance_after: 2800
-      },
-      {
-        user_id: users[2]._id,
-        amount: 50,
-        reason: '新用户注册奖励',
-        balance_after: 800
-      }
-    ]);
+    console.log(`✅ 成功创建 ${events.length} 个测试事件`);
 
     res.json({
       success: true,
       message: '测试数据创建成功',
       data: {
-        events: events.length,
-        users: users.length,
-        relations: 2,
-        points: 3
+        events: events.length
       }
     });
 
