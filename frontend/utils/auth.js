@@ -62,8 +62,74 @@ const saveLoginInfo = (loginData) => {
   }
 };
 
-// 微信登录
-const wechatLogin = () => {
+// 微信登录（基础版本）
+const wechatLogin = (params) => {
+  return new Promise((resolve, reject) => {
+    wx.showLoading({
+      title: '登录中...',
+      mask: true
+    });
+
+    // 调用后端登录接口
+    API.login({
+      code: params.code,
+      userInfo: params.userInfo,
+      loginType: 'wechat'
+    }).then(res => {
+      wx.hideLoading();
+
+      if (res.success || res.data) {
+        const loginData = res.data || res;
+        saveLoginInfo(loginData);
+        resolve(loginData);
+      } else {
+        console.error('后端登录响应异常:', res);
+        reject(new Error('登录服务异常，请稍后重试'));
+      }
+    }).catch(err => {
+      wx.hideLoading();
+      console.error('微信登录API调用失败:', err);
+      reject(new Error('网络连接失败，请检查网络后重试'));
+    });
+  });
+};
+
+// 微信登录（带手机号）
+const wechatLoginWithPhone = (params) => {
+  return new Promise((resolve, reject) => {
+    wx.showLoading({
+      title: '登录中...',
+      mask: true
+    });
+
+    // 调用后端登录接口，包含手机号加密数据
+    API.login({
+      code: params.code,
+      userInfo: params.userInfo,
+      encryptedData: params.encryptedData,
+      iv: params.iv,
+      loginType: 'wechat_with_phone'
+    }).then(res => {
+      wx.hideLoading();
+
+      if (res.success || res.data) {
+        const loginData = res.data || res;
+        saveLoginInfo(loginData);
+        resolve(loginData);
+      } else {
+        console.error('后端登录响应异常:', res);
+        reject(new Error('登录服务异常，请稍后重试'));
+      }
+    }).catch(err => {
+      wx.hideLoading();
+      console.error('微信登录API调用失败:', err);
+      reject(new Error('网络连接失败，请检查网络后重试'));
+    });
+  });
+};
+
+// 微信登录（兼容旧版本）
+const wechatLoginLegacy = () => {
   return new Promise((resolve, reject) => {
     wx.showLoading({
       title: '登录中...',
@@ -75,13 +141,13 @@ const wechatLogin = () => {
       success: (loginRes) => {
         if (loginRes.code) {
           console.log('获取微信登录code成功:', loginRes.code);
-          
+
           // 尝试获取用户信息
           wx.getUserProfile({
             desc: '用于完善用户资料和提供更好的服务',
             success: (userRes) => {
               console.log('获取用户信息成功:', userRes.userInfo);
-              
+
               // 调用后端登录接口
               API.login({
                 code: loginRes.code,
@@ -89,27 +155,24 @@ const wechatLogin = () => {
                 loginType: 'wechat'
               }).then(res => {
                 wx.hideLoading();
-                
+
                 if (res.success || res.data) {
                   const loginData = res.data || res;
                   saveLoginInfo(loginData);
                   resolve(loginData);
                 } else {
                   console.error('后端登录响应异常:', res);
-                  // 后端失败时使用开发模式登录
-                  handleWechatLoginFallback(userRes.userInfo, resolve, reject);
+                  reject(new Error('登录服务异常，请稍后重试'));
                 }
               }).catch(err => {
                 wx.hideLoading();
                 console.error('微信登录API调用失败:', err);
-                
-                // 网络失败时使用开发模式登录
-                handleWechatLoginFallback(userRes.userInfo, resolve, reject);
+                reject(new Error('网络连接失败，请检查网络后重试'));
               });
             },
             fail: (err) => {
               console.error('获取用户信息失败:', err);
-              
+
               // 分析失败原因并提供用户友好的反馈
               if (err.errMsg && err.errMsg.includes('can only be invoked by user TAP gesture')) {
                 console.log('getUserProfile需要在用户点击事件中调用，使用基础登录');
@@ -124,16 +187,17 @@ const wechatLogin = () => {
                     saveLoginInfo(loginData);
                     resolve(loginData);
                   } else {
-                    handleWechatLoginFallback(null, resolve, reject);
+                    reject(new Error('登录服务异常，请稍后重试'));
                   }
                 }).catch(err => {
                   wx.hideLoading();
-                  console.log('基础微信登录失败，使用静默登录');
-                  handleWechatLoginFallback(null, resolve, reject);
+                  console.error('基础微信登录失败:', err);
+                  reject(new Error('微信登录失败，请检查网络连接或稍后重试'));
                 });
               } else {
-                // 用户拒绝授权或其他错误，使用静默登录
-                handleWechatLoginFallback(null, resolve, reject);
+                // 用户拒绝授权或其他错误
+                wx.hideLoading();
+                reject(new Error('用户取消授权或获取用户信息失败'));
               }
             }
           });
@@ -542,6 +606,8 @@ module.exports = {
   getRefreshToken,
   saveLoginInfo,
   wechatLogin,
+  wechatLoginWithPhone,
+  wechatLoginLegacy,
   devLogin,
   refreshAccessToken,
   checkAndRefreshToken,
@@ -553,4 +619,4 @@ module.exports = {
   getUserAchievements,
   searchUsers,
   getLeaderboard
-}; 
+};

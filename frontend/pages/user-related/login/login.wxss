@@ -43,7 +43,33 @@
 .btn-wx-login {
   width: 100%;
   height: 88rpx;
-  background: #0A4A39;
+  background: linear-gradient(135deg, #07C160 0%, #05A050 100%);
+  color: #FFFFFF;
+  border-radius: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20rpx;
+  border: none;
+  box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-wx-login:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 2rpx 8rpx rgba(7, 193, 96, 0.4);
+}
+
+.btn-wx-login.loading {
+  background: linear-gradient(135deg, #999999 0%, #777777 100%);
+  box-shadow: 0 4rpx 12rpx rgba(153, 153, 153, 0.3);
+}
+
+/* 手机号授权按钮 */
+.btn-phone-auth {
+  width: 100%;
+  height: 88rpx;
+  background: linear-gradient(135deg, #1AAD19 0%, #0E8A0E 100%);
   color: #FFFFFF;
   border-radius: 44rpx;
   display: flex;
@@ -51,6 +77,18 @@
   justify-content: center;
   margin-bottom: 40rpx;
   border: none;
+  box-shadow: 0 4rpx 12rpx rgba(26, 173, 25, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-phone-auth:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 2rpx 8rpx rgba(26, 173, 25, 0.4);
+}
+
+.btn-phone-auth.loading {
+  background: linear-gradient(135deg, #999999 0%, #777777 100%);
+  box-shadow: 0 4rpx 12rpx rgba(153, 153, 153, 0.3);
 }
 
 .btn-icon {
@@ -61,6 +99,15 @@
 .btn-text {
   font-size: 32rpx;
   font-weight: 500;
+}
+
+.loading-icon {
+  animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .divider {

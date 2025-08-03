@@ -7,7 +7,10 @@ Page({
     countdown: 0,
     isRegister: false,
     userInfo: null,
-    loginLoading: false
+    loginLoading: false,
+    phoneLoading: false,
+    showPhoneAuth: false,
+    hasUserInfo: false
   },
 
   onLoad(options) {
@@ -133,70 +136,226 @@ Page({
     }, 1000);
   },
 
-  // 微信登录 - 增强版本
-  wxLogin() {
-    if (this.data.loginLoading) return;
-    
-    this.setData({ loginLoading: true });
-    
-    auth.wechatLogin().then(loginData => {
-      this.setData({ loginLoading: false });
-      
-      console.log('微信登录成功:', loginData);
-      
-      const loginType = loginData.user?.loginType;
-      const successMessage = loginType === 'wechat_fallback' ? '登录成功（开发模式）' : '登录成功';
-      
+  // 微信用户信息授权回调
+  onGetUserInfo(e) {
+    console.log('微信用户信息授权回调:', e);
+
+    if (e.detail.errMsg === 'getUserInfo:ok') {
+      // 用户同意授权
+      const userInfo = e.detail.userInfo;
+      this.setData({
+        userInfo: userInfo,
+        hasUserInfo: true,
+        showPhoneAuth: true
+      });
+
       wx.showToast({
-        title: successMessage,
+        title: '授权成功',
         icon: 'success'
       });
-      
-      // 延迟跳转，让用户看到成功提示
-      setTimeout(() => {
-        this.redirectToUser();
-      }, 1000);
-      
-    }).catch(err => {
-      this.setData({ loginLoading: false });
-      
-      console.error('微信登录失败:', err);
-      
-      // 提供更友好的错误信息
-      let errorMessage = '登录失败';
-      if (err.message) {
-        if (err.message.includes('用户取消')) {
-          errorMessage = '用户取消授权';
-        } else if (err.message.includes('网络')) {
-          errorMessage = '网络连接失败';
-        } else if (err.message.includes('凭证')) {
-          errorMessage = '微信授权失败';
+
+      // 直接进行微信登录
+      this.performWechatLogin(userInfo);
+    } else {
+      // 用户拒绝授权
+      console.log('用户拒绝微信授权');
+      wx.showToast({
+        title: '需要授权才能登录',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 手机号授权回调
+  onGetPhoneNumber(e) {
+    console.log('手机号授权回调:', e);
+
+    if (e.detail.errMsg === 'getPhoneNumber:ok') {
+      // 用户同意授权手机号
+      this.setData({ phoneLoading: true });
+
+      const { encryptedData, iv } = e.detail;
+
+      // 执行完整的微信登录流程
+      this.performWechatLoginWithPhone(encryptedData, iv);
+    } else {
+      // 用户拒绝授权手机号
+      console.log('用户拒绝手机号授权');
+      wx.showToast({
+        title: '可以跳过手机号授权',
+        icon: 'none'
+      });
+
+      // 仍然可以进行基础微信登录
+      if (this.data.hasUserInfo) {
+        this.performWechatLogin(this.data.userInfo);
+      }
+    }
+  },
+
+  // 执行微信登录（带手机号）
+  performWechatLoginWithPhone(encryptedData, iv) {
+    wx.login({
+      success: (loginRes) => {
+        if (loginRes.code) {
+          console.log('获取微信登录code成功:', loginRes.code);
+
+          // 调用后端登录接口，包含手机号加密数据
+          auth.wechatLoginWithPhone({
+            code: loginRes.code,
+            userInfo: this.data.userInfo,
+            encryptedData: encryptedData,
+            iv: iv
+          }).then(loginData => {
+            this.setData({
+              phoneLoading: false,
+              loginLoading: false
+            });
+
+            console.log('微信登录成功:', loginData);
+
+            wx.showToast({
+              title: '登录成功',
+              icon: 'success'
+            });
+
+            setTimeout(() => {
+              this.redirectToUser();
+            }, 1000);
+
+          }).catch(err => {
+            this.setData({
+              phoneLoading: false,
+              loginLoading: false
+            });
+
+            console.error('微信登录失败:', err);
+            this.showLoginError(err);
+          });
         } else {
-          errorMessage = err.message;
+          this.setData({
+            phoneLoading: false,
+            loginLoading: false
+          });
+
+          wx.showToast({
+            title: '获取微信凭证失败',
+            icon: 'none'
+          });
+        }
+      },
+      fail: (err) => {
+        this.setData({
+          phoneLoading: false,
+          loginLoading: false
+        });
+
+        console.error('微信登录失败:', err);
+        wx.showToast({
+          title: '微信登录失败',
+          icon: 'none'
+        });
+      }
+    });
+  },
+
+  // 执行基础微信登录
+  performWechatLogin(userInfo) {
+    this.setData({ loginLoading: true });
+
+    wx.login({
+      success: (loginRes) => {
+        if (loginRes.code) {
+          console.log('获取微信登录code成功:', loginRes.code);
+
+          // 调用后端登录接口
+          auth.wechatLogin({
+            code: loginRes.code,
+            userInfo: userInfo
+          }).then(loginData => {
+            this.setData({ loginLoading: false });
+
+            console.log('微信登录成功:', loginData);
+
+            wx.showToast({
+              title: '登录成功',
+              icon: 'success'
+            });
+
+            setTimeout(() => {
+              this.redirectToUser();
+            }, 1000);
+
+          }).catch(err => {
+            this.setData({ loginLoading: false });
+
+            console.error('微信登录失败:', err);
+            this.showLoginError(err);
+          });
+        } else {
+          this.setData({ loginLoading: false });
+
+          wx.showToast({
+            title: '获取微信凭证失败',
+            icon: 'none'
+          });
+        }
+      },
+      fail: (err) => {
+        this.setData({ loginLoading: false });
+
+        console.error('微信登录失败:', err);
+        wx.showToast({
+          title: '微信登录失败',
+          icon: 'none'
+        });
+      }
+    });
+  },
+
+  // 显示登录错误信息
+  showLoginError(err) {
+    let errorMessage = '登录失败';
+    if (err.message) {
+      if (err.message.includes('用户取消')) {
+        errorMessage = '用户取消授权';
+      } else if (err.message.includes('网络')) {
+        errorMessage = '网络连接失败';
+      } else if (err.message.includes('凭证')) {
+        errorMessage = '微信授权失败';
+      } else {
+        errorMessage = err.message;
+      }
+    }
+
+    wx.showModal({
+      title: '登录失败',
+      content: `${errorMessage}\n\n您可以尝试：\n1. 检查网络连接\n2. 重新打开小程序\n3. 使用手机验证码登录`,
+      confirmText: '重试',
+      cancelText: '使用验证码',
+      success: (res) => {
+        if (res.confirm) {
+          // 重试微信登录
+          if (this.data.hasUserInfo) {
+            this.performWechatLogin(this.data.userInfo);
+          }
+        } else {
+          // 切换到手机验证码登录
+          wx.showToast({
+            title: '请使用手机验证码登录',
+            icon: 'none'
+          });
         }
       }
-      
-      wx.showModal({
-        title: '登录失败',
-        content: `${errorMessage}\n\n您可以尝试：\n1. 检查网络连接\n2. 重新打开小程序\n3. 使用手机验证码登录`,
-        confirmText: '重试',
-        cancelText: '使用验证码',
-        success: (res) => {
-          if (res.confirm) {
-            // 重试微信登录
-            setTimeout(() => {
-              this.wxLogin();
-            }, 500);
-          } else {
-            // 切换到手机验证码登录
-            // 这里可以添加切换逻辑
-            wx.showToast({
-              title: '请使用手机验证码登录',
-              icon: 'none'
-            });
-          }
-        }
-      });
+    });
+  },
+
+  // 微信登录 - 增强版本（保留兼容性）
+  wxLogin() {
+    // 这个方法现在主要用于兼容性，实际授权通过 onGetUserInfo 处理
+    wx.showToast({
+      title: '请点击授权按钮',
+      icon: 'none'
     });
   },
 

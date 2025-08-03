@@ -7,11 +7,29 @@
   </view>
   
   <view class="login-content">
-    <!-- 微信登录按钮 -->
-    <button class="btn-wx-login {{loginLoading ? 'loading' : ''}}" bindtap="wxLogin" disabled="{{loginLoading}}">
+    <!-- 微信授权登录按钮 -->
+    <button
+      class="btn-wx-login {{loginLoading ? 'loading' : ''}}"
+      open-type="getUserInfo"
+      bindgetuserinfo="onGetUserInfo"
+      disabled="{{loginLoading}}"
+    >
       <text class="btn-icon" wx:if="{{!loginLoading}}">📱</text>
       <text class="btn-icon loading-icon" wx:else>⏳</text>
-      <text class="btn-text">{{loginLoading ? '登录中...' : '微信快速登录'}}</text>
+      <text class="btn-text">{{loginLoading ? '登录中...' : '微信授权登录'}}</text>
+    </button>
+
+    <!-- 获取手机号按钮 -->
+    <button
+      class="btn-phone-auth {{phoneLoading ? 'loading' : ''}}"
+      open-type="getPhoneNumber"
+      bindgetphonenumber="onGetPhoneNumber"
+      disabled="{{phoneLoading}}"
+      wx:if="{{showPhoneAuth}}"
+    >
+      <text class="btn-icon" wx:if="{{!phoneLoading}}">📞</text>
+      <text class="btn-icon loading-icon" wx:else>⏳</text>
+      <text class="btn-text">{{phoneLoading ? '获取中...' : '授权手机号'}}</text>
     </button>
     
     <view class="divider">

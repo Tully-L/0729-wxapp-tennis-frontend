@@ -340,73 +340,127 @@
       
       <!-- Create Tab Content -->
       <view wx:elif="{{activeTab === 'create'}}" class="tab-panel create-panel">
-        <view class="create-content">
-          <view class="create-header">
-            <text class="create-title">创建新赛事</text>
-          </view>
-          
-          <!-- Quick Create Form -->
-          <view class="quick-create-form">
-            <view class="form-section">
-              <view class="form-label">赛事名称</view>
+        <view class="create-container">
+          <view class="form-section">
+            <view class="section-title">基本信息</view>
+            
+            <view class="form-item">
+              <view class="form-label">赛事名称 *</view>
               <input 
                 class="form-input" 
-                placeholder="请输入赛事名称"
-                value="{{tabData.create.formData.name}}"
-                bindinput="onCreateFormInput"
-                data-field="name"
+                placeholder="请输入赛事名称" 
+                value="{{eventData.name}}"
+                bindinput="inputName"
               />
             </view>
+
+            <view class="form-item">
+              <view class="form-label">赛事类型 *</view>
+              <view class="type-options">
+                <view 
+                  wx:for="{{eventTypes}}" 
+                  wx:key="id"
+                  class="type-option {{eventData.eventType === item.id ? 'active' : ''}}"
+                  bindtap="selectEventType"
+                  data-type="{{item.id}}"
+                >
+                  {{item.name}}
+                </view>
+              </view>
+            </view>
+
+            <view class="form-item">
+              <view class="form-label">场地 *</view>
+              <input 
+                class="form-input" 
+                placeholder="请输入场地名称" 
+                value="{{eventData.venue}}"
+                bindinput="inputVenue"
+              />
+            </view>
+
+            <view class="form-item">
+              <view class="form-label">球场</view>
+              <input 
+                class="form-input" 
+                placeholder="请输入球场编号" 
+                value="{{eventData.court}}"
+                bindinput="inputCourt"
+              />
+            </view>
+
+            <view class="form-item">
+              <view class="form-label">地区</view>
+              <input 
+                class="form-input" 
+                placeholder="请输入地区" 
+                value="{{eventData.region}}"
+                bindinput="inputRegion"
+              />
+            </view>
+          </view>
+
+          <view class="form-section">
+            <view class="section-title">时间安排</view>
             
-            <view class="form-section">
-              <view class="form-label">赛事类型</view>
-              <picker 
-                bindchange="onEventTypeChange" 
-                value="{{tabData.create.formData.eventTypeIndex}}" 
-                range="{{eventTypes}}" 
-                range-key="name"
-              >
-                <view class="picker-display">
-                  {{eventTypes[tabData.create.formData.eventTypeIndex].name || '请选择赛事类型'}}
+            <view class="form-item">
+              <view class="form-label">比赛日期 *</view>
+              <picker mode="date" bindchange="selectEventDate">
+                <view class="picker-input {{eventData.eventDate ? '' : 'placeholder'}}">
+                  {{eventData.eventDate || '请选择比赛日期'}}
                 </view>
               </picker>
             </view>
-            
-            <view class="form-section">
-              <view class="form-label">比赛场地</view>
-              <input 
-                class="form-input" 
-                placeholder="请输入比赛场地"
-                value="{{tabData.create.formData.venue}}"
-                bindinput="onCreateFormInput"
-                data-field="venue"
-              />
-            </view>
-            
-            <view class="form-section">
-              <view class="form-label">比赛时间</view>
-              <picker 
-                mode="multiSelector" 
-                bindchange="onDateTimeChange"
-                value="{{tabData.create.formData.dateTimeIndex}}"
-                range="{{dateTimeRange}}"
-              >
-                <view class="picker-display">
-                  {{tabData.create.formData.eventDate || '请选择比赛时间'}}
+
+            <view class="form-item">
+              <view class="form-label">报名截止 *</view>
+              <picker mode="date" bindchange="selectDeadline">
+                <view class="picker-input {{eventData.registrationDeadline ? '' : 'placeholder'}}">
+                  {{eventData.registrationDeadline || '请选择报名截止日期'}}
                 </view>
               </picker>
             </view>
+          </view>
+
+          <view class="form-section">
+            <view class="section-title">赛事说明</view>
             
-            <view class="form-actions">
-              <button class="btn-save-draft" bindtap="saveDraft">保存草稿</button>
-              <button class="btn-create" bindtap="createEventQuick">立即创建</button>
+            <view class="form-item">
+              <textarea 
+                class="form-textarea" 
+                placeholder="请输入赛事说明（可选）" 
+                value="{{eventData.description}}"
+                bindinput="inputDescription"
+                maxlength="500"
+              />
+              <view class="textarea-count">{{eventData.description.length || 0}}/500</view>
             </view>
           </view>
-          
-          <!-- Or Full Form Link -->
-          <view class="full-form-link">
-            <button class="btn-full-form" bindtap="goToFullCreateForm">
-              使用完整表单创建
+
+          <view class="form-section">
+            <view class="section-title">发布设置</view>
+            
+            <view class="form-item">
+              <view class="switch-item">
+                <view class="switch-label">公开赛事</view>
+                <switch 
+                  checked="{{eventData.isPublic}}" 
+                  bindchange="togglePublic"
+                  color="#0A4A39"
+                />
+              </view>
+              <view class="switch-desc">公开赛事所有用户都可以看到和报名</view>
+            </view>
+          </view>
+
+          <view class="form-actions">
+            <button class="btn-cancel" bindtap="resetForm">重置</button>
+            <button 
+              class="btn-submit {{submitting ? 'disabled' : ''}}" 
+              bindtap="createEvent"
+              disabled="{{submitting}}"
+            >
+              {{submitting ? '创建中...' : '创建赛事'}}
             </button>
           </view>
         </view>

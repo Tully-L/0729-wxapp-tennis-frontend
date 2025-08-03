@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信登录测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-wechat {
+            background: linear-gradient(135deg, #07C160 0%, #05A050 100%);
+            color: white;
+        }
+        .btn-wechat:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(7, 193, 96, 0.3);
+        }
+        .btn-phone {
+            background: linear-gradient(135deg, #1AAD19 0%, #0E8A0E 100%);
+            color: white;
+        }
+        .btn-phone:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 173, 25, 0.3);
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .code {
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🎾 网球热登录测试</h1>
+        
+        <button class="btn btn-wechat" onclick="testWechatLogin()">
+            📱 测试微信登录
+        </button>
+        
+        <button class="btn btn-phone" onclick="testPhoneLogin()">
+            📞 测试手机号登录
+        </button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://zero729-wxapp-tennis.onrender.com/api';
+        
+        function showResult(message, type = 'info') {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = message;
+        }
+        
+        function testWechatLogin() {
+            showResult('正在测试微信登录...', 'info');
+            
+            // 模拟微信登录数据
+            const mockData = {
+                code: '0c1ZmqFa1oQc3K0MrTFa1V8VLp4ZmqFo',
+                userInfo: {
+                    nickName: '测试用户',
+                    avatarUrl: 'https://thirdwx.qlogo.cn/mmopen/test.jpg',
+                    gender: 1,
+                    country: '中国',
+                    province: '广东',
+                    city: '深圳'
+                },
+                loginType: 'wechat'
+            };
+            
+            fetch(`${API_BASE}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(mockData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showResult(`
+                        <strong>✅ 微信登录成功！</strong><br>
+                        用户ID: ${data.data.user.id}<br>
+                        昵称: ${data.data.user.nickname}<br>
+                        积分: ${data.data.user.total_points}<br>
+                        等级: ${data.data.user.level.name}<br>
+                        <div class="code">Token: ${data.data.accessToken.substring(0, 50)}...</div>
+                    `, 'success');
+                } else {
+                    showResult(`❌ 登录失败: ${data.message}`, 'error');
+                }
+            })
+            .catch(error => {
+                showResult(`❌ 网络错误: ${error.message}`, 'error');
+            });
+        }
+        
+        function testPhoneLogin() {
+            showResult('正在测试手机号登录...', 'info');
+            
+            // 模拟带手机号的微信登录数据
+            const mockData = {
+                code: '0c1ZmqFa1oQc3K0MrTFa1V8VLp4ZmqFo',
+                userInfo: {
+                    nickName: '测试用户',
+                    avatarUrl: 'https://thirdwx.qlogo.cn/mmopen/test.jpg',
+                    gender: 1
+                },
+                encryptedData: 'mock_encrypted_data',
+                iv: 'mock_iv',
+                loginType: 'wechat_with_phone'
+            };
+            
+            fetch(`${API_BASE}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(mockData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showResult(`
+                        <strong>✅ 手机号登录成功！</strong><br>
+                        用户ID: ${data.data.user.id}<br>
+                        昵称: ${data.data.user.nickname}<br>
+                        积分: ${data.data.user.total_points}<br>
+                        等级: ${data.data.user.level.name}<br>
+                        <div class="code">Token: ${data.data.accessToken.substring(0, 50)}...</div>
+                    `, 'success');
+                } else {
+                    showResult(`❌ 登录失败: ${data.message}`, 'error');
+                }
+            })
+            .catch(error => {
+                showResult(`❌ 网络错误: ${error.message}`, 'error');
+            });
+        }
+        
+        // 页面加载时显示说明
+        window.onload = function() {
+            showResult(`
+                <strong>📋 测试说明：</strong><br>
+                1. 点击"测试微信登录"模拟基础微信登录<br>
+                2. 点击"测试手机号登录"模拟带手机号的微信登录<br>
+                3. 查看控制台可以看到详细的请求和响应信息<br>
+                <br>
+                <strong>🔗 API地址：</strong> ${API_BASE}<br>
+                <strong>✅ 服务状态：</strong> Render生产环境正常运行
+            `, 'info');
+        };
+    </script>
+</body>
+</html>

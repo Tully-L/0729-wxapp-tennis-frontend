@@ -1,93 +1,116 @@
 <!-- user.wxml -->
 <view class="page-container">
-  <!-- 顶部背景与头像信息区 -->
-  <view class="top-info-section">
-    <view class="top-bg"></view>
-    <view class="user-profile">
-      <!-- 头像 -->
-      <view class="user-avatar"></view>
-      <!-- 用户信息 -->
-      <view class="user-details">
-        <text class="user-name">{{profile.nickname || '球员88662'}}</text>
-        <text class="user-uid">UID: {{profile.customId || profile.id || '86594010'}}</text>
-        <text class="user-info">{{profile.age || 22}}岁 | 体重{{profile.weight || '-'}} | 球龄{{profile.experience || '-'}} | 持拍手{{profile.hand || '-'}}</text>
-      </view>
-      <!-- 编辑图标 -->
-      <view class="edit-icon" bindtap="editProfile"></view>
+  <!-- 未登录状态 - 跳转到登录页面 -->
+  <view wx:if="{{!isLoggedIn}}" class="login-prompt">
+    <view class="prompt-content">
+      <view class="prompt-icon">👤</view>
+      <view class="prompt-title">请先登录</view>
+      <view class="prompt-subtitle">登录后可查看个人信息和赛事记录</view>
+      <button class="login-btn" bindtap="goToLogin">立即登录</button>
     </view>
   </view>
 
-  <!-- 欢迎语与功能快捷入口区 -->
-  <view class="welcome-section">
-    <!-- 欢迎语 -->
-    <view class="welcome-bar">
-      <text class="welcome-text">嗨，欢迎加入LJ网球社，记录努力和精彩</text>
+  <!-- 已登录状态 - 显示用户信息 -->
+  <view wx:else class="logged-in-container">
+    <!-- 顶部背景与头像信息区 -->
+    <view class="top-info-section">
+      <view class="top-bg"></view>
+      <view class="user-profile">
+        <!-- 头像 -->
+        <view class="user-avatar">
+          <image wx:if="{{userInfo.avatarUrl}}" src="{{userInfo.avatarUrl}}" class="avatar-image" mode="aspectFill"></image>
+          <view wx:else class="default-avatar"></view>
+        </view>
+        <!-- 用户信息 -->
+        <view class="user-details">
+          <text class="user-name">{{userInfo.nickName || userInfo.nickname || '网球选手'}}</text>
+          <text class="user-uid">UID: {{profile.customId || profile.id || userInfo.id || '86594010'}}</text>
+          <text class="user-info">{{profile.age ? profile.age + '岁' : '-'}} | 体重{{profile.weight || '-'}} | 球龄{{profile.experience || '-'}} | 持拍手{{profile.hand || '-'}}</text>
+        </view>
+        <!-- 操作按钮区 -->
+        <view class="action-buttons">
+          <view class="edit-btn" bindtap="editProfile">
+            <text class="btn-text">修改</text>
+          </view>
+          <view class="logout-btn" bindtap="logout">
+            <text class="btn-text">退出</text>
+          </view>
+        </view>
+      </view>
     </view>
-    <!-- 功能快捷入口 -->
-    <view class="quick-actions">
-      <view class="action-item" bindtap="goToOrders">
-        <view class="action-icon order-icon"></view>
-        <text class="action-text">订单</text>
-      </view>
-      <view class="action-item" bindtap="goToMessages">
-        <view class="action-icon message-icon"></view>
-        <text class="action-text">消息</text>
-      </view>
-      <view class="action-item" bindtap="goToCustomerService">
-        <view class="action-icon service-icon"></view>
-        <text class="action-text">客服</text>
-      </view>
-      <view class="action-item" bindtap="goToSettings">
-        <view class="action-icon settings-icon"></view>
-        <text class="action-text">设置</text>
-      </view>
-    </view>
-  </view>
 
-  <!-- 业务模块区 -->
-  <view class="business-modules">
-    <view class="module-row">
-      <view class="module-item mdou-module" bindtap="goToMDou">
-        <view class="module-icon mdou-icon"></view>
-        <view class="module-content">
-          <text class="module-title">M豆</text>
-          <text class="module-value">{{userStats.mDou || 2500}}</text>
-        </view>
+    <!-- 欢迎语与功能快捷入口区 -->
+    <view class="welcome-section">
+      <!-- 欢迎语 -->
+      <view class="welcome-bar">
+        <text class="welcome-text">嗨，欢迎加入LJ网球社，记录努力和精彩</text>
       </view>
-      <view class="module-item coupon-module" bindtap="goToCoupons">
-        <view class="module-icon coupon-icon"></view>
-        <view class="module-content">
-          <text class="module-title">优惠券</text>
-          <text class="module-value">{{userStats.coupons || 3}}张</text>
+      <!-- 功能快捷入口 -->
+      <view class="quick-actions">
+        <view class="action-item" bindtap="goToOrders">
+          <view class="action-icon order-icon"></view>
+          <text class="action-text">订单</text>
         </view>
-      </view>
-    </view>
-    <view class="module-row">
-      <view class="module-item events-module" bindtap="goToMyEvents">
-        <view class="module-icon events-icon"></view>
-        <view class="module-content">
-          <text class="module-title">我的赛事</text>
-          <text class="module-value">{{userStats.events || 5}}场</text>
+        <view class="action-item" bindtap="goToMessages">
+          <view class="action-icon message-icon"></view>
+          <text class="action-text">消息</text>
         </view>
-      </view>
-      <view class="module-item member-module" bindtap="goToMemberCenter">
-        <view class="module-icon member-icon"></view>
-        <view class="module-content">
-          <text class="module-title">会员中心</text>
-          <text class="module-value">{{userStats.memberLevel || 'VIP'}}</text>
+        <view class="action-item" bindtap="goToCustomerService">
+          <view class="action-icon service-icon"></view>
+          <text class="action-text">客服</text>
+        </view>
+        <view class="action-item" bindtap="goToSettings">
+          <view class="action-icon settings-icon"></view>
+          <text class="action-text">设置</text>
         </view>
       </view>
     </view>
-  </view>
 
-  <!-- 我的赛事记录区 -->
-  <view class="events-record-section">
-    <view class="section-title">我的赛事记录</view>
-    <view class="events-list">
-      <!-- 这里可以添加赛事记录列表 -->
-      <view class="empty-events">暂无赛事记录</view>
-      <!-- 下方白色区域 -->
-      <view class="bottom-white-space"></view>
+    <!-- 业务模块区 -->
+    <view class="business-modules">
+      <view class="module-row">
+        <view class="module-item mdou-module" bindtap="goToMDou">
+          <view class="module-icon mdou-icon"></view>
+          <view class="module-content">
+            <text class="module-title">M豆</text>
+            <text class="module-value">{{userStats.mDou || 0}}</text>
+          </view>
+        </view>
+        <view class="module-item coupon-module" bindtap="goToCoupons">
+          <view class="module-icon coupon-icon"></view>
+          <view class="module-content">
+            <text class="module-title">优惠券</text>
+            <text class="module-value">{{userStats.coupons || 0}}张</text>
+          </view>
+        </view>
+      </view>
+      <view class="module-row">
+        <view class="module-item events-module" bindtap="goToMyEvents">
+          <view class="module-icon events-icon"></view>
+          <view class="module-content">
+            <text class="module-title">我的赛事</text>
+            <text class="module-value">{{userStats.events || 0}}场</text>
+          </view>
+        </view>
+        <view class="module-item member-module" bindtap="goToMemberCenter">
+          <view class="module-icon member-icon"></view>
+          <view class="module-content">
+            <text class="module-title">会员中心</text>
+            <text class="module-value">{{userStats.memberLevel || 'VIP'}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 我的赛事记录区 -->
+    <view class="events-record-section">
+      <view class="section-title">我的赛事记录</view>
+      <view class="events-list">
+        <!-- 这里可以添加赛事记录列表 -->
+        <view class="empty-events">暂无赛事记录</view>
+        <!-- 下方白色区域 -->
+        <view class="bottom-white-space"></view>
+      </view>
     </view>
   </view>
 </view>

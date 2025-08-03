@@ -224,17 +224,8 @@ const request = (url, method = 'GET', data = {}, showLoading = true) => {
     // 检查是否为mock token，如果是则直接使用fallback
     if (token && token.startsWith('mock_token_')) {
       console.log('检测到mock token，直接使用本地模拟数据');
-      // 使用nextTick确保loading状态正确关闭
-      if (showLoading) {
-        wx.nextTick(() => {
-          try {
-            wx.hideLoading();
-          } catch (e) {
-            console.log('hideLoading已执行或不存在对应的showLoading');
-          }
-        });
-      }
-      handleMockFallback(url, method, cleanRequestData(data), resolve, reject, false);
+      // 直接调用fallback，不在这里处理loading
+      handleMockFallback(url, method, cleanRequestData(data), resolve, reject, showLoading);
       return;
     }
     
@@ -288,8 +279,8 @@ const request = (url, method = 'GET', data = {}, showLoading = true) => {
             console.error('服务器错误:', res.statusCode);
             handleMockFallback(url, method, cleanData, resolve, reject);
           } else {
-            // 对于404和403错误，直接使用fallback，不记录错误日志
-            if (res.statusCode === 403 || res.statusCode === 404) {
+            // 对于400、403、404错误，直接使用fallback，不记录错误日志
+            if (res.statusCode === 400 || res.statusCode === 403 || res.statusCode === 404) {
               console.log('API endpoint not available, using fallback data for:', url);
               handleMockFallback(url, method, cleanData, resolve, reject);
             } else {
@@ -702,14 +693,14 @@ const handleMockFallback = (url, method, data, resolve, reject, needHideLoading 
             checkinAt: new Date().toISOString()
           }
         });
-      } else if (url.includes('/events') && method === 'GET') {
+      } else if (url === '/events' && method === 'GET') {
         // 获取赛事列表
         const events = getStoredEvents();
         resolve({
           success: true,
           data: events
         });
-      } else if (url.includes('/events') && method === 'POST') {
+      } else if (url === '/events' && method === 'POST') {
         // 创建新赛事
         const events = getStoredEvents();
         const newEvent = {
@@ -1201,7 +1192,6 @@ const API = {
   createEvent: (data) => request('/events', 'POST', data),
   updateEvent: (id, data) => request(`/events/${id}`, 'PUT', data),
   deleteEvent: (id) => request(`/events/${id}`, 'DELETE'),
-  getUserEvents: (params) => request('/events/user', 'GET', params),
   getEventStats: () => request('/events/stats', 'GET'),
   registerForEvent: (eventId, data) => request(`/events/${eventId}/register`, 'POST', data),
   cancelRegistration: (eventId) => request(`/events/${eventId}/register`, 'DELETE'),

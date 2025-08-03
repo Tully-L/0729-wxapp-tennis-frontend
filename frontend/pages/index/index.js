@@ -70,7 +70,7 @@ Page({
   },
   
   onLoad: function() {
-    // Initialize user info
+    // Initialize user info (不强制登录，允许游客浏览)
     this.initUserInfo();
     
     // Try to load eventTypes from cache
@@ -158,22 +158,34 @@ Page({
       ...this.data.filters
     };
     
-    return API.getMatches(params)
+    return API.getEvents(params)
       .then(res => {
-        console.log('获取到的比赛数据:', res);
+        console.log('获取到的赛事数据:', res);
 
-        // 将后端返回的比赛数组转换为按日期分组的格式
-        const matches = res.data || [];
-        const matchGroups = this.groupMatchesByDate(matches);
+        // 确保数据格式正确
+        let events = [];
+        if (res.success && res.data) {
+          if (Array.isArray(res.data)) {
+            events = res.data;
+          } else if (Array.isArray(res.data.events)) {
+            events = res.data.events;
+          } else {
+            console.warn('API返回的数据格式不正确:', res.data);
+            events = [];
+          }
+        }
+
+        // 将后端返回的赛事数组转换为按日期分组的格式
+        const matchGroups = this.groupMatchesByDate(events);
 
         this.setData({
           matches: matchGroups,
-          hasMore: res.pagination && res.pagination.page < res.pagination.pages,
+          hasMore: res.pagination ? (res.pagination.page < res.pagination.pages) : false,
           loading: false
         });
       })
       .catch(err => {
-        console.error('Failed to load matches:', err);
+        console.error('Failed to load events:', err);
         this.setData({ loading: false });
       });
   },
@@ -194,12 +206,24 @@ Page({
       ...this.data.filters
     };
     
-    API.getMatches(params)
+    API.getEvents(params)
       .then(res => {
-        if (res.data.length > 0) {
+        // 确保数据格式正确
+        let events = [];
+        if (res.success && res.data) {
+          if (Array.isArray(res.data)) {
+            events = res.data;
+          } else if (Array.isArray(res.data.events)) {
+            events = res.data.events;
+          } else {
+            console.warn('API返回的数据格式不正确:', res.data);
+            events = [];
+          }
+        }
+
+        if (events.length > 0) {
           // 将新数据转换为分组格式
-          const newMatches = res.data || [];
-          const newGroups = this.groupMatchesByDate(newMatches);
+          const newGroups = this.groupMatchesByDate(events);
 
           // 合并现有分组和新分组
           const existingGroups = this.data.matches;
@@ -207,7 +231,7 @@ Page({
 
           this.setData({
             matches: mergedGroups,
-            hasMore: res.data.length === this.data.pageSize,
+            hasMore: events.length === this.data.pageSize,
             loading: false
           });
         } else {
@@ -218,7 +242,7 @@ Page({
         }
       })
       .catch(err => {
-        console.error('Failed to load more matches:', err);
+        console.error('Failed to load more events:', err);
         this.setData({ loading: false });
       });
   },
@@ -393,11 +417,11 @@ Page({
     });
   },
   
-  // Load match statistics
+  // Load event statistics
   loadMatchStats: function() {
     this.setData({ statsLoading: true });
     
-    API.getMatchStats().then(res => {
+    API.getEventStats().then(res => {
       if (res.success) {
         this.setData({
           matchStats: res.data,
@@ -407,7 +431,7 @@ Page({
         this.setData({ statsLoading: false });
       }
     }).catch(err => {
-      console.error('获取比赛统计失败:', err);
+      console.error('获取赛事统计失败:', err);
       this.setData({ statsLoading: false });
     });
   },
@@ -449,20 +473,20 @@ Page({
   performSearch: function(query) {
     this.setData({ searchLoading: true });
     
-    API.searchMatches({
+    API.searchEvents({
       query: query,
       limit: 10
     }).then(res => {
       if (res.success) {
         this.setData({
-          searchResults: res.data.matches || [],
+          searchResults: res.data || [],
           searchLoading: false
         });
       } else {
         this.setData({ searchLoading: false });
       }
     }).catch(err => {
-      console.error('搜索比赛失败:', err);
+      console.error('搜索赛事失败:', err);
       this.setData({ searchLoading: false });
     });
   },

@@ -50,6 +50,30 @@ Page({
   onShow: function() {
     // 每次显示页面时检查登录状态
     this.checkLoginStatus();
+
+    // 检查是否需要强制刷新用户数据（从编辑页面返回）
+    const shouldRefresh = wx.getStorageSync('shouldRefreshUserData');
+    if (shouldRefresh) {
+      console.log('检测到用户数据更新，强制刷新');
+      wx.removeStorageSync('shouldRefreshUserData');
+      wx.removeStorageSync('userProfile');
+      wx.removeStorageSync('userStats');
+      this.setData({
+        profile: null,
+        userStats: null,
+        loading: true
+      });
+      if (auth.checkLogin()) {
+        this.loadUserProfile();
+        this.loadUserStats();
+      }
+    }
+
+    // 如果用户未登录，显示登录界面而不是跳转
+    if (!auth.checkLogin()) {
+      console.log('用户未登录，显示登录界面');
+      // 用户页面不跳转，而是显示登录按钮
+    }
   },
 
   // 检查登录状态
@@ -264,9 +288,11 @@ Page({
     });
   },
   
-  // Login
-  login: function() {
-    auth.goToLogin();
+  // 跳转到登录页面
+  goToLogin: function() {
+    wx.navigateTo({
+      url: '/pages/user-related/login/login'
+    });
   },
 
   // Logout

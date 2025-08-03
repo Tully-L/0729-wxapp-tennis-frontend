@@ -306,6 +306,9 @@ Page({
         wx.removeStorageSync('userProfile');
         wx.removeStorageSync('userStats');
 
+        // 设置刷新标志，让用户页面知道需要刷新数据
+        wx.setStorageSync('shouldRefreshUserData', true);
+
         wx.showToast({
           title: '保存成功',
           icon: 'success'

@@ -17,9 +17,7 @@ services:
       - key: CORS_ORIGIN
         value: "*"
       - key: MONGODB_URI
-        fromDatabase:
-          name: tennis-heat-db
-          property: connectionString
+        value: mongodb+srv://LTully:147LBlei258@cluster0.cfkzz8t.mongodb.net/tennis_heat?retryWrites=true&w=majority&appName=Cluster0
       - key: WECHAT_APP_ID
         value: wx0670b8a59611fccf
       - key: WECHAT_APP_SECRET
@@ -40,9 +38,3 @@ services:
         value: 5242880
     healthCheckPath: /health
     autoDeploy: true
-
-databases:
-  - name: tennis-heat-db
-    databaseName: tennis_heat
-    user: tennis_user
-    plan: free
