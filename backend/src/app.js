@@ -61,7 +61,7 @@ app.post('/admin/create-test-data', async (req, res) => {
     const events = await Event.create([
       {
         title: '温布尔登锦标赛 2024',
-        category: '网球比赛',
+        category: 'tennis',
         start_time: new Date('2024-07-01T09:00:00Z'),
         end_time: new Date('2024-07-01T18:00:00Z'),
         location: '全英俱乐部，伦敦',
@@ -79,7 +79,7 @@ app.post('/admin/create-test-data', async (req, res) => {
       },
       {
         title: '法国网球公开赛 2024',
-        category: '网球比赛',
+        category: 'tennis',
         start_time: new Date('2024-05-26T09:00:00Z'),
         end_time: new Date('2024-06-09T18:00:00Z'),
         location: '罗兰·加洛斯球场，巴黎',
@@ -97,7 +97,7 @@ app.post('/admin/create-test-data', async (req, res) => {
       },
       {
         title: '澳大利亚网球公开赛 2024',
-        category: '网球比赛',
+        category: 'tennis',
         start_time: new Date('2024-01-14T09:00:00Z'),
         end_time: new Date('2024-01-28T18:00:00Z'),
         location: '墨尔本公园，墨尔本',
@@ -115,7 +115,7 @@ app.post('/admin/create-test-data', async (req, res) => {
       },
       {
         title: '上海大师赛 2024',
-        category: '网球比赛',
+        category: 'tennis',
         start_time: new Date('2024-10-05T09:00:00Z'),
         end_time: new Date('2024-10-13T18:00:00Z'),
         location: '上海旗忠森林体育城',
@@ -133,7 +133,7 @@ app.post('/admin/create-test-data', async (req, res) => {
       },
       {
         title: '北京网球公开赛 2024',
-        category: '网球比赛',
+        category: 'tennis',
         start_time: new Date('2024-09-25T09:00:00Z'),
         end_time: new Date('2024-10-06T18:00:00Z'),
         location: '北京国家网球中心',
