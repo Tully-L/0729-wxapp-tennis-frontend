@@ -7,21 +7,13 @@ const { connectDB, checkConnection, getDBStats } = require('./config/database');
 const { createIndexes, getIndexInfo } = require('./config/indexes');
 const errorHandler = require('./middleware/errorHandler');
 const { ensureUtf8Encoding } = require('./middleware/encoding');
-const SocketService = require('./services/socketService');
 
 // 导入模型
 const Event = require('./models/Event');
-const Match = require('./models/Match');
 
 // 导入路由
 const authRoutes = require('./routes/auth');
 const eventRoutes = require('./routes/events');
-const matchRoutes = require('./routes/matches');
-const gameRoutes = require('./routes/games');
-const regionRoutes = require('./routes/regions');
-const paymentRoutes = require('./routes/payments');
-const websocketRoutes = require('./routes/websocket');
-const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 
@@ -55,12 +47,6 @@ app.use(ensureUtf8Encoding);
 // 路由
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
-app.use('/api/matches', matchRoutes);
-app.use('/api/games', gameRoutes);
-app.use('/api/regions', regionRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/websocket', websocketRoutes);
-app.use('/api/notifications', notificationRoutes);
 
 // 临时管理员端点 - 创建测试数据
 app.post('/admin/create-test-data', async (req, res) => {
@@ -341,13 +327,7 @@ app.get('/api/info', (req, res) => {
       health: '/api/health',
       info: '/api/info',
       auth: '/api/auth/*',
-      events: '/api/events/*',
-      matches: '/api/matches/*',
-      games: '/api/games/*',
-      regions: '/api/regions/*',
-      payments: '/api/payments/*',
-      websocket: '/api/websocket/*',
-      notifications: '/api/notifications/*'
+      events: '/api/events/*'
     },
     newFeatures: {
       separatedLayout: '分离式布局 - 比赛数据与报名入口分离',
@@ -474,15 +454,13 @@ app.post('/dev/init-data', async (req, res) => {
 
     // 检查是否已有数据
     const existingEvents = await Event.countDocuments();
-    const existingMatches = await Match.countDocuments();
 
     if (existingEvents > 0 && !force) {
       return res.json({
         success: true,
         message: '数据已存在，如需重新初始化请添加 ?force=true 参数',
         data: {
-          events: existingEvents,
-          matches: existingMatches
+          events: existingEvents
         }
       });
     }
@@ -490,7 +468,6 @@ app.post('/dev/init-data', async (req, res) => {
     // 如果强制重新初始化，先清除现有数据
     if (force) {
       await Event.deleteMany({});
-      await Match.deleteMany({});
       console.log('🧹 已清除现有数据');
     }
 
@@ -536,41 +513,11 @@ app.post('/dev/init-data', async (req, res) => {
 
     const createdEvents = await Event.insertMany(testEvents);
 
-    // 创建测试比赛
-    const testMatches = [];
-    createdEvents.forEach((event, index) => {
-      for (let i = 0; i < 3; i++) {
-        testMatches.push({
-          eventId: event._id,
-          eventType: event.eventType,
-          status: ['报名中', '比赛中', '已结束'][i],
-          stage: '第一轮',
-          venue: event.venue,
-          region: event.region,
-          scheduledTime: new Date(Date.now() + (i * 24 * 60 * 60 * 1000)),
-          isLive: i === 1,
-          players: {
-            team1: { name: `选手${index * 3 + i + 1}`, ranking: 10 + i },
-            team2: { name: `选手${index * 3 + i + 2}`, ranking: 15 + i }
-          },
-          organizer: event.organizer,
-          spectators: [],
-          score: { sets: [], winner: null },
-          statistics: { duration: null, totalGames: 0 },
-          tags: event.tags,
-          isPublic: true
-        });
-      }
-    });
-
-    const createdMatches = await Match.insertMany(testMatches);
-
     res.json({
       success: true,
       message: '测试数据初始化完成',
       data: {
-        events: createdEvents.length,
-        matches: createdMatches.length
+        events: createdEvents.length
       }
     });
   } catch (error) {
@@ -582,108 +529,7 @@ app.post('/dev/init-data', async (req, res) => {
   }
 });
 
-// 快速创建比赛数据端点
-app.post('/dev/create-matches', async (req, res) => {
-  try {
-    console.log('🏆 开始创建比赛数据...');
-
-    // 获取所有赛事
-    const events = await Event.find({}).lean();
-    console.log(`📊 找到 ${events.length} 个赛事`);
-
-    if (events.length === 0) {
-      return res.json({
-        success: false,
-        message: '没有找到赛事，请先创建赛事数据'
-      });
-    }
-
-    // 清除现有比赛数据
-    const deleteResult = await Match.deleteMany({});
-    console.log(`🧹 已清除 ${deleteResult.deletedCount} 条现有比赛数据`);
-
-    // 为每个赛事创建比赛
-    const allMatches = [];
-    const mongoose = require('mongoose');
-
-    for (let i = 0; i < events.length; i++) {
-      const event = events[i];
-      console.log(`为赛事 "${event.name}" 创建比赛...`);
-
-      // 为每个赛事创建3场比赛
-      for (let j = 0; j < 3; j++) {
-        const statusList = ['报名中', '比赛中', '已结束'];
-        const currentStatus = statusList[j];
-
-        const match = {
-          matchName: `${event.name} - ${event.eventType} - ${currentStatus}`,
-          eventId: new mongoose.Types.ObjectId(event._id),
-          eventType: event.eventType,
-          status: currentStatus,
-          stage: '第一轮',
-          venue: event.venue,
-          region: event.region,
-          scheduledTime: new Date(Date.now() + (j * 24 * 60 * 60 * 1000)),
-          isLive: j === 1,
-          players: {
-            team1: {
-              name: `选手${i * 3 + j + 1}`,
-              ranking: 10 + j
-            },
-            team2: {
-              name: `选手${i * 3 + j + 2}`,
-              ranking: 15 + j
-            }
-          },
-          organizer: event.organizer || { name: '系统管理员', id: new mongoose.Types.ObjectId() },
-          spectators: [],
-          score: { sets: [], winner: null },
-          statistics: { duration: null, totalGames: 0 },
-          tags: event.tags || [],
-          isPublic: true
-        };
-        allMatches.push(match);
-        console.log(`  准备创建: ${match.status} - ${match.eventType}`);
-      }
-    }
-
-    console.log(`准备批量创建 ${allMatches.length} 场比赛...`);
-
-    // 批量创建比赛
-    const createdMatches = await Match.insertMany(allMatches);
-    console.log(`✅ 成功创建 ${createdMatches.length} 场比赛`);
-
-    // 验证创建结果
-    const totalMatches = await Match.countDocuments();
-    console.log(`📊 数据库中现有比赛总数: ${totalMatches}`);
-
-    res.json({
-      success: true,
-      message: '比赛数据创建完成',
-      data: {
-        events: events.length,
-        matches: createdMatches.length,
-        totalInDB: totalMatches,
-        matchDetails: createdMatches.map(m => ({
-          id: m._id,
-          eventType: m.eventType,
-          status: m.status,
-          venue: m.venue,
-          isLive: m.isLive
-        }))
-      }
-    });
-
-  } catch (error) {
-    console.error('❌ 创建比赛数据失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '创建比赛数据失败',
-      error: error.message,
-      stack: error.stack
-    });
-  }
-});
+// 启动服务器
 
 // 404 处理
 app.use('*', (req, res) => {
@@ -706,28 +552,7 @@ const server = app.listen(PORT, () => {
   console.log(`🧪 Test endpoint: http://localhost:${PORT}/test`);
 });
 
-// 初始化WebSocket服务
-const socketService = new SocketService(server);
-app.locals.socketService = socketService;
-
-// 初始化推送服务
-const PushService = require('./services/pushService');
-const pushService = new PushService();
-app.locals.pushService = pushService;
-
-// 初始化支付服务
-const PaymentService = require('./services/paymentService');
-const paymentService = new PaymentService();
-app.locals.paymentService = paymentService;
-
-// 定期清理过期订单
-setInterval(() => {
-  paymentService.cleanupExpiredOrders();
-}, 5 * 60 * 1000); // 每5分钟清理一次
-
-console.log(`🔌 WebSocket service initialized`);
-console.log(`📱 Push service initialized`);
-console.log(`💰 Payment service initialized`);
+console.log(`✅ Server initialized successfully`);
 
 // 优雅关闭
 process.on('SIGTERM', () => {
