@@ -23,7 +23,11 @@ services:
       - key: WECHAT_APP_ID
         value: wx0670b8a59611fccf
       - key: WECHAT_APP_SECRET
-        value: your_wechat_app_secret
+        value: bf3a3afe062e312fc0291a37b2ab5e53
+      - key: WECHAT_APPID
+        value: wx0670b8a59611fccf
+      - key: WECHAT_SECRET
+        value: bf3a3afe062e312fc0291a37b2ab5e53
       - key: WECHAT_MCH_ID
         value: your_wechat_mch_id
       - key: WECHAT_API_KEY

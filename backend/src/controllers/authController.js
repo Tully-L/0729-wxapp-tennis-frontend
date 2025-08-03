@@ -3,6 +3,33 @@ const UserAuth = require('../models/UserAuth');
 const { generateTokenPair, verifyToken } = require('../utils/jwt');
 const { WeChatAPIError, BusinessError } = require('../middleware/errorHandler');
 const axios = require('axios');
+const crypto = require('crypto');
+
+// 微信数据解密函数
+const decryptWeChatData = (encryptedData, iv, sessionKey) => {
+  try {
+    const sessionKeyBuffer = Buffer.from(sessionKey, 'base64');
+    const encryptedDataBuffer = Buffer.from(encryptedData, 'base64');
+    const ivBuffer = Buffer.from(iv, 'base64');
+
+    const decipher = crypto.createDecipheriv('aes-128-cbc', sessionKeyBuffer, ivBuffer);
+    decipher.setAutoPadding(true);
+
+    let decrypted = decipher.update(encryptedDataBuffer, null, 'utf8');
+    decrypted += decipher.final('utf8');
+
+    const decryptedData = JSON.parse(decrypted);
+
+    // 验证水印
+    if (decryptedData.watermark && decryptedData.watermark.appid !== process.env.WECHAT_APPID) {
+      throw new Error('水印验证失败');
+    }
+
+    return decryptedData;
+  } catch (error) {
+    throw new Error(`解密失败: ${error.message}`);
+  }
+};
 
 // 微信登录
 const wechatLogin = async (req, res, next) => {
@@ -16,21 +43,30 @@ const wechatLogin = async (req, res, next) => {
       });
     }
 
-    const { code, userInfo } = req.body;
+    const { code, userInfo, encryptedData, iv, loginType } = req.body;
 
     // 验证必需参数
     if (!code) {
       throw new BusinessError('微信授权码不能为空', 'MISSING_CODE');
     }
 
-    // 验证环境变量
-    if (!process.env.WECHAT_APPID || !process.env.WECHAT_SECRET) {
+    // 验证环境变量 - 支持多种命名方式
+    const wechatAppId = process.env.WECHAT_APPID || process.env.WECHAT_APP_ID;
+    const wechatSecret = process.env.WECHAT_SECRET || process.env.WECHAT_APP_SECRET;
+
+    if (!wechatAppId || !wechatSecret) {
+      console.error('微信配置检查:', {
+        WECHAT_APPID: !!process.env.WECHAT_APPID,
+        WECHAT_APP_ID: !!process.env.WECHAT_APP_ID,
+        WECHAT_SECRET: !!process.env.WECHAT_SECRET,
+        WECHAT_APP_SECRET: !!process.env.WECHAT_APP_SECRET
+      });
       throw new BusinessError('微信小程序配置不完整', 'WECHAT_CONFIG_MISSING');
     }
 
     // 获取微信 openid 和 session_key
     const wechatResponse = await axios.get(
-      `https://api.weixin.qq.com/sns/jscode2session?appid=${process.env.WECHAT_APPID}&secret=${process.env.WECHAT_SECRET}&js_code=${code}&grant_type=authorization_code`,
+      `https://api.weixin.qq.com/sns/jscode2session?appid=${wechatAppId}&secret=${wechatSecret}&js_code=${code}&grant_type=authorization_code`,
       { timeout: 10000 }
     );
 
@@ -47,6 +83,18 @@ const wechatLogin = async (req, res, next) => {
       throw new WeChatAPIError('未获取到用户openid', wechatResponse.data);
     }
 
+    // 解密手机号（如果提供了加密数据）
+    let phoneNumber = null;
+    if (encryptedData && iv && session_key) {
+      try {
+        phoneNumber = decryptWeChatData(encryptedData, iv, session_key);
+        console.log('解密手机号成功:', phoneNumber);
+      } catch (error) {
+        console.warn('解密手机号失败:', error.message);
+        // 不抛出错误，允许继续登录
+      }
+    }
+
     // 查找或创建用户
     let userAuth = await UserAuth.findUserByAuth('wechat', openid);
     let user;
@@ -55,14 +103,22 @@ const wechatLogin = async (req, res, next) => {
     if (!userAuth) {
       // 创建新用户
       isNewUser = true;
+      const extInfo = {
+        gender: userInfo?.gender === 1 ? 'male' : userInfo?.gender === 2 ? 'female' : 'unknown'
+      };
+
+      // 如果解密到手机号，添加到扩展信息中
+      if (phoneNumber && phoneNumber.phoneNumber) {
+        extInfo.phone = phoneNumber.phoneNumber;
+        extInfo.countryCode = phoneNumber.countryCode || '86';
+      }
+
       user = new User({
         nickname: userInfo?.nickName || `网球选手${Date.now().toString().slice(-4)}`,
         avatar: userInfo?.avatarUrl || null,
         total_points: 0,
         status: 'active',
-        ext_info: {
-          gender: userInfo?.gender === 1 ? 'male' : userInfo?.gender === 2 ? 'female' : 'unknown'
-        },
+        ext_info: extInfo,
         is_deleted: false
       });
 
