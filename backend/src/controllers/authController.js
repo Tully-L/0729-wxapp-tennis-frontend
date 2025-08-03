@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const UserAuth = require('../models/UserAuth');
 const { generateTokenPair, verifyToken } = require('../utils/jwt');
 const { WeChatAPIError, BusinessError } = require('../middleware/errorHandler');
 const axios = require('axios');
@@ -47,34 +48,52 @@ const wechatLogin = async (req, res, next) => {
     }
 
     // 查找或创建用户
-    let user = await User.findOne({ openid });
+    let userAuth = await UserAuth.findUserByAuth('wechat', openid);
+    let user;
     let isNewUser = false;
 
-    if (!user) {
+    if (!userAuth) {
       // 创建新用户
       isNewUser = true;
       user = new User({
-        openid,
-        unionid,
         nickname: userInfo?.nickName || `网球选手${Date.now().toString().slice(-4)}`,
         avatar: userInfo?.avatarUrl || null,
-        gender: userInfo?.gender === 1 ? 'male' : userInfo?.gender === 2 ? 'female' : 'unknown'
+        total_points: 0,
+        status: 'active',
+        ext_info: {
+          gender: userInfo?.gender === 1 ? 'male' : userInfo?.gender === 2 ? 'female' : 'unknown'
+        },
+        is_deleted: false
       });
-      
+
+      await user.save();
+
+      // 创建微信认证记录
+      await UserAuth.addAuthForUser(user._id, 'wechat', openid, true);
+
+      // 如果有unionid，也添加记录
+      if (unionid) {
+        try {
+          await UserAuth.addAuthForUser(user._id, 'wechat', unionid, false);
+        } catch (error) {
+          console.warn(`⚠️ Failed to add unionid auth: ${error.message}`);
+        }
+      }
+
       console.log(`🆕 Creating new user: ${user.nickname} (${openid})`);
     } else {
       // 更新现有用户信息
+      user = userAuth.user_id;
       if (userInfo?.nickName) user.nickname = userInfo.nickName;
       if (userInfo?.avatarUrl) user.avatar = userInfo.avatarUrl;
       if (userInfo?.gender) {
-        user.gender = userInfo.gender === 1 ? 'male' : userInfo.gender === 2 ? 'female' : 'unknown';
+        user.ext_info = user.ext_info || {};
+        user.ext_info.gender = userInfo.gender === 1 ? 'male' : userInfo.gender === 2 ? 'female' : 'unknown';
       }
-      user.lastLoginAt = new Date();
-      
+
+      await user.save();
       console.log(`🔄 Updating existing user: ${user.nickname} (${openid})`);
     }
-
-    await user.save();
 
     // 生成令牌对
     const tokens = generateTokenPair(user._id);
@@ -89,15 +108,13 @@ const wechatLogin = async (req, res, next) => {
         ...tokens,
         user: {
           id: user._id,
-          openid: user.openid,
           nickname: user.nickname,
           avatar: user.avatar,
-          gender: user.gender,
-          region: user.region,
-          stats: user.stats,
+          total_points: user.total_points,
+          status: user.status,
           level: userLevel,
           isNewUser,
-          lastLoginAt: user.lastLoginAt
+          ext_info: user.ext_info
         }
       }
     });
@@ -109,24 +126,28 @@ const wechatLogin = async (req, res, next) => {
 // 获取用户信息
 const getUserProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id)
-      .populate('clubs', 'name logo region')
-      .select('-openid -unionid'); // 不返回敏感信息
+    const user = await User.findById(req.user._id);
 
-    if (!user) {
+    if (!user || user.is_deleted) {
       throw new BusinessError('用户不存在', 'USER_NOT_FOUND');
     }
 
-    // 获取用户等级和比赛历史
+    // 获取用户等级
     const userLevel = user.getUserLevel();
-    const matchHistory = await user.getMatchHistory();
+
+    // 获取用户认证信息
+    const userAuths = await UserAuth.getUserAuths(user._id);
 
     res.json({
       success: true,
       data: {
         ...user.toObject(),
         level: userLevel,
-        recentMatches: matchHistory.slice(0, 5) // 只返回最近5场比赛
+        auths: userAuths.map(auth => ({
+          type: auth.auth_type,
+          isPrimary: auth.is_primary,
+          createdAt: auth.created_at
+        }))
       }
     });
   } catch (error) {
@@ -137,19 +158,11 @@ const getUserProfile = async (req, res, next) => {
 // 更新用户信息
 const updateUserProfile = async (req, res, next) => {
   try {
-    const { customId, nickname, signature, phone, email, region, bio, avatar, backgroundImage } = req.body;
+    const { nickname, avatar, phone, email, region, bio, gender, signature, backgroundImage } = req.body;
 
     // 验证输入数据
     if (nickname && nickname.trim().length < 2) {
       throw new BusinessError('昵称至少需要2个字符', 'INVALID_NICKNAME');
-    }
-
-    if (customId && (customId.length < 4 || customId.length > 20 || !/^[a-zA-Z0-9]+$/.test(customId))) {
-      throw new BusinessError('用户ID必须是4-20位字母数字组合', 'INVALID_CUSTOM_ID');
-    }
-
-    if (signature && signature.length > 30) {
-      throw new BusinessError('个性签名不能超过30个字符', 'SIGNATURE_TOO_LONG');
     }
 
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -162,27 +175,16 @@ const updateUserProfile = async (req, res, next) => {
 
     const user = await User.findById(req.user._id);
 
-    if (!user) {
+    if (!user || user.is_deleted) {
       throw new BusinessError('用户不存在', 'USER_NOT_FOUND');
-    }
-
-    // 检查自定义ID是否已被其他用户使用
-    if (customId && customId !== user.customId) {
-      const existingUser = await User.findOne({
-        customId: customId.trim(),
-        _id: { $ne: user._id }
-      });
-      if (existingUser) {
-        throw new BusinessError('用户ID已被使用', 'CUSTOM_ID_TAKEN');
-      }
-      user.customId = customId.trim();
     }
 
     // 检查昵称是否已被其他用户使用
     if (nickname && nickname !== user.nickname) {
       const existingUser = await User.findOne({
         nickname: nickname.trim(),
-        _id: { $ne: user._id }
+        _id: { $ne: user._id },
+        is_deleted: false
       });
       if (existingUser) {
         throw new BusinessError('昵称已被使用', 'NICKNAME_TAKEN');
@@ -190,14 +192,19 @@ const updateUserProfile = async (req, res, next) => {
       user.nickname = nickname.trim();
     }
 
-    if (signature !== undefined) user.signature = signature ? signature.trim() : null;
-    if (phone) user.phone = phone;
-    if (email) user.email = email.toLowerCase();
-    if (region) user.region = region.trim();
-    if (bio !== undefined) user.bio = bio ? bio.trim() : null;
+    // 更新基本信息
     if (avatar) user.avatar = avatar;
-    if (backgroundImage) user.backgroundImage = backgroundImage;
-    
+
+    // 更新扩展信息
+    user.ext_info = user.ext_info || {};
+    if (phone) user.ext_info.phone = phone;
+    if (email) user.ext_info.email = email.toLowerCase();
+    if (region) user.ext_info.region = region.trim();
+    if (bio !== undefined) user.ext_info.bio = bio ? bio.trim() : null;
+    if (gender) user.ext_info.gender = gender;
+    if (signature !== undefined) user.ext_info.signature = signature ? signature.trim() : null;
+    if (backgroundImage) user.ext_info.backgroundImage = backgroundImage;
+
     await user.save();
 
     // 获取更新后的用户等级
@@ -234,7 +241,7 @@ const refreshToken = async (req, res, next) => {
 
     // 查找用户
     const user = await User.findById(decoded.userId);
-    if (!user || !user.isActive) {
+    if (!user || user.is_deleted || user.status !== 'active') {
       throw new BusinessError('用户不存在或已被停用', 'USER_NOT_FOUND');
     }
 
@@ -255,22 +262,75 @@ const refreshToken = async (req, res, next) => {
 const getUserStats = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
-    
-    if (!user) {
+
+    if (!user || user.is_deleted) {
       throw new BusinessError('用户不存在', 'USER_NOT_FOUND');
     }
 
-    // 获取详细统计信息
-    const detailedStats = await user.getDetailedStats();
-    const achievements = user.getAchievements();
+    // 获取用户等级
+    const userLevel = user.getUserLevel();
+
+    // 获取用户参与的赛事统计
+    const UserEventRelation = require('../models/UserEventRelation');
+    const eventStats = await UserEventRelation.aggregate([
+      { $match: { user_id: user._id, is_deleted: false } },
+      {
+        $group: {
+          _id: null,
+          totalEvents: { $sum: 1 },
+          approvedEvents: {
+            $sum: { $cond: [{ $eq: ['$signup_status', 'approved'] }, 1, 0] }
+          },
+          checkedInEvents: {
+            $sum: { $cond: ['$is_signin', 1, 0] }
+          },
+          totalPoints: { $sum: '$points' }
+        }
+      }
+    ]);
+
+    const stats = eventStats[0] || {
+      totalEvents: 0,
+      approvedEvents: 0,
+      checkedInEvents: 0,
+      totalPoints: 0
+    };
+
+    // 计算胜负统计（简化版本，实际应根据业务逻辑计算）
+    const wins = Math.floor(stats.checkedInEvents * 0.6); // 假设60%胜率
+    const losses = stats.checkedInEvents - wins;
+    const winRate = stats.checkedInEvents > 0 ?
+      ((wins / stats.checkedInEvents) * 100).toFixed(0) + '%' : '0%';
+
+    // 计算账户年龄（天数）
+    const accountAge = Math.floor((new Date() - new Date(user.created_at)) / (1000 * 60 * 60 * 24));
+
+    // 格式化为前端期望的格式
+    const formattedStats = {
+      basic: {
+        participationCount: stats.approvedEvents || 0,
+        wins: wins,
+        losses: losses,
+        winRate: winRate,
+        totalPoints: user.total_points // 注意：使用totalPoints，不是etaPoints
+      },
+      level: {
+        name: userLevel.name || '新手',
+        level: userLevel.level || 1
+      },
+      accountAge: accountAge,
+      monthlyActivity: Math.min(stats.approvedEvents, 10), // 限制在10以内
+      status: user.status,
+      // 兼容前端用户页面的字段
+      mDou: user.total_points, // M豆等于积分
+      coupons: Math.floor(user.total_points / 500), // 根据积分计算优惠券数量
+      events: stats.approvedEvents, // 我的赛事数量
+      memberLevel: userLevel.name || 'VIP' // 会员等级
+    };
 
     res.json({
       success: true,
-      data: {
-        ...detailedStats,
-        achievements,
-        totalClubs: user.clubs.length
-      }
+      data: formattedStats
     });
   } catch (error) {
     next(error);
@@ -281,31 +341,33 @@ const getUserStats = async (req, res, next) => {
 const getLeaderboard = async (req, res, next) => {
   try {
     const { limit = 10, type = 'points' } = req.query;
-    
+
     let sortField;
     switch (type) {
       case 'points':
-        sortField = { 'stats.etaPoints': -1 };
-        break;
-      case 'wins':
-        sortField = { 'stats.wins': -1 };
-        break;
-      case 'participation':
-        sortField = { 'stats.participationCount': -1 };
+        sortField = { total_points: -1 };
         break;
       default:
-        sortField = { 'stats.etaPoints': -1 };
+        sortField = { total_points: -1 };
     }
 
-    const users = await User.find({ isActive: true })
+    const users = await User.find({
+      status: 'active',
+      is_deleted: false
+    })
       .sort(sortField)
       .limit(parseInt(limit))
-      .select('nickname avatar stats region createdAt');
+      .select('nickname avatar total_points ext_info created_at');
 
     const leaderboard = users.map((user, index) => ({
       rank: index + 1,
-      ...user.toObject(),
-      level: user.getUserLevel()
+      id: user._id,
+      nickname: user.nickname,
+      avatar: user.avatar,
+      total_points: user.total_points,
+      region: user.ext_info?.region,
+      level: user.getUserLevel(),
+      created_at: user.created_at
     }));
 
     res.json({
@@ -324,22 +386,41 @@ const getLeaderboard = async (req, res, next) => {
 const searchUsers = async (req, res, next) => {
   try {
     const { query, limit = 20 } = req.query;
-    
+
     if (!query || query.trim().length < 2) {
       throw new BusinessError('搜索关键词至少需要2个字符', 'INVALID_SEARCH_QUERY');
     }
 
-    const users = await User.searchUsers(query.trim(), parseInt(limit));
-    
+    const searchQuery = query.trim();
+    const users = await User.find({
+      $and: [
+        { status: 'active', is_deleted: false },
+        {
+          $or: [
+            { nickname: { $regex: searchQuery, $options: 'i' } },
+            { 'ext_info.phone': { $regex: searchQuery, $options: 'i' } },
+            { 'ext_info.email': { $regex: searchQuery, $options: 'i' } }
+          ]
+        }
+      ]
+    })
+    .limit(parseInt(limit))
+    .select('nickname avatar total_points ext_info created_at');
+
     const results = users.map(user => ({
-      ...user.toObject(),
-      level: user.getUserLevel()
+      id: user._id,
+      nickname: user.nickname,
+      avatar: user.avatar,
+      total_points: user.total_points,
+      region: user.ext_info?.region,
+      level: user.getUserLevel(),
+      created_at: user.created_at
     }));
 
     res.json({
       success: true,
       data: {
-        query: query.trim(),
+        query: searchQuery,
         count: results.length,
         users: results
       }
@@ -353,13 +434,12 @@ const searchUsers = async (req, res, next) => {
 const deactivateAccount = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
-    
-    if (!user) {
+
+    if (!user || user.is_deleted) {
       throw new BusinessError('用户不存在', 'USER_NOT_FOUND');
     }
 
-    user.isActive = false;
-    await user.save();
+    await user.softDelete();
 
     res.json({
       success: true,
@@ -370,43 +450,50 @@ const deactivateAccount = async (req, res, next) => {
   }
 };
 
-// 获取用户比赛记录
-const getUserMatches = async (req, res, next) => {
+// 获取用户赛事记录
+const getUserEvents = async (req, res, next) => {
   try {
     const { page = 1, limit = 10, status } = req.query;
     const user = await User.findById(req.user._id);
-    
-    if (!user) {
+
+    if (!user || user.is_deleted) {
       throw new BusinessError('用户不存在', 'USER_NOT_FOUND');
     }
 
-    const Match = require('../models/Match');
-    
+    const UserEventRelation = require('../models/UserEventRelation');
+    const Event = require('../models/Event');
+
     // 构建查询条件
     const query = {
-      $or: [
-        { 'players.userId': user._id },
-        { 'organizer.id': user._id }
-      ]
+      user_id: user._id,
+      is_deleted: false
     };
-    
+
     if (status) {
-      query.status = status;
+      query.signup_status = status;
     }
 
-    const matches = await Match.find(query)
-      .sort({ createdAt: -1 })
+    const relations = await UserEventRelation.find(query)
+      .sort({ signup_time: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
-      .populate('eventId', 'name eventType')
-      .select('eventType stage status venue startTime endTime players score sets winner');
+      .populate('event_id', 'title category start_time end_time location status');
 
-    const total = await Match.countDocuments(query);
+    const total = await UserEventRelation.countDocuments(query);
 
     res.json({
       success: true,
       data: {
-        matches,
+        events: relations.map(relation => ({
+          relation_id: relation._id,
+          event: relation.event_id,
+          signup_status: relation.signup_status,
+          signup_time: relation.signup_time,
+          is_signin: relation.is_signin,
+          signin_time: relation.signin_time,
+          points: relation.points,
+          rank: relation.rank
+        })),
         pagination: {
           page: parseInt(page),
           limit: parseInt(limit),
@@ -420,27 +507,39 @@ const getUserMatches = async (req, res, next) => {
   }
 };
 
-// 获取用户成就
-const getUserAchievements = async (req, res, next) => {
+// 获取用户积分记录
+const getUserPointsHistory = async (req, res, next) => {
   try {
+    const { page = 1, limit = 20 } = req.query;
     const user = await User.findById(req.user._id);
-    
-    if (!user) {
+
+    if (!user || user.is_deleted) {
       throw new BusinessError('用户不存在', 'USER_NOT_FOUND');
     }
 
-    const achievements = user.getAchievements();
+    const PointsRecord = require('../models/PointsRecord');
+
+    const records = await PointsRecord.getUserPointsHistory(
+      user._id,
+      parseInt(page),
+      parseInt(limit)
+    );
+
     const level = user.getUserLevel();
 
     res.json({
       success: true,
       data: {
-        achievements,
-        level,
-        stats: user.stats,
+        user: {
+          id: user._id,
+          nickname: user.nickname,
+          total_points: user.total_points,
+          level
+        },
+        records,
         progress: {
-          nextLevelPoints: getNextLevelPoints(user.stats.etaPoints),
-          currentLevelProgress: getCurrentLevelProgress(user.stats.etaPoints)
+          nextLevelPoints: getNextLevelPoints(user.total_points),
+          currentLevelProgress: getCurrentLevelProgress(user.total_points)
         }
       }
     });
@@ -452,103 +551,38 @@ const getUserAchievements = async (req, res, next) => {
 // 获取系统统计概览
 const getSystemStats = async (req, res, next) => {
   try {
-    const overallStats = await User.getOverallStats();
-    
-    res.json({
-      success: true,
-      data: overallStats
+    const totalUsers = await User.countDocuments({ is_deleted: false });
+    const activeUsers = await User.countDocuments({ status: 'active', is_deleted: false });
+
+    const Event = require('../models/Event');
+    const totalEvents = await Event.countDocuments({ is_deleted: false });
+    const activeEvents = await Event.countDocuments({
+      status: { $in: ['published', 'ongoing'] },
+      is_deleted: false
     });
-  } catch (error) {
-    next(error);
-  }
-};
 
-// 验证用户权限
-const checkUserPermission = async (req, res, next) => {
-  try {
-    const { permission } = req.params;
-    const user = await User.findById(req.user._id);
-    
-    if (!user) {
-      throw new BusinessError('用户不存在', 'USER_NOT_FOUND');
-    }
+    const UserEventRelation = require('../models/UserEventRelation');
+    const totalParticipations = await UserEventRelation.countDocuments({ is_deleted: false });
 
-    const hasPermission = user.hasPermission(permission);
-    const level = user.getUserLevel();
+    const PointsRecord = require('../models/PointsRecord');
+    const totalPointsAwarded = await PointsRecord.aggregate([
+      { $match: { amount: { $gt: 0 } } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
 
     res.json({
       success: true,
       data: {
-        permission,
-        hasPermission,
-        userLevel: level,
-        allPermissions: getUserPermissions(level.level)
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// 更新用户活跃度
-const updateUserActivity = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.user._id);
-    
-    if (!user) {
-      throw new BusinessError('用户不存在', 'USER_NOT_FOUND');
-    }
-
-    await user.updateActivity();
-
-    res.json({
-      success: true,
-      message: '活跃度已更新',
-      data: {
-        lastLoginAt: user.lastLoginAt
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// 获取用户详细比赛历史
-const getUserDetailedMatches = async (req, res, next) => {
-  try {
-    const { 
-      limit = 10, 
-      status, 
-      eventType, 
-      startDate, 
-      endDate 
-    } = req.query;
-    
-    const user = await User.findById(req.user._id);
-    
-    if (!user) {
-      throw new BusinessError('用户不存在', 'USER_NOT_FOUND');
-    }
-
-    const matches = await user.getMatchHistory({
-      limit: parseInt(limit),
-      status,
-      eventType,
-      startDate,
-      endDate
-    });
-
-    res.json({
-      success: true,
-      data: {
-        matches,
-        filters: {
-          status,
-          eventType,
-          startDate,
-          endDate
+        users: {
+          total: totalUsers,
+          active: activeUsers
         },
-        count: matches.length
+        events: {
+          total: totalEvents,
+          active: activeEvents
+        },
+        participations: totalParticipations,
+        totalPointsAwarded: totalPointsAwarded[0]?.total || 0
       }
     });
   } catch (error) {
@@ -569,7 +603,7 @@ const getNextLevelPoints = (currentPoints) => {
 const getCurrentLevelProgress = (currentPoints) => {
   let currentLevel = 0;
   let nextLevel = 50;
-  
+
   if (currentPoints >= 1000) {
     currentLevel = 1000;
     nextLevel = 2000;
@@ -583,22 +617,9 @@ const getCurrentLevelProgress = (currentPoints) => {
     currentLevel = 50;
     nextLevel = 200;
   }
-  
+
   const progress = ((currentPoints - currentLevel) / (nextLevel - currentLevel)) * 100;
   return Math.min(Math.max(progress, 0), 100);
-};
-
-// 辅助函数：获取用户权限列表
-const getUserPermissions = (level) => {
-  const permissions = {
-    'Rookie': ['view_matches', 'join_events'],
-    'Beginner': ['view_matches', 'join_events', 'create_private_events'],
-    'Intermediate': ['view_matches', 'join_events', 'create_private_events', 'organize_matches'],
-    'Advanced': ['view_matches', 'join_events', 'create_private_events', 'organize_matches', 'moderate_events'],
-    'Professional': ['view_matches', 'join_events', 'create_private_events', 'organize_matches', 'moderate_events', 'admin_functions']
-  };
-  
-  return permissions[level] || permissions['Rookie'];
 };
 
 module.exports = {
@@ -610,10 +631,7 @@ module.exports = {
   getLeaderboard,
   searchUsers,
   deactivateAccount,
-  getUserMatches,
-  getUserAchievements,
-  getSystemStats,
-  checkUserPermission,
-  updateUserActivity,
-  getUserDetailedMatches
-}; 
+  getUserEvents,
+  getUserPointsHistory,
+  getSystemStats
+};

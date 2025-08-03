@@ -16,7 +16,11 @@
     "diagnose": "node scripts/diagnose-mongodb.js",
     "fix-dns": "node scripts/fix-dns.js",
     "lint": "echo \"Linting not configured yet\"",
-    "clean": "echo \"Cleaning temporary files...\" && rm -rf logs/*.log || echo \"No logs to clean\""
+    "clean": "echo \"Cleaning temporary files...\" && rm -rf logs/*.log || echo \"No logs to clean\"",
+    "migrate": "node scripts/migrate-database.js",
+    "setup:indexes": "node scripts/setup-indexes.js",
+    "verify:migration": "node scripts/verify-migration.js",
+    "db:setup": "npm run migrate && npm run setup:indexes && npm run verify:migration"
   },
   "keywords": [
     "tennis",

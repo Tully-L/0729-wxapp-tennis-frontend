@@ -351,18 +351,18 @@ Page({
       return;
     }
     
-    // 检查赛事状态
-    if (event.status !== 'registration') {
+    // 检查赛事状态 - 适配新数据库结构
+    if (event.status !== 'published' && event.status !== 'registration') {
       wx.showToast({
         title: '该赛事不在报名期',
         icon: 'none'
       });
       return;
     }
-    
+
     wx.showModal({
       title: '确认报名',
-      content: `确定要报名参加 ${event.name} 吗？`,
+      content: `确定要报名参加 ${event.title || event.name} 吗？`,
       success: (res) => {
         if (res.confirm) {
           this.processEventRegistration(id, event);
@@ -407,7 +407,7 @@ Page({
         setTimeout(() => {
           wx.showModal({
             title: '报名成功',
-            content: `您已成功报名 ${event.name}，请关注赛事通知和缴费信息。`,
+            content: `您已成功报名 ${event.title || event.name}，请关注赛事通知和缴费信息。`,
             showCancel: false,
             confirmText: '知道了'
           });
@@ -518,7 +518,7 @@ Page({
 
     wx.showModal({
       title: '确认取消报名',
-      content: `确定要取消报名 ${event.name} 吗？`,
+      content: `确定要取消报名 ${event.title || event.name} 吗？`,
       success: (res) => {
         if (res.confirm) {
           this.processCancelRegistration(eventId);

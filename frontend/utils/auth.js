@@ -338,21 +338,22 @@ const checkUserPermission = (permission) => {
 const getUserStats = () => {
   return new Promise((resolve, reject) => {
     if (!checkLogin()) {
-      // 返回默认统计数据而不是拒绝
+      // 返回默认统计数据而不是拒绝 - 适配新数据库结构
       const defaultStats = {
         basic: {
           participationCount: 0,
           wins: 0,
           losses: 0,
           winRate: '0%',
-          etaPoints: 1000
+          totalPoints: 1000
         },
         level: {
           name: '新手',
           level: 1
         },
         accountAge: 0,
-        monthlyActivity: 0
+        monthlyActivity: 0,
+        status: 'active'
       };
       resolve(defaultStats);
       return;
@@ -372,23 +373,25 @@ const getUserStats = () => {
         wx.setStorageSync('userStats', statsData);
         resolve(statsData);
       } else {
-        // 使用模拟数据
+        // 使用模拟数据 - 适配新数据库结构
+        const userInfo = getUserInfo();
         const mockStats = {
           basic: {
             participationCount: Math.floor(Math.random() * 20) + 5,
             wins: Math.floor(Math.random() * 15) + 3,
             losses: Math.floor(Math.random() * 10) + 2,
             winRate: '0%',
-            etaPoints: Math.floor(Math.random() * 1000) + 1500
+            totalPoints: userInfo?.total_points || Math.floor(Math.random() * 1000) + 1500
           },
           level: {
-            name: '业余选手',
+            name: userInfo?.ext_info?.level === 'beginner' ? '新手' : '业余选手',
             level: Math.floor(Math.random() * 5) + 2
           },
-          accountAge: Math.floor(Math.random() * 365) + 30,
-          monthlyActivity: Math.floor(Math.random() * 10) + 2
+          accountAge: userInfo?.created_at ? Math.floor((new Date() - new Date(userInfo.created_at)) / (1000 * 60 * 60 * 24)) : Math.floor(Math.random() * 365) + 30,
+          monthlyActivity: Math.floor(Math.random() * 10) + 2,
+          status: userInfo?.status || 'active'
         };
-        
+
         // 计算胜率
         mockStats.basic.winRate = ((mockStats.basic.wins / mockStats.basic.participationCount) * 100).toFixed(0) + '%';
         

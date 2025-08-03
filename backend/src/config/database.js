@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
+  // 确保环境变量已加载
+  if (!process.env.MONGODB_URI) {
+    require('dotenv').config();
+  }
+
   const mongoUri = process.env.MONGODB_URI;
   const isAtlas = mongoUri.includes('mongodb+srv://');
   

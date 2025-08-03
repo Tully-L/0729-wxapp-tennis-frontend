@@ -77,91 +77,117 @@ const mockMatches = [
   }
 ];
 
-// 初始化默认赛事数据
+// 初始化默认赛事数据 - 适配新数据库结构
 const defaultEvents = [
   {
     _id: '1',
-    name: '温布尔登锦标赛 2024',
-    eventType: '男子单打',
-    status: 'registration',
-    venue: '全英俱乐部',
-    region: '伦敦',
-    eventDate: '2024-07-01',
-    registrationDeadline: '2024-06-15',
-    organizer: { name: '温布尔登网球俱乐部' },
-    coverImage: null,
-    createdAt: '2024-01-01',
-    createdBy: 'system'
+    title: '温布尔登锦标赛 2024',
+    category: '网球比赛',
+    status: 'published',
+    location: '全英俱乐部，伦敦',
+    start_time: new Date('2024-07-01T09:00:00Z'),
+    end_time: new Date('2024-07-01T18:00:00Z'),
+    max_participants: 128,
+    description: '世界顶级网球赛事，草地网球的最高殿堂',
+    ext_info: {
+      eventType: '男子单打',
+      registrationDeadline: '2024-06-15',
+      organizer: { name: '温布尔登网球俱乐部' },
+      surface: '草地',
+      prizePool: 50000
+    },
+    is_deleted: false,
+    created_at: new Date('2024-01-01'),
+    updated_at: new Date('2024-01-01'),
+    created_by: 'system'
   },
   {
     _id: '2',
-    name: '美国公开赛 2024',
-    eventType: '女子单打',
-    status: 'upcoming',
-    venue: 'USTA比利·简·金',
-    region: '纽约',
-    eventDate: '2024-08-26',
-    registrationDeadline: '2024-08-01',
-    organizer: { name: '美国网球协会' },
-    coverImage: null,
-    createdAt: '2024-01-02',
-    createdBy: 'system'
+    title: '美国公开赛 2024',
+    category: '网球比赛',
+    status: 'published',
+    location: 'USTA比利·简·金网球中心，纽约',
+    start_time: new Date('2024-08-26T09:00:00Z'),
+    end_time: new Date('2024-08-26T18:00:00Z'),
+    max_participants: 128,
+    description: '美国网球公开赛，硬地网球的经典赛事',
+    ext_info: {
+      eventType: '女子单打',
+      registrationDeadline: '2024-08-01',
+      organizer: { name: '美国网球协会' },
+      surface: '硬地',
+      prizePool: 45000
+    },
+    is_deleted: false,
+    created_at: new Date('2024-01-02'),
+    updated_at: new Date('2024-01-02'),
+    created_by: 'system'
   },
   {
     _id: '3',
-    name: '法国公开赛 2024',
-    eventType: '男子单打',
-    status: 'registration',
-    venue: '罗兰加洛斯',
-    region: '巴黎',
-    eventDate: '2024-05-26',
-    registrationDeadline: '2024-05-01',
-    organizer: { name: '法国网球协会' },
-    coverImage: null,
-    createdAt: '2024-01-03',
-    createdBy: 'system'
+    title: '法国公开赛 2024',
+    category: '网球比赛',
+    status: 'published',
+    location: '罗兰加洛斯，巴黎',
+    start_time: new Date('2024-05-26T09:00:00Z'),
+    end_time: new Date('2024-05-26T18:00:00Z'),
+    max_participants: 128,
+    description: '法国网球公开赛，红土网球的王者之争',
+    ext_info: {
+      eventType: '男子单打',
+      registrationDeadline: '2024-05-01',
+      organizer: { name: '法国网球协会' },
+      surface: '红土',
+      prizePool: 40000
+    },
+    is_deleted: false,
+    created_at: new Date('2024-01-03'),
+    updated_at: new Date('2024-01-03'),
+    created_by: 'system'
   },
   {
     _id: '4',
-    name: '法国网球公开赛女子组',
-    eventType: '女子单打',
-    status: 'registration',
-    venue: '法国巴黎罗兰加洛斯',
-    region: '法国',
-    eventDate: '2024-06-01',
-    registrationDeadline: '2024-05-15',
-    organizer: { name: '法国体育协会' },
-    coverImage: null,
-    createdAt: '2024-01-04',
-    createdBy: 'system'
+    title: '澳大利亚网球公开赛',
+    category: '网球比赛',
+    status: 'published',
+    location: '墨尔本公园，墨尔本',
+    start_time: new Date('2024-01-15T09:00:00Z'),
+    end_time: new Date('2024-01-15T18:00:00Z'),
+    max_participants: 64,
+    description: '澳大利亚网球公开赛，南半球的网球盛宴',
+    ext_info: {
+      eventType: '混合双打',
+      registrationDeadline: '2024-01-01',
+      organizer: { name: '澳大利亚网球协会' },
+      surface: '硬地',
+      prizePool: 35000
+    },
+    is_deleted: false,
+    created_at: new Date('2024-01-05'),
+    updated_at: new Date('2024-01-05'),
+    created_by: 'system'
   },
   {
     _id: '5',
-    name: '澳大利亚网球公开赛',
-    eventType: '混合双打',
-    status: 'upcoming',
-    venue: '墨尔本公园',
-    region: '墨尔本',
-    eventDate: '2024-01-15',
-    registrationDeadline: '2024-01-01',
-    organizer: { name: '澳大利亚网球协会' },
-    coverImage: null,
-    createdAt: '2024-01-05',
-    createdBy: 'system'
-  },
-  {
-    _id: '6',
-    name: '网球热业余锦标赛',
-    eventType: '男子双打',
-    status: 'registration',
-    venue: '网球热体育中心',
-    region: '北京',
-    eventDate: '2024-08-15',
-    registrationDeadline: '2024-08-01',
-    organizer: { name: '网球热' },
-    coverImage: null,
-    createdAt: '2024-01-06',
-    createdBy: 'system'
+    title: '网球热业余锦标赛',
+    category: '业余比赛',
+    status: 'published',
+    location: '网球热体育中心，北京',
+    start_time: new Date('2024-08-15T09:00:00Z'),
+    end_time: new Date('2024-08-15T18:00:00Z'),
+    max_participants: 32,
+    description: '面向业余爱好者的网球比赛，欢迎各水平选手参与',
+    ext_info: {
+      eventType: '男子双打',
+      registrationDeadline: '2024-08-01',
+      organizer: { name: '网球热' },
+      surface: '硬地',
+      prizePool: 5000
+    },
+    is_deleted: false,
+    created_at: new Date('2024-01-06'),
+    updated_at: new Date('2024-01-06'),
+    created_by: 'system'
   }
 ];
 
@@ -556,30 +582,27 @@ const handleMockFallback = (url, method, data, resolve, reject, needHideLoading 
         const events = getStoredEvents();
         const query = data.query || '';
         let filteredEvents = events;
-        
+
         if (query) {
-          filteredEvents = events.filter(event => 
-            event.name.toLowerCase().includes(query.toLowerCase()) ||
-            event.eventType.toLowerCase().includes(query.toLowerCase()) ||
-            event.venue.toLowerCase().includes(query.toLowerCase()) ||
-            event.region.toLowerCase().includes(query.toLowerCase())
+          filteredEvents = events.filter(event =>
+            event.title?.toLowerCase().includes(query.toLowerCase()) ||
+            event.category?.toLowerCase().includes(query.toLowerCase()) ||
+            event.location?.toLowerCase().includes(query.toLowerCase())
           );
         }
-        
-        resolve({ 
+
+        resolve({
           success: true,
-          data: { 
-            events: filteredEvents,
-            total: filteredEvents.length
-          }
+          data: filteredEvents,
+          total: filteredEvents.length
         });
       } else if (url.includes('/events/user')) {
         // 获取用户赛事
         const events = getStoredEvents();
-        const userEvents = events.filter(event => event.createdBy === wx.getStorageSync('userInfo')?.id);
-        resolve({ 
+        const userEvents = events.filter(event => event.created_by === wx.getStorageSync('userInfo')?.id);
+        resolve({
           success: true,
-          data: { events: userEvents }
+          data: userEvents
         });
       } else if (url.includes('/events/hot-registrations')) {
         // 获取火热报名数据
@@ -644,55 +667,122 @@ const handleMockFallback = (url, method, data, resolve, reject, needHideLoading 
             completed: events.filter(e => e.status === 'completed').length
           }
         });
+      } else if (url.includes('/events/') && url.includes('/register') && method === 'POST') {
+        // 报名参加赛事
+        const eventId = url.split('/')[2];
+        console.log(`模拟报名赛事: ${eventId}`);
+        resolve({
+          success: true,
+          message: '报名成功',
+          data: {
+            eventId: eventId,
+            userId: wx.getStorageSync('userInfo')?.id || 'user',
+            registeredAt: new Date().toISOString()
+          }
+        });
+      } else if (url.includes('/events/') && url.includes('/register') && method === 'DELETE') {
+        // 取消报名
+        const eventId = url.split('/')[2];
+        console.log(`模拟取消报名: ${eventId}`);
+        resolve({
+          success: true,
+          message: '取消报名成功',
+          data: { eventId: eventId }
+        });
+      } else if (url.includes('/events/') && url.includes('/checkin') && method === 'POST') {
+        // 签到赛事
+        const eventId = url.split('/')[2];
+        console.log(`模拟签到赛事: ${eventId}`);
+        resolve({
+          success: true,
+          message: '签到成功',
+          data: {
+            eventId: eventId,
+            userId: wx.getStorageSync('userInfo')?.id || 'user',
+            checkinAt: new Date().toISOString()
+          }
+        });
       } else if (url.includes('/events') && method === 'GET') {
         // 获取赛事列表
         const events = getStoredEvents();
-        resolve({ data: events });
+        resolve({
+          success: true,
+          data: events
+        });
       } else if (url.includes('/events') && method === 'POST') {
         // 创建新赛事
         const events = getStoredEvents();
         const newEvent = {
           _id: Date.now().toString(),
-          ...data,
-          status: 'registration',
-          organizer: { name: wx.getStorageSync('userInfo')?.nickName || '用户' },
-          coverImage: null,
-          createdAt: new Date().toISOString().split('T')[0],
-          createdBy: wx.getStorageSync('userInfo')?.id || 'user'
+          title: data.title,
+          category: data.category || '其他活动',
+          status: 'draft',
+          location: data.location,
+          start_time: new Date(data.start_time),
+          end_time: new Date(data.end_time),
+          max_participants: data.max_participants || 50,
+          description: data.description || '',
+          ext_info: {
+            organizer: { name: wx.getStorageSync('userInfo')?.nickName || '用户' },
+            ...data.ext_info
+          },
+          is_deleted: false,
+          created_at: new Date(),
+          updated_at: new Date(),
+          created_by: wx.getStorageSync('userInfo')?.id || 'user'
         };
         events.push(newEvent);
         saveEventsToStorage(events);
-        resolve({ data: newEvent });
+        resolve({
+          success: true,
+          message: '赛事创建成功',
+          data: newEvent
+        });
       } else if (url.includes('/users/')) {
         resolve({
+          success: true,
           data: {
-            id: 'user123',
+            _id: 'user123',
             nickname: '网球选手',
             avatar: null,
-            stats: {
+            total_points: 2500,
+            status: 'active',
+            ext_info: {
               participationCount: 15,
               wins: 10,
               losses: 5,
-              winRate: '67%',
-              etaPoints: 2500
-            }
+              winRate: '67%'
+            },
+            created_at: new Date('2024-01-01'),
+            updated_at: new Date()
           }
         });
       } else if (url.includes('/auth/login') || url.includes('/auth/dev-login')) {
         // 模拟登录成功
         const mockUser = {
-          id: 'user_' + Date.now(),
-          nickName: '网球选手',
-          phone: data.phone || '',
-          avatarUrl: null
+          _id: 'user_' + Date.now(),
+          nickname: '网球选手',
+          avatar: null,
+          total_points: 1000,
+          status: 'active',
+          ext_info: {
+            phone: data.phone || '',
+            level: 'beginner'
+          },
+          is_deleted: false,
+          created_at: new Date(),
+          updated_at: new Date()
         };
-        wx.setStorageSync('token', 'mock_token_' + Date.now());
+        const mockToken = 'mock_token_' + Date.now();
+        wx.setStorageSync('token', mockToken);
         wx.setStorageSync('userInfo', mockUser);
-        resolve({ 
-          data: { 
-            user: mockUser, 
-            accessToken: wx.getStorageSync('token')
-          } 
+        resolve({
+          success: true,
+          data: {
+            user: mockUser,
+            accessToken: mockToken,
+            refreshToken: 'mock_refresh_' + Date.now()
+          }
         });
       } else if (url.includes('/auth/sms-code')) {
         // 模拟发送短信验证码成功
@@ -710,10 +800,18 @@ const handleMockFallback = (url, method, data, resolve, reject, needHideLoading 
         const isValidCode = data.code === '1234' || data.code === '123456'; // 开发模式固定验证码
         if (isValidCode) {
           const mockUser = {
-            id: 'user_' + Date.now(),
-            nickName: `网球选手${data.phone.slice(-4)}`,
-            phone: data.phone,
-            avatarUrl: null
+            _id: 'user_' + Date.now(),
+            nickname: `网球选手${data.phone.slice(-4)}`,
+            avatar: null,
+            total_points: 1000,
+            status: 'active',
+            ext_info: {
+              phone: data.phone,
+              level: 'beginner'
+            },
+            is_deleted: false,
+            created_at: new Date(),
+            updated_at: new Date()
           };
           const mockToken = 'mock_token_' + Date.now();
           wx.setStorageSync('token', mockToken);
@@ -1087,8 +1185,8 @@ const API = {
   updateUserProfile: (data) => request('/auth/profile', 'PUT', data),
   getUserStats: () => request('/auth/stats', 'GET'),
   getUserAchievements: () => request('/auth/achievements', 'GET'),
-  getUserMatches: (params) => request('/auth/matches', 'GET', params),
-  getUserDetailedMatches: (params) => request('/auth/matches/detailed', 'GET', params),
+  getUserEvents: (params) => request('/auth/events', 'GET', params),
+  getUserDetailedEvents: (params) => request('/auth/events/detailed', 'GET', params),
   getLeaderboard: (params) => request('/auth/leaderboard', 'GET', params),
   searchUsers: (params) => request('/auth/search', 'GET', params),
   checkUserPermission: (permission) => request(`/auth/permission/${permission}`, 'GET'),
@@ -1105,6 +1203,11 @@ const API = {
   deleteEvent: (id) => request(`/events/${id}`, 'DELETE'),
   getUserEvents: (params) => request('/events/user', 'GET', params),
   getEventStats: () => request('/events/stats', 'GET'),
+  registerForEvent: (eventId, data) => request(`/events/${eventId}/register`, 'POST', data),
+  cancelRegistration: (eventId) => request(`/events/${eventId}/register`, 'DELETE'),
+  updateEventStatus: (eventId, data) => request(`/events/${eventId}/status`, 'PUT', data),
+  checkinEvent: (eventId, data) => request(`/events/${eventId}/checkin`, 'POST', data),
+  getEventParticipants: (eventId, params) => request(`/events/${eventId}/participants`, 'GET', params),
   
   // Matches - Enhanced Match Management System
   getMatches: (params) => request('/matches', 'GET', params),

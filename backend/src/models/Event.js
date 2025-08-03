@@ -1,227 +1,172 @@
 const mongoose = require('mongoose');
 
+// 赛事信息表 - 存储赛事基础信息及管理状态
 const eventSchema = new mongoose.Schema({
-  name: {
+  title: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    maxlength: 100
   },
-  eventType: {
+  category: {
     type: String,
     required: true,
-    enum: ['男子单打', '女子单打', '男子双打', '女子双打', '混合双打']
+    enum: ['tennis', 'running', 'swimming', 'basketball', 'football', 'badminton']
   },
-  status: {
-    type: String,
-    required: true,
-    enum: ['registration', 'upcoming', 'ongoing', 'completed', 'cancelled'],
-    default: 'registration'
-  },
-  venue: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  region: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  eventDate: {
+  start_time: {
     type: Date,
     required: true
   },
-  registrationDeadline: {
+  end_time: {
     type: Date,
-    required: true
-  },
-  organizer: {
-    name: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+    required: true,
+    validate: {
+      validator: function(v) {
+        return v > this.start_time;
+      },
+      message: '结束时间必须晚于开始时间'
     }
   },
-  coverImage: {
+  location: {
     type: String,
-    default: null
+    required: true,
+    trim: true,
+    maxlength: 200
   },
   description: {
     type: String,
-    trim: true
+    trim: true,
+    maxlength: 1000
   },
-  maxParticipants: {
+  max_participants: {
     type: Number,
-    default: 0
+    default: null,
+    min: 0
   },
-  currentParticipants: {
-    type: Number,
-    default: 0
-  },
-  registrationFee: {
-    type: Number,
-    default: 0
-  },
-  participants: [{
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    registeredAt: {
-      type: Date,
-      default: Date.now
-    },
-    paymentStatus: {
-      type: String,
-      enum: ['pending', 'paid', 'refunded'],
-      default: 'pending'
-    },
-    paymentId: String
-  }],
-  matches: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Match'
-  }],
-  tags: [{
+  status: {
     type: String,
-    trim: true
-  }],
-  isPublic: {
+    enum: ['draft', 'published', 'ongoing', 'ended', 'canceled'],
+    default: 'draft',
+    index: true
+  },
+  ext_info: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
+  is_deleted: {
     type: Boolean,
-    default: true
+    default: false,
+    index: true
+  },
+  created_at: {
+    type: Date,
+    default: Date.now
+  },
+  updated_at: {
+    type: Date,
+    default: Date.now
   }
 }, {
-  timestamps: true
+  timestamps: false
+});
+
+// 更新时间戳
+eventSchema.pre('save', function(next) {
+  this.updated_at = new Date();
+  next();
 });
 
 // 检查是否可以报名
 eventSchema.methods.canRegister = function() {
-  return this.status === 'registration' && 
-         new Date() < this.registrationDeadline &&
-         (this.maxParticipants === 0 || this.currentParticipants < this.maxParticipants);
+  return this.status === 'published' &&
+         new Date() < this.start_time &&
+         (this.max_participants === null || this.getCurrentParticipantCount() < this.max_participants) &&
+         !this.is_deleted;
 };
 
-// 添加参与者
-eventSchema.methods.addParticipant = function(userId) {
-  if (!this.canRegister()) {
-    throw new Error('Cannot register for this event');
-  }
-  
-  const existingParticipant = this.participants.find(p => p.user.toString() === userId.toString());
-  if (existingParticipant) {
-    throw new Error('User already registered');
-  }
-  
-  this.participants.push({ user: userId });
-  this.currentParticipants += 1;
-  return this.save();
-};
-
-// 移除参与者
-eventSchema.methods.removeParticipant = function(userId) {
-  const participantIndex = this.participants.findIndex(p => p.user.toString() === userId.toString());
-  if (participantIndex === -1) {
-    throw new Error('User not registered for this event');
-  }
-  
-  this.participants.splice(participantIndex, 1);
-  this.currentParticipants = Math.max(0, this.currentParticipants - 1);
-  return this.save();
-};
-
-// 更新支付状态
-eventSchema.methods.updatePaymentStatus = function(userId, status, paymentId = null) {
-  const participant = this.participants.find(p => p.user.toString() === userId.toString());
-  if (!participant) {
-    throw new Error('User not registered for this event');
-  }
-  
-  participant.paymentStatus = status;
-  if (paymentId) {
-    participant.paymentId = paymentId;
-  }
-  
-  return this.save();
-};
-
-// 检查用户是否已报名
-eventSchema.methods.isUserRegistered = function(userId) {
-  return this.participants.some(p => p.user.toString() === userId.toString());
-};
-
-// 获取参与者统计
-eventSchema.methods.getParticipantStats = function() {
-  const stats = {
-    total: this.participants.length,
-    paid: 0,
-    pending: 0,
-    refunded: 0
-  };
-  
-  this.participants.forEach(p => {
-    stats[p.paymentStatus]++;
+// 获取当前参与者数量
+eventSchema.methods.getCurrentParticipantCount = async function() {
+  const UserEventRelation = require('./UserEventRelation');
+  return await UserEventRelation.countDocuments({
+    event_id: this._id,
+    signup_status: 'approved',
+    is_deleted: false
   });
-  
-  return stats;
 };
 
-// 检查是否可以开始比赛
+// 检查是否可以开始赛事
 eventSchema.methods.canStartEvent = function() {
-  return this.status === 'upcoming' && 
-         new Date() >= this.eventDate &&
-         this.participants.length >= 2;
+  return this.status === 'published' &&
+         new Date() >= this.start_time &&
+         new Date() < this.end_time;
 };
 
 // 更新赛事状态
 eventSchema.methods.updateStatus = function(newStatus, reason = null) {
   const validTransitions = {
-    'registration': ['upcoming', 'cancelled'],
-    'upcoming': ['ongoing', 'cancelled'],
-    'ongoing': ['completed', 'cancelled'],
-    'completed': [],
-    'cancelled': ['registration'] // 可以重新开放报名
+    'draft': ['published', 'canceled'],
+    'published': ['ongoing', 'canceled'],
+    'ongoing': ['ended', 'canceled'],
+    'ended': [],
+    'canceled': ['draft'] // 可以重新编辑
   };
-  
+
   if (!validTransitions[this.status].includes(newStatus)) {
     throw new Error(`Cannot transition from ${this.status} to ${newStatus}`);
   }
-  
+
   this.status = newStatus;
   if (reason) {
-    this.statusReason = reason;
+    this.ext_info.statusReason = reason;
   }
-  this.statusUpdatedAt = new Date();
-  
+
+  return this.save();
+};
+
+// 软删除
+eventSchema.methods.softDelete = function() {
+  this.is_deleted = true;
+  this.status = 'canceled';
+  return this.save();
+};
+
+// 恢复赛事
+eventSchema.methods.restore = function() {
+  this.is_deleted = false;
   return this.save();
 };
 
 // 获取赛事统计信息
-eventSchema.methods.getEventStats = function() {
+eventSchema.methods.getEventStats = async function() {
+  const UserEventRelation = require('./UserEventRelation');
+  const stats = await UserEventRelation.getEventStats(this._id);
+
   return {
     id: this._id,
-    name: this.name,
-    eventType: this.eventType,
+    title: this.title,
+    category: this.category,
     status: this.status,
-    participantCount: this.participants.length,
-    maxParticipants: this.maxParticipants,
-    registrationRate: this.maxParticipants > 0 ? 
-      (this.participants.length / this.maxParticipants * 100).toFixed(1) + '%' : 'N/A',
-    daysUntilEvent: Math.ceil((this.eventDate - new Date()) / (1000 * 60 * 60 * 24)),
-    daysUntilRegistrationDeadline: Math.ceil((this.registrationDeadline - new Date()) / (1000 * 60 * 60 * 24)),
-    revenue: this.participants.filter(p => p.paymentStatus === 'paid').length * this.registrationFee,
-    createdAt: this.createdAt,
-    updatedAt: this.updatedAt
+    participantCount: stats.approvedCount,
+    maxParticipants: this.max_participants,
+    registrationRate: this.max_participants ?
+      (stats.approvedCount / this.max_participants * 100).toFixed(1) + '%' : 'N/A',
+    daysUntilEvent: Math.ceil((this.start_time - new Date()) / (1000 * 60 * 60 * 24)),
+    signinRate: stats.approvedCount > 0 ?
+      (stats.signinCount / stats.approvedCount * 100).toFixed(1) + '%' : '0%',
+    totalPoints: stats.totalPoints,
+    createdAt: this.created_at,
+    updatedAt: this.updated_at
   };
 };
 
 // 静态方法：获取赛事统计
-eventSchema.statics.getEventStats = async function(filters = {}) {
+eventSchema.statics.getOverallStats = async function(filters = {}) {
+  // 添加默认过滤条件
+  const defaultFilters = { is_deleted: false };
+  const finalFilters = { ...defaultFilters, ...filters };
+
   const pipeline = [
-    { $match: filters },
+    { $match: finalFilters },
     {
       $group: {
         _id: null,
@@ -232,57 +177,44 @@ eventSchema.statics.getEventStats = async function(filters = {}) {
             count: 1
           }
         },
-        byType: {
+        byCategory: {
           $push: {
-            eventType: '$eventType',
+            category: '$category',
             count: 1
-          }
-        },
-        totalParticipants: { $sum: '$currentParticipants' },
-        totalRevenue: {
-          $sum: {
-            $multiply: [
-              '$registrationFee',
-              { $size: { $filter: { input: '$participants', cond: { $eq: ['$$this.paymentStatus', 'paid'] } } } }
-            ]
           }
         }
       }
     }
   ];
-  
+
   const result = await this.aggregate(pipeline);
-  
+
   if (result.length === 0) {
     return {
       total: 0,
       byStatus: [],
-      byType: [],
-      totalParticipants: 0,
-      totalRevenue: 0
+      byCategory: []
     };
   }
-  
+
   const stats = result[0];
-  
+
   // 处理状态统计
   const statusCounts = {};
   stats.byStatus.forEach(item => {
     statusCounts[item.status] = (statusCounts[item.status] || 0) + 1;
   });
-  
-  // 处理类型统计
-  const typeCounts = {};
-  stats.byType.forEach(item => {
-    typeCounts[item.eventType] = (typeCounts[item.eventType] || 0) + 1;
+
+  // 处理分类统计
+  const categoryCounts = {};
+  stats.byCategory.forEach(item => {
+    categoryCounts[item.category] = (categoryCounts[item.category] || 0) + 1;
   });
-  
+
   return {
     total: stats.total,
     byStatus: Object.entries(statusCounts).map(([status, count]) => ({ _id: status, count })),
-    byType: Object.entries(typeCounts).map(([eventType, count]) => ({ _id: eventType, count })),
-    totalParticipants: stats.totalParticipants,
-    totalRevenue: stats.totalRevenue
+    byCategory: Object.entries(categoryCounts).map(([category, count]) => ({ _id: category, count }))
   };
 };
 
@@ -291,65 +223,68 @@ eventSchema.statics.searchEvents = async function(query, options = {}) {
   const {
     page = 1,
     limit = 20,
-    sortBy = 'eventDate',
+    sortBy = 'start_time',
     sortOrder = 'asc',
     status,
-    eventType,
-    region,
-    dateRange
+    category,
+    location,
+    dateRange,
+    includeDeleted = false
   } = options;
-  
+
   const filters = {};
-  
+
+  // 默认不包含已删除的赛事
+  if (!includeDeleted) {
+    filters.is_deleted = false;
+  }
+
   // 文本搜索
   if (query) {
     filters.$or = [
-      { name: new RegExp(query, 'i') },
+      { title: new RegExp(query, 'i') },
       { description: new RegExp(query, 'i') },
-      { venue: new RegExp(query, 'i') },
-      { 'organizer.name': new RegExp(query, 'i') }
+      { location: new RegExp(query, 'i') }
     ];
   }
-  
+
   // 状态筛选
   if (status) {
     filters.status = status;
   }
-  
-  // 类型筛选
-  if (eventType) {
-    filters.eventType = eventType;
+
+  // 分类筛选
+  if (category) {
+    filters.category = category;
   }
-  
-  // 地区筛选
-  if (region) {
-    filters.region = new RegExp(region, 'i');
+
+  // 地点筛选
+  if (location) {
+    filters.location = new RegExp(location, 'i');
   }
-  
+
   // 日期范围筛选
   if (dateRange) {
     if (dateRange.start) {
-      filters.eventDate = { $gte: new Date(dateRange.start) };
+      filters.start_time = { $gte: new Date(dateRange.start) };
     }
     if (dateRange.end) {
-      filters.eventDate = filters.eventDate || {};
-      filters.eventDate.$lte = new Date(dateRange.end);
+      filters.start_time = filters.start_time || {};
+      filters.start_time.$lte = new Date(dateRange.end);
     }
   }
-  
+
   const skip = (page - 1) * limit;
   const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
-  
+
   const [events, total] = await Promise.all([
     this.find(filters)
-      .populate('organizer.id', 'nickname avatar')
-      .populate('participants.user', 'nickname avatar')
       .sort(sort)
       .skip(skip)
       .limit(limit),
     this.countDocuments(filters)
   ]);
-  
+
   return {
     events,
     pagination: {
@@ -362,12 +297,10 @@ eventSchema.statics.searchEvents = async function(query, options = {}) {
 };
 
 // 索引
-eventSchema.index({ name: 'text', description: 'text', venue: 'text' });
-eventSchema.index({ eventDate: 1 });
-eventSchema.index({ registrationDeadline: 1 });
-eventSchema.index({ status: 1 });
-eventSchema.index({ eventType: 1 });
-eventSchema.index({ region: 1 });
-eventSchema.index({ 'organizer.id': 1 });
+eventSchema.index({ title: 'text', description: 'text', location: 'text' });
+eventSchema.index({ start_time: 1, status: 1 });
+eventSchema.index({ status: 1, is_deleted: 1 });
+eventSchema.index({ category: 1 });
+eventSchema.index({ created_at: -1 });
 
-module.exports = mongoose.model('Event', eventSchema); 
+module.exports = mongoose.model('Event', eventSchema);
