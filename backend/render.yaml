@@ -12,7 +12,7 @@ services:
         value: 10000
       - key: JWT_SECRET
         generateValue: true
-      - key: JWT_EXPIRE
+      - key: JWT_EXPIRES_IN
         value: 7d
       - key: CORS_ORIGIN
         value: "*"

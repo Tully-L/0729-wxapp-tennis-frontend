@@ -706,5 +706,14 @@ Page({
         icon: 'none'
       });
     });
+  },
+
+  // 切换我的赛事类型
+  switchMyEventType: function(e) {
+    const type = e.currentTarget.dataset.type;
+    this.setData({
+      [`tabData.my.type`]: type
+    });
+    this.loadMyEvents();
   }
 });

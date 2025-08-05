@@ -35,9 +35,9 @@ const auth = async (req, res, next) => {
       });
     }
 
-    if (!user.isActive) {
-      return res.status(401).json({ 
-        success: false, 
+    if (user.status !== 'active' || user.is_deleted) {
+      return res.status(401).json({
+        success: false,
         message: 'User account is deactivated.',
         code: 'ACCOUNT_DEACTIVATED'
       });
@@ -90,7 +90,7 @@ const optionalAuth = async (req, res, next) => {
       if (decoded.type === 'access') {
         const user = await User.findById(decoded.userId);
         
-        if (user && user.isActive) {
+        if (user && user.status === 'active' && !user.is_deleted) {
           req.user = user;
           req.token = token;
           
