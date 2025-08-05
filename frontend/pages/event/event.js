@@ -137,6 +137,7 @@ Page({
 
   // Load events
   loadEvents: function () {
+    console.log('🚀 loadEvents 被调用');
     if (this.data.loading) return Promise.resolve();
 
     this.setData({ loading: true });
@@ -147,6 +148,7 @@ Page({
       ...this.data.filters
     };
 
+    console.log('📋 API请求参数:', params);
     return API.getEvents(params)
       .then(res => {
         console.log('📋 加载全部赛事成功:', res.data);
@@ -453,11 +455,13 @@ Page({
   },
 
   loadAllEvents: function () {
+    console.log('🔄 开始加载全部赛事...');
     this.setData({
       events: [],
       currentPage: 1,
       hasMore: true
     });
+    console.log('📞 调用 loadEvents()...');
     this.loadEvents();
   },
 

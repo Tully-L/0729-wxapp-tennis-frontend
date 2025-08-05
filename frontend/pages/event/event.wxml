@@ -149,15 +149,6 @@
       <text>events.length: {{events.length}}</text>
       <text>tabData.my.events.length: {{tabData.my.events.length}}</text>
       <text>activeTab: {{activeTab}}</text>
-      <text>第一个赛事: {{events[0].title}}</text>
-    </view>
-
-    <!-- 强制显示赛事列表 -->
-    <view style="background: #fff; padding: 10px;">
-      <text>强制显示测试:</text>
-      <view wx:for="{{events}}" wx:key="_id" style="border: 1px solid #ccc; margin: 5px; padding: 10px;">
-        <text>{{item.title}} - {{item.category}}</text>
-      </view>
     </view>
 
     <!-- All Events Display -->
