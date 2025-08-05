@@ -11,7 +11,9 @@ const {
   deactivateAccount,
   getUserEvents,
   getUserPointsHistory,
-  getSystemStats
+  getSystemStats,
+  getUserAchievements,
+  updateUserActivity
 } = require('../controllers/authController');
 const { auth, optionalAuth } = require('../middleware/auth');
 
@@ -118,4 +120,10 @@ router.get('/search', auth, searchUsers);
 // 获取系统统计概览（可选认证）
 router.get('/system-stats', optionalAuth, getSystemStats);
 
-module.exports = router; 
+// 获取用户成就
+router.get('/achievements', auth, getUserAchievements);
+
+// 更新用户活跃度
+router.post('/activity', auth, updateUserActivity);
+
+module.exports = router;

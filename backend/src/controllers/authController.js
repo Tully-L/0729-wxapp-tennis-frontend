@@ -678,6 +678,110 @@ const getCurrentLevelProgress = (currentPoints) => {
   return Math.min(Math.max(progress, 0), 100);
 };
 
+// 获取用户成就
+const getUserAchievements = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user || user.is_deleted) {
+      throw new BusinessError('用户不存在', 'USER_NOT_FOUND');
+    }
+
+    // 基于用户数据生成成就
+    const achievements = [];
+
+    // 登录成就
+    if (user.created_at) {
+      achievements.push({
+        id: 'first_login',
+        name: '初来乍到',
+        description: '完成首次登录',
+        icon: '🎉',
+        unlocked: true,
+        unlockedAt: user.created_at
+      });
+    }
+
+    // 积分成就
+    if (user.total_points >= 100) {
+      achievements.push({
+        id: 'points_100',
+        name: '积分达人',
+        description: '累计获得100积分',
+        icon: '⭐',
+        unlocked: true,
+        unlockedAt: user.updated_at
+      });
+    }
+
+    if (user.total_points >= 500) {
+      achievements.push({
+        id: 'points_500',
+        name: '积分大师',
+        description: '累计获得500积分',
+        icon: '🏆',
+        unlocked: true,
+        unlockedAt: user.updated_at
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        achievements,
+        total: achievements.length,
+        unlocked: achievements.filter(a => a.unlocked).length
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 更新用户活跃度
+const updateUserActivity = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user || user.is_deleted) {
+      throw new BusinessError('用户不存在', 'USER_NOT_FOUND');
+    }
+
+    // 更新最后活跃时间
+    user.lastLoginAt = new Date();
+
+    // 更新扩展信息中的活跃度数据
+    if (!user.ext_info) {
+      user.ext_info = {};
+    }
+
+    if (!user.ext_info.activity) {
+      user.ext_info.activity = {
+        lastActive: new Date(),
+        dailyLogins: 1,
+        weeklyLogins: 1,
+        monthlyLogins: 1
+      };
+    } else {
+      user.ext_info.activity.lastActive = new Date();
+      user.ext_info.activity.dailyLogins = (user.ext_info.activity.dailyLogins || 0) + 1;
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: '活跃度更新成功',
+      data: {
+        lastActive: user.ext_info.activity.lastActive,
+        dailyLogins: user.ext_info.activity.dailyLogins
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   wechatLogin,
   getUserProfile,
@@ -689,5 +793,7 @@ module.exports = {
   deactivateAccount,
   getUserEvents,
   getUserPointsHistory,
-  getSystemStats
+  getSystemStats,
+  getUserAchievements,
+  updateUserActivity
 };

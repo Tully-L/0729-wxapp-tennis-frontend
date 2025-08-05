@@ -69,20 +69,35 @@ Page({
   },
 
   onLoad: function () {
-    // Check login status (不强制登录，允许游客浏览)
-    const isLoggedIn = auth.checkLogin();
-    const userInfo = auth.getUserInfo();
-
-    this.setData({
-      userInfo: userInfo,
-      isLoggedIn: isLoggedIn
-    });
+    this.checkAndUpdateLoginStatus();
 
     // Initialize tab system
     this.initTabSystem();
 
     // Load initial tab data
     this.loadTabData(this.data.activeTab);
+  },
+
+  onShow: function () {
+    // 每次显示页面时重新检查登录状态
+    this.checkAndUpdateLoginStatus();
+  },
+
+  // 检查并更新登录状态
+  checkAndUpdateLoginStatus: function() {
+    const isLoggedIn = auth.checkLogin();
+    const userInfo = auth.getUserInfo();
+    const token = auth.getToken();
+
+    console.log('检查登录状态:', { isLoggedIn, hasUserInfo: !!userInfo, hasToken: !!token });
+
+    this.setData({
+      userInfo: userInfo,
+      isLoggedIn: isLoggedIn
+    });
+
+    // 重新初始化tab系统以更新按钮状态
+    this.initTabSystem();
   },
 
   onPullDownRefresh: function () {
@@ -341,14 +356,25 @@ Page({
   // Tab system methods
   initTabSystem: function () {
     // Initialize tab system with user authentication check
+    const isLoggedIn = this.data.isLoggedIn;
+    console.log('初始化Tab系统，登录状态:', isLoggedIn);
+
     const tabs = this.data.tabs.map(tab => {
-      if (tab.requiresAuth && !this.data.isLoggedIn) {
+      const needsAuth = tab.requiresAuth;
+      const shouldDisable = needsAuth && !isLoggedIn;
+
+      console.log(`Tab ${tab.id}: requiresAuth=${needsAuth}, isLoggedIn=${isLoggedIn}, disabled=${shouldDisable}`);
+
+      if (shouldDisable) {
         return { ...tab, disabled: true };
       }
-      return tab;
+      return { ...tab, disabled: false };
     });
 
     this.setData({ tabs });
+
+    // 强制更新页面
+    this.$forceUpdate && this.$forceUpdate();
   },
 
   // Simple button navigation handler
