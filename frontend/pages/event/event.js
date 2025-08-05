@@ -481,16 +481,27 @@ Page({
       return;
     }
 
+    console.log('🔍 开始加载我的赛事...');
+
     // Load user events
     API.getUserEvents({ type: 'all', page: 1, limit: 20 }).then(res => {
+      console.log('📊 getUserEvents API响应:', res);
+
       if (res.success && res.data) {
+        console.log('📋 原始数据结构:', res.data);
+
         // 后端返回的是关系数据，需要提取事件信息
         const relations = res.data.events || [];
-        const events = relations.map(relation => {
+        console.log('🔗 关联关系数量:', relations.length);
+        console.log('🔗 关联关系详情:', relations);
+
+        const events = relations.map((relation, index) => {
+          console.log(`🔍 处理关联关系 ${index}:`, relation);
           const event = relation.event;
+          console.log(`📋 赛事数据 ${index}:`, event);
+
           if (event) {
-            // 添加关系信息到事件对象中
-            return {
+            const processedEvent = {
               ...event,
               _id: event._id,
               title: event.title,
@@ -505,6 +516,10 @@ Page({
               is_signin: relation.is_signin,
               points: relation.points
             };
+            console.log(`✅ 处理后的赛事 ${index}:`, processedEvent);
+            return processedEvent;
+          } else {
+            console.log(`❌ 赛事数据为空 ${index}`);
           }
           return null;
         }).filter(Boolean);
