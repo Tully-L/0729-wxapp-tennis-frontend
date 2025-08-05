@@ -52,49 +52,81 @@ Page({
   // 加载赛事详情
   loadEventDetail: function() {
     this.setData({ loading: true });
-    
-    // 模拟赛事详情数据
-    const mockEvent = {
-      _id: this.data.eventId,
-      name: '温布尔登锦标赛 2024',
-      eventType: '男子单打',
-      status: 'registration',
-      venue: '全英俱乐部',
-      court: '中央球场',
-      region: '伦敦',
-      eventDate: '2024-07-01',
-      registrationDeadline: '2024-06-15',
-      description: '世界最著名的网球锦标赛之一，在草地球场上进行。这是一项历史悠久的赛事，吸引了全世界最优秀的网球选手参与。',
-      organizer: { 
-        name: '温布尔登网球俱乐部',
-        contact: '020-1234-5678',
-        email: 'info@wimbledon.org'
-      },
-      rules: [
-        '参赛选手必须年满18周岁',
-        '需要提供有效的网球等级证明',
-        '比赛采用三盘两胜制',
-        '遵守国际网球联合会规则'
-      ],
-      prizes: [
-        '冠军：奖金 £50,000 + 奖杯',
-        '亚军：奖金 £25,000 + 奖牌',
-        '四强：奖金 £10,000',
-        '八强：奖金 £5,000'
-      ],
-      registrationFee: '£500',
-      maxParticipants: 128,
-      coverImage: null
-    };
-    
-    setTimeout(() => {
-      this.setData({
-        event: mockEvent,
-        loading: false,
-        isRegistered: Math.random() > 0.7, // 随机模拟是否已报名
-        registrationCount: Math.floor(Math.random() * 100) + 20 // 随机报名人数
+
+    console.log('🔍 加载赛事详情，ID:', this.data.eventId);
+
+    // 调用真实的API获取赛事详情
+    API.getEventDetail(this.data.eventId)
+      .then(res => {
+        console.log('📋 赛事详情API响应:', res);
+
+        if (res.success && res.data) {
+          const event = res.data;
+
+          // 格式化赛事数据以适配前端显示
+          const formattedEvent = {
+            _id: event._id,
+            name: event.title || event.name,
+            title: event.title,
+            eventType: event.ext_info?.eventType || event.category,
+            status: event.status === 'published' ? 'registration' : event.status,
+            venue: event.ext_info?.venue || event.location,
+            court: event.ext_info?.court || '',
+            region: event.ext_info?.region || '',
+            eventDate: event.start_time ? new Date(event.start_time).toISOString().split('T')[0] : '',
+            registrationDeadline: event.ext_info?.registrationDeadline || '',
+            description: event.description || '暂无描述',
+            location: event.location,
+            start_time: event.start_time,
+            end_time: event.end_time,
+            max_participants: event.max_participants,
+            organizer: {
+              name: event.ext_info?.organizer?.name || '赛事组织者',
+              contact: '',
+              email: ''
+            },
+            rules: [
+              '请按时参加比赛',
+              '遵守比赛规则',
+              '保持良好的体育精神'
+            ],
+            prizes: [
+              '参与奖励',
+              '优秀表现奖'
+            ],
+            registrationFee: '免费',
+            maxParticipants: event.max_participants || 20,
+            coverImage: null
+          };
+
+          console.log('✅ 格式化后的赛事数据:', formattedEvent);
+
+          this.setData({
+            event: formattedEvent,
+            loading: false,
+            isRegistered: false, // TODO: 检查用户是否已报名
+            registrationCount: 0 // TODO: 获取实际报名人数
+          });
+        } else {
+          console.error('❌ 获取赛事详情失败:', res);
+          this.setData({
+            loading: false,
+            error: true
+          });
+        }
+      })
+      .catch(err => {
+        console.error('❌ 赛事详情API调用失败:', err);
+        this.setData({
+          loading: false,
+          error: true
+        });
+
+        wx.showToast({
+          title: '加载失败',
+          icon: 'none'
+        });
       });
-    }, 1000);
   },
   
   // 报名赛事
