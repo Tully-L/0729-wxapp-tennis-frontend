@@ -199,6 +199,10 @@ const getEventDetail = async (req, res, next) => {
 // 创建赛事
 const createEvent = async (req, res, next) => {
   try {
+    console.log('🎾 收到创建赛事请求');
+    console.log('请求体:', JSON.stringify(req.body, null, 2));
+    console.log('用户信息:', req.user ? { id: req.user._id, nickname: req.user.nickname } : '未登录');
+
     const {
       title,
       category,
@@ -210,20 +214,51 @@ const createEvent = async (req, res, next) => {
       ext_info
     } = req.body;
 
+    console.log('提取的字段:', { title, category, start_time, end_time, location });
+
     // 验证必需字段
     if (!title || !category || !start_time || !location) {
+      console.error('❌ 缺少必需字段:', { title: !!title, category: !!category, start_time: !!start_time, location: !!location });
       throw new BusinessError('标题、分类、开始时间和地点为必填项', 'MISSING_REQUIRED_FIELDS');
     }
 
     // 验证时间
+    console.log('🕐 验证时间...');
     const startTime = new Date(start_time);
     const endTime = end_time ? new Date(end_time) : new Date(startTime.getTime() + 4 * 60 * 60 * 1000);
+    const now = new Date();
 
-    if (startTime <= new Date()) {
-      throw new BusinessError('开始时间必须晚于当前时间', 'INVALID_START_TIME');
+    console.log('时间验证:', {
+      start_time,
+      startTime: startTime.toISOString(),
+      end_time,
+      endTime: endTime.toISOString(),
+      now: now.toISOString(),
+      startTimeValid: startTime > now,
+      endTimeValid: endTime > startTime
+    });
+
+    if (isNaN(startTime.getTime())) {
+      console.error('❌ 开始时间格式无效:', start_time);
+      throw new BusinessError('开始时间格式无效', 'INVALID_START_TIME');
+    }
+
+    if (isNaN(endTime.getTime())) {
+      console.error('❌ 结束时间格式无效:', end_time);
+      throw new BusinessError('结束时间格式无效', 'INVALID_END_TIME');
+    }
+
+    // 放宽时间验证 - 允许当天的赛事
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    if (startTime < todayStart) {
+      console.error('❌ 开始时间不能早于今天:', { startTime, todayStart });
+      throw new BusinessError('开始时间不能早于今天', 'INVALID_START_TIME');
     }
 
     if (endTime <= startTime) {
+      console.error('❌ 结束时间必须晚于开始时间:', { startTime, endTime });
       throw new BusinessError('结束时间必须晚于开始时间', 'INVALID_END_TIME');
     }
 
