@@ -650,10 +650,34 @@ Page({
 
     this.setData({ submitting: true });
 
+    // 转换前端字段名到后端期望的字段名
+    const { eventData } = this.data;
+    const apiData = {
+      title: eventData.name,
+      category: 'tennis', // 默认为网球
+      start_time: eventData.eventDate + 'T09:00:00.000Z', // 默认上午9点开始
+      end_time: eventData.eventDate + 'T17:00:00.000Z', // 默认下午5点结束
+      location: `${eventData.venue} ${eventData.court}`.trim(),
+      description: eventData.description || '',
+      max_participants: 20, // 默认最大参与人数
+      ext_info: {
+        region: eventData.region,
+        eventType: eventData.eventType,
+        venue: eventData.venue,
+        court: eventData.court,
+        isPublic: eventData.isPublic,
+        registrationDeadline: eventData.registrationDeadline
+      }
+    };
+
+    console.log('发送到后端的数据:', apiData);
+
     // 调用API创建赛事
-    API.createEvent(this.data.eventData)
+    API.createEvent(apiData)
       .then(res => {
         this.setData({ submitting: false });
+
+        console.log('创建赛事成功:', res);
 
         wx.showToast({
           title: '创建成功',
