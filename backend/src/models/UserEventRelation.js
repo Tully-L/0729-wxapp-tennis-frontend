@@ -21,6 +21,11 @@ const userEventRelationSchema = new mongoose.Schema({
     enum: ['pending', 'approved', 'rejected'],
     default: 'pending'
   },
+  role: {
+    type: String,
+    enum: ['participant', 'organizer', 'admin'],
+    default: 'participant'
+  },
   points: {
     type: Number,
     default: 0,

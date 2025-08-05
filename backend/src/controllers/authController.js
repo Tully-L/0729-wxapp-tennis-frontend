@@ -529,6 +529,8 @@ const getUserEvents = async (req, res, next) => {
       query.signup_status = status;
     }
 
+    console.log(`🔍 查询用户赛事，用户ID: ${user._id}, 查询条件:`, query);
+
     const relations = await UserEventRelation.find(query)
       .sort({ signup_time: -1 })
       .skip((page - 1) * limit)
@@ -536,6 +538,16 @@ const getUserEvents = async (req, res, next) => {
       .populate('event_id', 'title category start_time end_time location status');
 
     const total = await UserEventRelation.countDocuments(query);
+
+    console.log(`📊 找到 ${relations.length} 个关联关系，总数: ${total}`);
+    console.log('关联关系详情:', relations.map(r => ({
+      id: r._id,
+      user_id: r.user_id,
+      event_id: r.event_id?._id,
+      event_title: r.event_id?.title,
+      signup_status: r.signup_status,
+      role: r.role
+    })));
 
     res.json({
       success: true,

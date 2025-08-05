@@ -242,6 +242,27 @@ const createEvent = async (req, res, next) => {
 
     await event.save();
 
+    // 自动为创建者建立用户-赛事关联关系（作为组织者）
+    const UserEventRelation = require('../models/UserEventRelation');
+
+    try {
+      const relation = new UserEventRelation({
+        user_id: req.user._id,
+        event_id: event._id,
+        signup_time: new Date(),
+        signup_status: 'approved', // 创建者自动批准
+        role: 'organizer', // 标记为组织者
+        points: 0,
+        is_deleted: false
+      });
+
+      await relation.save();
+      console.log(`✅ 为用户 ${req.user._id} 创建赛事关联关系: ${event._id}`);
+    } catch (relationError) {
+      console.error('创建用户-赛事关联失败:', relationError);
+      // 不抛出错误，因为赛事已经创建成功
+    }
+
     res.status(201).json({
       success: true,
       message: '赛事创建成功',
