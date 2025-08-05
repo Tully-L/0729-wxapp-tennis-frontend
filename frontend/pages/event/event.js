@@ -526,8 +526,10 @@ Page({
 
         console.log('处理后的用户赛事:', events);
         this.setData({
-          userEvents: events
+          userEvents: events,
+          'tabData.my.events': events  // 修复数据绑定
         });
+        console.log('✅ 数据已设置到 tabData.my.events');
       }
     }).catch(err => {
       console.error('获取用户赛事失败:', err);
@@ -699,10 +701,17 @@ Page({
           icon: 'success'
         });
 
-        // 创建成功后重置表单并切换到全部标签页
+        // 创建成功后重置表单并刷新数据
         this.resetForm();
-        this.setData({ activeTab: 'all' });
+
+        // 刷新全部赛事列表
         this.loadAllEvents();
+
+        // 刷新我的赛事列表
+        this.loadMyEvents();
+
+        // 切换到全部标签页显示新创建的赛事
+        this.setData({ activeTab: 'all' });
       })
       .catch(err => {
         this.setData({ submitting: false });
