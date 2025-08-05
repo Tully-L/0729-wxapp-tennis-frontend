@@ -22,6 +22,23 @@ Page({
     hasMore: true,
     loading: false,
 
+    // Tab data structure
+    tabData: {
+      all: {
+        events: [],
+        loading: false
+      },
+      my: {
+        events: [],
+        type: 'all',
+        loading: false
+      },
+      popular: {
+        events: [],
+        loading: false
+      }
+    },
+
     // Filter options
     filters: {
       eventType: '',
@@ -132,11 +149,14 @@ Page({
 
     return API.getEvents(params)
       .then(res => {
+        console.log('📋 加载全部赛事成功:', res.data);
         this.setData({
           events: res.data,
+          'tabData.all.events': res.data,  // 同时设置到tabData
           hasMore: res.data.length === this.data.pageSize,
           loading: false
         });
+        console.log('✅ 全部赛事数据已设置');
       })
       .catch(err => {
         console.error('Failed to load events:', err);
