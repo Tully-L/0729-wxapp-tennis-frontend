@@ -199,9 +199,15 @@ const getEventDetail = async (req, res, next) => {
 // 创建赛事
 const createEvent = async (req, res, next) => {
   try {
-    console.log('🎾 收到创建赛事请求');
+    console.log('🎾 收到创建赛事请求 - v2.0');
     console.log('请求体:', JSON.stringify(req.body, null, 2));
     console.log('用户信息:', req.user ? { id: req.user._id, nickname: req.user.nickname } : '未登录');
+    console.log('当前时间:', new Date().toISOString());
+
+    // 测试数据库连接
+    const mongoose = require('mongoose');
+    console.log('数据库连接状态:', mongoose.connection.readyState);
+    console.log('数据库名称:', mongoose.connection.name);
 
     const {
       title,
