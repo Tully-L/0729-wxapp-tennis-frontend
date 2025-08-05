@@ -196,103 +196,54 @@ const getEventDetail = async (req, res, next) => {
   }
 };
 
-// 创建赛事
+// 创建赛事 - 简化版本
 const createEvent = async (req, res, next) => {
   try {
-    console.log('🎾 收到创建赛事请求 - v2.0');
+    console.log('🎾 收到创建赛事请求 - SIMPLIFIED v3.0');
     console.log('请求体:', JSON.stringify(req.body, null, 2));
     console.log('用户信息:', req.user ? { id: req.user._id, nickname: req.user.nickname } : '未登录');
-    console.log('当前时间:', new Date().toISOString());
 
-    // 测试数据库连接
-    const mongoose = require('mongoose');
-    console.log('数据库连接状态:', mongoose.connection.readyState);
-    console.log('数据库名称:', mongoose.connection.name);
+    const { title, category, start_time, end_time, location, description, max_participants, ext_info } = req.body;
 
-    const {
-      title,
-      category,
-      start_time,
-      end_time,
-      location,
-      description,
-      max_participants,
-      ext_info
-    } = req.body;
-
-    console.log('提取的字段:', { title, category, start_time, end_time, location });
-
-    // 验证必需字段
-    if (!title || !category || !start_time || !location) {
-      console.error('❌ 缺少必需字段:', { title: !!title, category: !!category, start_time: !!start_time, location: !!location });
-      throw new BusinessError('标题、分类、开始时间和地点为必填项', 'MISSING_REQUIRED_FIELDS');
+    // 最基本的验证
+    if (!title || !location) {
+      console.error('❌ 缺少必需字段');
+      return res.status(400).json({
+        success: false,
+        message: '标题和地点为必填项'
+      });
     }
 
-    // 验证时间
-    console.log('🕐 验证时间...');
-    const startTime = new Date(start_time);
-    const endTime = end_time ? new Date(end_time) : new Date(startTime.getTime() + 4 * 60 * 60 * 1000);
-    const now = new Date();
-
-    console.log('时间验证:', {
-      start_time,
-      startTime: startTime.toISOString(),
-      end_time,
-      endTime: endTime.toISOString(),
-      now: now.toISOString(),
-      startTimeValid: startTime > now,
-      endTimeValid: endTime > startTime
-    });
-
-    if (isNaN(startTime.getTime())) {
-      console.error('❌ 开始时间格式无效:', start_time);
-      throw new BusinessError('开始时间格式无效', 'INVALID_START_TIME');
-    }
-
-    if (isNaN(endTime.getTime())) {
-      console.error('❌ 结束时间格式无效:', end_time);
-      throw new BusinessError('结束时间格式无效', 'INVALID_END_TIME');
-    }
-
-    // 放宽时间验证 - 允许当天的赛事
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-
-    if (startTime < todayStart) {
-      console.error('❌ 开始时间不能早于今天:', { startTime, todayStart });
-      throw new BusinessError('开始时间不能早于今天', 'INVALID_START_TIME');
-    }
-
-    if (endTime <= startTime) {
-      console.error('❌ 结束时间必须晚于开始时间:', { startTime, endTime });
-      throw new BusinessError('结束时间必须晚于开始时间', 'INVALID_END_TIME');
-    }
-
-    const event = new Event({
+    // 简化的赛事对象
+    const eventData = {
       title: title.trim(),
-      category,
-      start_time: startTime,
-      end_time: endTime,
+      category: category || 'tennis',
+      start_time: start_time ? new Date(start_time) : new Date(),
+      end_time: end_time ? new Date(end_time) : new Date(Date.now() + 8 * 60 * 60 * 1000), // 8小时后
       location: location.trim(),
-      description: description?.trim(),
-      max_participants: max_participants > 0 ? max_participants : null,
-      status: 'draft',
+      description: description || '',
+      max_participants: max_participants || 20,
+      status: 'published', // 直接发布
+      created_by: req.user._id,
       ext_info: ext_info || {},
       is_deleted: false
-    });
+    };
 
+    console.log('准备保存的赛事数据:', eventData);
+
+    const event = new Event(eventData);
     await event.save();
 
-    // 自动为创建者建立用户-赛事关联关系（作为组织者）
-    const UserEventRelation = require('../models/UserEventRelation');
+    console.log('✅ 赛事保存成功:', event._id);
 
+    // 自动为创建者建立用户-赛事关联关系
     try {
       const relation = new UserEventRelation({
         user_id: req.user._id,
         event_id: event._id,
         signup_time: new Date(),
-        signup_status: 'approved', // 创建者自动批准
-        role: 'organizer', // 标记为组织者
+        signup_status: 'approved',
+        role: 'organizer',
         points: 0,
         is_deleted: false
       });
@@ -301,7 +252,6 @@ const createEvent = async (req, res, next) => {
       console.log(`✅ 为用户 ${req.user._id} 创建赛事关联关系: ${event._id}`);
     } catch (relationError) {
       console.error('创建用户-赛事关联失败:', relationError);
-      // 不抛出错误，因为赛事已经创建成功
     }
 
     res.status(201).json({
@@ -310,6 +260,7 @@ const createEvent = async (req, res, next) => {
       data: event
     });
   } catch (error) {
+    console.error('创建赛事失败:', error);
     next(error);
   }
 };
