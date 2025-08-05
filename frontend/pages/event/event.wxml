@@ -143,14 +143,6 @@
     </view>
 
 
-    <!-- Debug Info -->
-    <view style="background: #f0f0f0; padding: 10px; margin: 10px; font-size: 12px;">
-      <text>调试信息:</text>
-      <text>events.length: {{events.length}}</text>
-      <text>tabData.my.events.length: {{tabData.my.events.length}}</text>
-      <text>activeTab: {{activeTab}}</text>
-    </view>
-
     <!-- All Events Display -->
     <block wx:if="{{events.length > 0}}">
       <view class="section-title" wx:if="{{searchQuery}}">

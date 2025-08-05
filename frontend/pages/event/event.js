@@ -137,7 +137,6 @@ Page({
 
   // Load events
   loadEvents: function () {
-    console.log('🚀 loadEvents 被调用');
     if (this.data.loading) return Promise.resolve();
 
     this.setData({ loading: true });
@@ -148,23 +147,17 @@ Page({
       ...this.data.filters
     };
 
-    console.log('📋 API请求参数:', params);
     return API.getEvents(params)
       .then(res => {
-        console.log('📋 加载全部赛事成功:', res.data);
-
         // 提取真实的赛事数组
         const eventsArray = res.data.events || res.data || [];
-        console.log('📊 提取的赛事数组:', eventsArray);
-        console.log('📊 赛事数量:', eventsArray.length);
 
         this.setData({
           events: eventsArray,
-          'tabData.all.events': eventsArray,  // 同时设置到tabData
+          'tabData.all.events': eventsArray,
           hasMore: eventsArray.length === this.data.pageSize,
           loading: false
         });
-        console.log('✅ 全部赛事数据已设置，数量:', eventsArray.length);
       })
       .catch(err => {
         console.error('Failed to load events:', err);
@@ -461,13 +454,11 @@ Page({
   },
 
   loadAllEvents: function () {
-    console.log('🔄 开始加载全部赛事...');
     this.setData({
       events: [],
       currentPage: 1,
       hasMore: true
     });
-    console.log('📞 调用 loadEvents()...');
     this.loadEvents();
   },
 
@@ -507,31 +498,20 @@ Page({
 
   loadMyEvents: function () {
     if (!this.data.isLoggedIn) {
-      console.log('用户未登录，无法加载我的赛事');
       return;
     }
 
-    console.log('🔍 开始加载我的赛事...');
-
     // Load user events
     API.getUserEvents({ type: 'all', page: 1, limit: 20 }).then(res => {
-      console.log('📊 getUserEvents API响应:', res);
-
       if (res.success && res.data) {
-        console.log('📋 原始数据结构:', res.data);
-
         // 后端返回的是关系数据，需要提取事件信息
         const relations = res.data.events || [];
-        console.log('🔗 关联关系数量:', relations.length);
-        console.log('🔗 关联关系详情:', relations);
 
-        const events = relations.map((relation, index) => {
-          console.log(`🔍 处理关联关系 ${index}:`, relation);
+        const events = relations.map(relation => {
           const event = relation.event;
-          console.log(`📋 赛事数据 ${index}:`, event);
 
           if (event) {
-            const processedEvent = {
+            return {
               ...event,
               _id: event._id,
               title: event.title,
@@ -546,20 +526,14 @@ Page({
               is_signin: relation.is_signin,
               points: relation.points
             };
-            console.log(`✅ 处理后的赛事 ${index}:`, processedEvent);
-            return processedEvent;
-          } else {
-            console.log(`❌ 赛事数据为空 ${index}`);
           }
           return null;
         }).filter(Boolean);
 
-        console.log('处理后的用户赛事:', events);
         this.setData({
           userEvents: events,
-          'tabData.my.events': events  // 修复数据绑定
+          'tabData.my.events': events
         });
-        console.log('✅ 数据已设置到 tabData.my.events');
       }
     }).catch(err => {
       console.error('获取用户赛事失败:', err);
