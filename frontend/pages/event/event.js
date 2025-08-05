@@ -152,13 +152,19 @@ Page({
     return API.getEvents(params)
       .then(res => {
         console.log('📋 加载全部赛事成功:', res.data);
+
+        // 提取真实的赛事数组
+        const eventsArray = res.data.events || res.data || [];
+        console.log('📊 提取的赛事数组:', eventsArray);
+        console.log('📊 赛事数量:', eventsArray.length);
+
         this.setData({
-          events: res.data,
-          'tabData.all.events': res.data,  // 同时设置到tabData
-          hasMore: res.data.length === this.data.pageSize,
+          events: eventsArray,
+          'tabData.all.events': eventsArray,  // 同时设置到tabData
+          hasMore: eventsArray.length === this.data.pageSize,
           loading: false
         });
-        console.log('✅ 全部赛事数据已设置');
+        console.log('✅ 全部赛事数据已设置，数量:', eventsArray.length);
       })
       .catch(err => {
         console.error('Failed to load events:', err);
