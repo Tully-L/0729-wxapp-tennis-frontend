@@ -143,6 +143,14 @@
     </view>
 
 
+    <!-- Debug Info -->
+    <view style="background: #f0f0f0; padding: 10px; margin: 10px; font-size: 12px;">
+      <text>调试信息:</text>
+      <text>events.length: {{events.length}}</text>
+      <text>tabData.my.events.length: {{tabData.my.events.length}}</text>
+      <text>activeTab: {{activeTab}}</text>
+    </view>
+
     <!-- All Events Display -->
     <block wx:if="{{events.length > 0}}">
       <view class="section-title" wx:if="{{searchQuery}}">
@@ -511,9 +519,9 @@
                 </view>
               </view>
               <view class="event-content">
-                <view class="event-title">{{item.name}}</view>
+                <view class="event-title">{{item.title || item.name}}</view>
                 <view class="event-info">
-                  <view class="event-type">{{item.eventType}}</view>
+                  <view class="event-type">{{item.category || item.eventType}}</view>
                   <view class="event-status status-{{item.status}}">
                     {{item.status === 'registration' ? '报名中' : 
                       item.status === 'upcoming' ? '即将开始' :
