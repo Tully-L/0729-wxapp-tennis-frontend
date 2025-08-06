@@ -48,75 +48,36 @@
   </view>
   <!-- 赛事卡片列表区域 -->
   <view class="event-cards">
-    <!-- 赛事卡片1 -->
-    <view class="event-card" bindtap="goToEventDetail" data-id="1">
-      <view class="card-img"></view> <!-- 赛事图片色块 -->
-      <view class="card-info">
-        <text class="card-title">[广州]白马杯Vol2-LOT(Love On Tennis)</text>
-        <view class="tags">
-          <text class="tag">ETA 200</text>
-          <text class="tag">双打8</text>
-          <text class="tag">20/20</text>
-        </view>
-        <view class="status">
-          <text class="status-tag">报名中</text>
-          <text class="time">7月26日(周六)19:00-8月2日(周六)22:00</text>
-        </view>
-      </view>
-    </view>
-
-    <!-- 赛事卡片2 -->
-    <view class="event-card" bindtap="goToEventDetail" data-id="2">
-      <view class="card-img"></view>
-      <view class="card-info">
-        <text class="card-title">[深圳]夏季精英挑战赛-ATP(Association of Tennis Professionals)</text>
-        <view class="tags">
-          <text class="tag">ETA 300</text>
-          <text class="tag">单打16</text>
-          <text class="tag">15/16</text>
-        </view>
-        <view class="status">
-          <text class="status-tag">即将开始</text>
-          <text class="time">8月5日(周六)09:00-8月6日(周日)18:00</text>
-        </view>
-      </view>
-    </view>
-
-    <!-- 赛事卡片3 -->
-    <view class="event-card" bindtap="goToEventDetail" data-id="3">
-      <view class="card-img"></view>
-      <view class="card-info">
-        <text class="card-title">[上海]都市网球公开赛-WTA(Women's Tennis Association)</text>
-        <view class="tags">
-          <text class="tag">ETA 150</text>
-          <text class="tag">混双12</text>
-          <text class="tag">8/12</text>
-        </view>
-        <view class="status">
-          <text class="status-tag">报名中</text>
-          <text class="time">8月12日(周六)14:00-8月13日(周日)17:00</text>
-        </view>
-      </view>
-    </view>
-
-    <!-- 动态赛事卡片（如果有数据的话） -->
-    <block wx:if="{{matches.length > 0}}">
-      <view wx:for="{{matches}}" wx:for-item="match" wx:key="_id" class="event-card" bindtap="goToDetail" data-id="{{match._id}}">
+    <!-- 动态赛事卡片 -->
+    <block wx:if="{{events.length > 0}}">
+      <view wx:for="{{events}}" wx:for-item="event" wx:key="_id" class="event-card" bindtap="goToEventDetail" data-id="{{event._id}}">
         <view class="card-img"></view>
         <view class="card-info">
-          <text class="card-title">{{match.matchName || match.eventType}}</text>
+          <text class="card-title">{{event.title || event.name}}</text>
           <view class="tags">
-            <text class="tag">{{match.eventType}}</text>
-            <text class="tag">{{match.stage}}</text>
-            <text class="tag">积分赛</text>
+            <text class="tag">{{event.eventTypeText}}</text>
+            <text class="tag">{{(event.ext_info && event.ext_info.maxParticipants) || event.maxParticipants || 20}}人</text>
+            <text class="tag">{{event.currentParticipants || 0}}/{{(event.ext_info && event.ext_info.maxParticipants) || event.maxParticipants || 20}}</text>
           </view>
           <view class="status">
-            <text class="status-tag">{{match.status === '已结束' ? '已结束' : match.status === '比赛中' ? '进行中' : '报名中'}}</text>
-            <text class="time">{{formatMatchTime(match.scheduledTime)}}</text>
+            <text class="status-tag">{{event.status === 'published' ? '报名中' : event.status === 'ongoing' ? '进行中' : event.status === 'ended' ? '已结束' : '报名中'}}</text>
+            <text class="time">{{event.start_time}}</text>
           </view>
         </view>
       </view>
     </block>
+    
+    <!-- 空状态 -->
+    <view wx:if="{{!loading && events.length === 0}}" class="empty-state">
+      <text class="empty-icon">📭</text>
+      <view class="empty-text">暂无赛事数据</view>
+    </view>
+    
+    <!-- 加载状态 -->
+    <view wx:if="{{loading}}" class="loading-state">
+      <view class="loading-spinner"></view>
+      <view class="loading-text">加载中...</view>
+    </view>
   </view>
 
 
