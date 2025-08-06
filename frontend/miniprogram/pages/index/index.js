@@ -13,16 +13,16 @@ Page({
     
     // Filter options  
     filters: {
-      eventType: '',
-      region: '',
-      status: '',
-      feeRange: '',
-      timeRange: '',
-      participantRange: '',
-      registrationStatus: '',
+      eventType: null,
+      region: null,
+      status: null,
+      feeRange: null,
+      timeRange: null,
+      participantRange: null,
+      registrationStatus: null,
       dateRange: {
-        start: '',
-        end: ''
+        start: null,
+        end: null
       }
     },
     showFilter: false,
@@ -68,12 +68,10 @@ Page({
     
     const params = {
       page: this.data.currentPage,
-      limit: this.data.pageSize,
-      sortBy: 'eventDate',
-      sortOrder: 'desc',
-      ...this.data.filters
+      limit: this.data.pageSize
     };
     
+    console.log('🏠 首页发送的请求参数:', params);
     return API.getEvents(params)
       .then(res => {
         console.log('🏠 首页获取到的赛事数据:', res);
@@ -116,10 +114,7 @@ Page({
     
     const params = {
       page: this.data.currentPage,
-      limit: this.data.pageSize,
-      sortBy: 'eventDate',
-      sortOrder: 'desc',
-      ...this.data.filters
+      limit: this.data.pageSize
     };
     
     API.getEvents(params)

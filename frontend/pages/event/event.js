@@ -28,6 +28,11 @@ Page({
         events: [],
         loading: false
       },
+      search: {
+        query: '',
+        results: [],
+        searchHistory: []
+      },
       my: {
         events: [],
         type: 'all',
@@ -43,6 +48,11 @@ Page({
     filters: {
       eventType: '',
       region: '',
+      status: '',
+      feeRange: '',
+      timeRange: '',
+      participantRange: '',
+      registrationStatus: '',
       dateRange: {
         start: '',
         end: ''
@@ -56,6 +66,47 @@ Page({
       { id: 'mens_doubles', name: '男子双打' },
       { id: 'womens_doubles', name: '女子双打' },
       { id: 'mixed_doubles', name: '混合双打' }
+    ],
+    statusOptions: [
+      { id: '', name: '全部状态' },
+      { id: 'published', name: '报名中' },
+      { id: 'ongoing', name: '进行中' },
+      { id: 'ended', name: '已结束' },
+      { id: 'canceled', name: '已取消' }
+    ],
+    feeRangeOptions: [
+      { id: '', name: '全部费用' },
+      { id: 'free', name: '免费' },
+      { id: '0-30', name: '0-30元' },
+      { id: '30-50', name: '30-50元' },
+      { id: '50-100', name: '50-100元' },
+      { id: '100-200', name: '100-200元' },
+      { id: '200-300', name: '200-300元' },
+      { id: '300+', name: '300元以上' }
+    ],
+    timeRangeOptions: [
+      { id: '', name: '全部时间' },
+      { id: 'today', name: '今天' },
+      { id: 'tomorrow', name: '明天' },
+      { id: 'this_week', name: '本周' },
+      { id: 'next_week', name: '下周' },
+      { id: 'this_month', name: '本月' },
+      { id: 'next_month', name: '下月' }
+    ],
+    participantRangeOptions: [
+      { id: '', name: '全部人数' },
+      { id: '1-10', name: '1-10人' },
+      { id: '10-20', name: '10-20人' },
+      { id: '20-50', name: '20-50人' },
+      { id: '50-100', name: '50-100人' },
+      { id: '100+', name: '100人以上' }
+    ],
+    registrationStatusOptions: [
+      { id: '', name: '全部状态' },
+      { id: 'open', name: '可报名' },
+      { id: 'almost_full', name: '即将满员' },
+      { id: 'full', name: '已满员' },
+      { id: 'closed', name: '报名关闭' }
     ],
 
     // User info
@@ -73,16 +124,31 @@ Page({
       venue: '',
       court: '',
       region: '',
+      address: '',
       description: '',
+      rules: '',
+      prizes: '',
       eventDate: '',
+      eventTime: '09:00',
       registrationDeadline: '',
+      registrationDeadlineTime: '18:00',
+      registrationFee: 0,
+      isFree: true,
+      maxParticipants: 20,
+      organizerName: '',
+      organizerPhone: '',
+      organizerEmail: '',
       isPublic: true
     },
     submitting: false,
 
     // Component states
     loading: false,
-    error: ''
+    error: '',
+    
+    // Sorting
+    sortBy: 'eventDate',
+    sortOrder: 'desc'
   },
 
   onLoad: function () {
@@ -91,8 +157,11 @@ Page({
     // Initialize tab system
     this.initTabSystem();
 
-    // Load initial tab data
+    // Load initial tab data - 首页默认显示全部赛事数据
     this.loadTabData(this.data.activeTab);
+    
+    // 确保首页显示真实赛事数据
+    this.loadAllEvents();
   },
 
   onShow: function () {
@@ -144,13 +213,23 @@ Page({
     const params = {
       page: this.data.currentPage,
       limit: this.data.pageSize,
+      sortBy: this.data.sortBy,
+      sortOrder: this.data.sortOrder,
       ...this.data.filters
     };
 
+    console.log('🏆 事件页面发送的请求参数:', params);
     return API.getEvents(params)
       .then(res => {
+        console.log('🏆 事件页面获取到的赛事数据:', res);
         // 提取真实的赛事数组
-        const eventsArray = res.data.events || res.data || [];
+        let eventsArray = res.data.events || res.data || [];
+        
+        // 对赛事数据进行中文化处理
+        eventsArray = eventsArray.map(event => ({
+          ...event,
+          eventTypeText: this.getEventTypeText(event.category || event.ext_info?.eventType || event.eventType)
+        }));
 
         this.setData({
           events: eventsArray,
@@ -229,6 +308,11 @@ Page({
       filters: {
         eventType: '',
         region: '',
+        status: '',
+        feeRange: '',
+        timeRange: '',
+        participantRange: '',
+        registrationStatus: '',
         dateRange: {
           start: '',
           end: ''
@@ -464,9 +548,11 @@ Page({
 
   loadSearchData: function () {
     // Initialize search tab
+    const searchHistory = wx.getStorageSync('searchHistory') || [];
     this.setData({
       searchQuery: '',
-      showSearch: true
+      showSearch: true,
+      'tabData.search.searchHistory': searchHistory
     });
   },
 
@@ -520,6 +606,8 @@ Page({
               end_time: event.end_time,
               location: event.location,
               status: event.status,
+              // 添加中文化的赛事类型
+              eventTypeText: this.getEventTypeText(event.category || event.ext_info?.eventType || event.eventType),
               // 添加用户相关信息
               signup_status: relation.signup_status,
               signup_time: relation.signup_time,
@@ -551,8 +639,17 @@ Page({
 
     API.getEvents(params)
       .then(res => {
+        let eventsArray = res.data.events || res.data || [];
+        
+        // 对热门赛事数据进行中文化处理
+        eventsArray = eventsArray.map(event => ({
+          ...event,
+          eventTypeText: this.getEventTypeText(event.category || event.ext_info?.eventType || event.eventType)
+        }));
+
         this.setData({
-          popularEvents: res.data || []
+          popularEvents: eventsArray,
+          'tabData.popular.events': eventsArray
         });
       })
       .catch(err => {
@@ -592,9 +689,27 @@ Page({
     });
   },
 
+  inputAddress: function (e) {
+    this.setData({
+      'eventData.address': e.detail.value
+    });
+  },
+
   inputDescription: function (e) {
     this.setData({
       'eventData.description': e.detail.value
+    });
+  },
+
+  inputRules: function (e) {
+    this.setData({
+      'eventData.rules': e.detail.value
+    });
+  },
+
+  inputPrizes: function (e) {
+    this.setData({
+      'eventData.prizes': e.detail.value
     });
   },
 
@@ -604,15 +719,65 @@ Page({
     });
   },
 
+  selectEventTime: function (e) {
+    this.setData({
+      'eventData.eventTime': e.detail.value
+    });
+  },
+
   selectDeadline: function (e) {
     this.setData({
       'eventData.registrationDeadline': e.detail.value
     });
   },
 
-  togglePublic: function () {
+  selectDeadlineTime: function (e) {
     this.setData({
-      'eventData.isPublic': !this.data.eventData.isPublic
+      'eventData.registrationDeadlineTime': e.detail.value
+    });
+  },
+
+  toggleFree: function (e) {
+    const isFree = e.detail.value;
+    this.setData({
+      'eventData.isFree': isFree,
+      'eventData.registrationFee': isFree ? 0 : this.data.eventData.registrationFee
+    });
+  },
+
+  inputRegistrationFee: function (e) {
+    this.setData({
+      'eventData.registrationFee': parseFloat(e.detail.value) || 0
+    });
+  },
+
+  inputMaxParticipants: function (e) {
+    this.setData({
+      'eventData.maxParticipants': parseInt(e.detail.value) || 20
+    });
+  },
+
+  inputOrganizerName: function (e) {
+    this.setData({
+      'eventData.organizerName': e.detail.value
+    });
+  },
+
+  inputOrganizerPhone: function (e) {
+    this.setData({
+      'eventData.organizerPhone': e.detail.value
+    });
+  },
+
+  inputOrganizerEmail: function (e) {
+    this.setData({
+      'eventData.organizerEmail': e.detail.value
+    });
+  },
+
+  togglePublic: function (e) {
+    this.setData({
+      'eventData.isPublic': e.detail.value
     });
   },
 
@@ -660,6 +825,62 @@ Page({
       return false;
     }
 
+    if (!eventData.organizerName.trim()) {
+      wx.showToast({
+        title: '请输入组织者姓名',
+        icon: 'none'
+      });
+      return false;
+    }
+
+    if (!eventData.organizerPhone.trim()) {
+      wx.showToast({
+        title: '请输入联系电话',
+        icon: 'none'
+      });
+      return false;
+    }
+
+    // 验证电话号码格式
+    const phoneRegex = /^1[3-9]\d{9}$/;
+    if (!phoneRegex.test(eventData.organizerPhone)) {
+      wx.showToast({
+        title: '请输入正确的手机号码',
+        icon: 'none'
+      });
+      return false;
+    }
+
+    // 验证邮箱格式（如果填写了邮箱）
+    if (eventData.organizerEmail && eventData.organizerEmail.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(eventData.organizerEmail)) {
+        wx.showToast({
+          title: '请输入正确的邮箱地址',
+          icon: 'none'
+        });
+        return false;
+      }
+    }
+
+    // 验证报名费用
+    if (!eventData.isFree && eventData.registrationFee <= 0) {
+      wx.showToast({
+        title: '请输入正确的报名费用',
+        icon: 'none'
+      });
+      return false;
+    }
+
+    // 验证最大参赛人数
+    if (eventData.maxParticipants <= 0) {
+      wx.showToast({
+        title: '请输入正确的最大参赛人数',
+        icon: 'none'
+      });
+      return false;
+    }
+
     return true;
   },
 
@@ -673,21 +894,41 @@ Page({
 
     // 转换前端字段名到后端期望的字段名
     const { eventData } = this.data;
+    
+    // 构建完整的开始和结束时间
+    const startDateTime = `${eventData.eventDate}T${eventData.eventTime}:00.000Z`;
+    const endDateTime = `${eventData.eventDate}T${eventData.eventTime.split(':')[0] < '18' ? '18:00' : '21:00'}:00.000Z`;
+    
+    // 构建报名截止时间
+    const registrationDeadlineDateTime = `${eventData.registrationDeadline}T${eventData.registrationDeadlineTime}:00.000Z`;
+
     const apiData = {
       title: eventData.name,
       category: 'tennis', // 默认为网球
-      start_time: eventData.eventDate + 'T09:00:00.000Z', // 默认上午9点开始
-      end_time: eventData.eventDate + 'T17:00:00.000Z', // 默认下午5点结束
-      location: `${eventData.venue} ${eventData.court}`.trim(),
+      start_time: startDateTime,
+      end_time: endDateTime,
+      location: eventData.address ? `${eventData.venue} ${eventData.address}`.trim() : `${eventData.venue} ${eventData.court}`.trim(),
       description: eventData.description || '',
-      max_participants: 20, // 默认最大参与人数
+      max_participants: eventData.maxParticipants || 20,
       ext_info: {
         region: eventData.region,
         eventType: eventData.eventType,
         venue: eventData.venue,
         court: eventData.court,
+        address: eventData.address,
+        rules: eventData.rules,
+        prizes: eventData.prizes,
+        registrationFee: eventData.isFree ? 0 : eventData.registrationFee,
+        isFree: eventData.isFree,
+        registrationDeadline: registrationDeadlineDateTime,
+        organizer: {
+          name: eventData.organizerName,
+          phone: eventData.organizerPhone,
+          email: eventData.organizerEmail
+        },
         isPublic: eventData.isPublic,
-        registrationDeadline: eventData.registrationDeadline
+        eventTime: eventData.eventTime,
+        registrationDeadlineTime: eventData.registrationDeadlineTime
       }
     };
 
@@ -737,9 +978,20 @@ Page({
         venue: '',
         court: '',
         region: '',
+        address: '',
         description: '',
+        rules: '',
+        prizes: '',
         eventDate: '',
+        eventTime: '09:00',
         registrationDeadline: '',
+        registrationDeadlineTime: '18:00',
+        registrationFee: 0,
+        isFree: true,
+        maxParticipants: 20,
+        organizerName: '',
+        organizerPhone: '',
+        organizerEmail: '',
         isPublic: true
       },
       submitting: false
@@ -753,7 +1005,8 @@ Page({
     });
   },
 
-  searchEvents: function () {
+  // 执行搜索
+  performSearch: function () {
     const query = this.data.searchQuery.trim();
     if (!query) {
       wx.showToast({
@@ -763,7 +1016,10 @@ Page({
       return;
     }
 
-    this.setData({ loading: true });
+    this.setData({ 
+      loading: true,
+      'tabData.search.results': []
+    });
 
     const params = {
       query: query,
@@ -772,8 +1028,20 @@ Page({
     };
 
     API.searchEvents(params).then(res => {
+      let results = res.data.events || res.data || [];
+      
+      // 对搜索结果进行中文化处理
+      results = results.map(event => ({
+        ...event,
+        eventTypeText: this.getEventTypeText(event.category || event.ext_info?.eventType || event.eventType)
+      }));
+      
+      // 保存搜索历史
+      this.saveSearchHistory(query);
+      
       this.setData({
-        events: res.data.events || [],
+        'tabData.search.results': results,
+        'tabData.search.query': query,
         loading: false
       });
     }).catch(err => {
@@ -786,6 +1054,82 @@ Page({
     });
   },
 
+  // 保存搜索历史
+  saveSearchHistory: function(query) {
+    let history = this.data.tabData.search.searchHistory || [];
+    
+    // 移除重复项
+    history = history.filter(item => item !== query);
+    
+    // 添加到开头
+    history.unshift(query);
+    
+    // 限制历史记录数量
+    if (history.length > 10) {
+      history = history.slice(0, 10);
+    }
+    
+    this.setData({
+      'tabData.search.searchHistory': history
+    });
+    
+    // 保存到本地存储
+    wx.setStorageSync('searchHistory', history);
+  },
+
+  // 从历史记录搜索
+  searchFromHistory: function(e) {
+    const query = e.currentTarget.dataset.query;
+    this.setData({
+      searchQuery: query
+    });
+    this.performSearch();
+  },
+
+  // 清除搜索历史
+  clearSearchHistory: function() {
+    this.setData({
+      'tabData.search.searchHistory': []
+    });
+    wx.removeStorageSync('searchHistory');
+  },
+
+  // 点击搜索框外区域隐藏搜索
+  hideSearchOnOutsideClick: function() {
+    // 清除搜索焦点和结果，但保留搜索历史
+    if (this.data.searchQuery || this.data.tabData.search.results.length > 0) {
+      this.setData({
+        searchQuery: '',
+        'tabData.search.results': [],
+        showSearch: false
+      });
+    }
+  },
+
+  // 防止搜索框点击事件冒泡
+  preventHideSearch: function(e) {
+    e.stopPropagation();
+  },
+
+  // 搜索框获取焦点
+  onSearchFocus: function() {
+    this.setData({
+      showSearch: true
+    });
+  },
+
+  // 搜索框失去焦点
+  onSearchBlur: function() {
+    // 延迟隐藏搜索状态，给点击搜索按钮留时间
+    setTimeout(() => {
+      if (!this.data.searchQuery && this.data.tabData.search.results.length === 0) {
+        this.setData({
+          showSearch: false
+        });
+      }
+    }, 200);
+  },
+
   // 切换我的赛事类型
   switchMyEventType: function(e) {
     const type = e.currentTarget.dataset.type;
@@ -793,5 +1137,65 @@ Page({
       [`tabData.my.type`]: type
     });
     this.loadMyEvents();
+  },
+
+  // 赛事类型中文化映射
+  getEventTypeText: function(eventType) {
+    const typeMap = {
+      'mens_singles': '男子单打',
+      'womens_singles': '女子单打', 
+      'mens_doubles': '男子双打',
+      'womens_doubles': '女子双打',
+      'mixed_doubles': '混合双打',
+      'tennis': '网球',
+      'badminton': '羽毛球',
+      'table_tennis': '乒乓球',
+      'basketball': '篮球',
+      'football': '足球',
+      'volleyball': '排球',
+      'ping_pong': '乒乓球',
+      'swimming': '游泳',
+      'running': '跑步',
+      'cycling': '自行车',
+      'golf': '高尔夫',
+      'other': '其他运动'
+    };
+    return typeMap[eventType] || eventType || '未知类型';
+  },
+
+  // 排序功能
+  changeSortBy: function(e) {
+    const sortField = e.currentTarget.dataset.sort;
+    let sortOrder = 'desc';
+    
+    // 如果点击的是当前排序字段，则切换排序顺序
+    if (this.data.sortBy === sortField) {
+      sortOrder = this.data.sortOrder === 'asc' ? 'desc' : 'asc';
+    }
+    
+    this.setData({
+      sortBy: sortField,
+      sortOrder: sortOrder,
+      events: [],
+      currentPage: 1,
+      hasMore: true
+    });
+    
+    this.loadEvents();
+  },
+
+  // 切换到创建标签页
+  switchToCreateTab: function() {
+    this.setData({ activeTab: 'create' });
+    this.loadTabData('create');
+  },
+
+  // 切换热门赛事时间范围
+  switchPopularTimeRange: function(e) {
+    const range = e.currentTarget.dataset.range;
+    this.setData({
+      'tabData.popular.timeRange': range
+    });
+    this.loadPopularEvents();
   }
 });
