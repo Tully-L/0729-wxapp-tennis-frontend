@@ -39,13 +39,12 @@
     <view class="close-icon" bindtap="closeNotice"></view> <!-- 关闭按钮色块 -->
   </view>
 
-  <!-- 赛事列表标题及筛选区域 -->
+  <!-- 赛事列表标题区域 -->
   <view class="event-list-header">
     <view class="title-icon"></view> <!-- 标题图标色块 -->
     <text class="list-title">近期赛事</text>
-    <view class="search-icon" bindtap="toggleSearch"></view> <!-- 搜索图标色块 -->
-    <view class="filter-icon" bindtap="toggleFilter"></view> <!-- 筛选图标色块 -->
   </view>
+  
   <!-- 赛事卡片列表区域 -->
   <view class="event-cards">
     <!-- 动态赛事卡片 -->
@@ -56,8 +55,8 @@
           <text class="card-title">{{event.title || event.name}}</text>
           <view class="tags">
             <text class="tag">{{event.eventTypeText}}</text>
-            <text class="tag">{{(event.ext_info && event.ext_info.maxParticipants) || event.maxParticipants || 20}}人</text>
-            <text class="tag">{{event.currentParticipants || 0}}/{{(event.ext_info && event.ext_info.maxParticipants) || event.maxParticipants || 20}}</text>
+            <text class="tag">{{(event.ext_info && event.ext_info.maxParticipants) || event.max_participants || 20}}人</text>
+            <text class="tag">{{event.currentParticipants || 0}}/{{(event.ext_info && event.ext_info.maxParticipants) || event.max_participants || 20}}</text>
           </view>
           <view class="status">
             <text class="status-tag">{{event.status === 'published' ? '报名中' : event.status === 'ongoing' ? '进行中' : event.status === 'ended' ? '已结束' : '报名中'}}</text>
@@ -77,28 +76,6 @@
     <view wx:if="{{loading}}" class="loading-state">
       <view class="loading-spinner"></view>
       <view class="loading-text">加载中...</view>
-    </view>
-  </view>
-
-
-  <!-- 搜索面板（隐藏状态） -->
-  <view class="search-panel {{showSearch ? 'show' : ''}}" wx:if="{{showSearch}}">
-    <view class="search-content">
-      <input class="search-input" placeholder="搜索赛事..." value="{{searchQuery}}" bindinput="onSearchInput" />
-      <button class="search-btn" bindtap="onSearch">搜索</button>
-    </view>
-  </view>
-
-  <!-- 筛选面板（隐藏状态） -->
-  <view class="filter-panel {{showFilter ? 'show' : ''}}" wx:if="{{showFilter}}">
-    <view class="filter-content">
-      <view class="filter-title">筛选条件</view>
-      <view class="filter-options">
-        <view class="filter-option" bindtap="filterByType" data-type="all">全部</view>
-        <view class="filter-option" bindtap="filterByType" data-type="single">单打</view>
-        <view class="filter-option" bindtap="filterByType" data-type="double">双打</view>
-      </view>
-      <button class="filter-confirm" bindtap="confirmFilter">确定</button>
     </view>
   </view>
 </view>
