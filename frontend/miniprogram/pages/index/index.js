@@ -11,20 +11,24 @@ Page({
     hasMore: true,
     loading: false,
     
-    // Filter options  
+    // Filter options - EXACTLY match event page structure
     filters: {
-      eventType: null,
-      region: null,
-      status: null,
-      feeRange: null,
-      timeRange: null,
-      participantRange: null,
-      registrationStatus: null,
+      eventType: '',
+      region: '',
+      status: '',
+      feeRange: '',
+      timeRange: '',
+      participantRange: '',
+      registrationStatus: '',
       dateRange: {
-        start: null,
-        end: null
+        start: '',
+        end: ''
       }
     },
+    
+    // Sorting - EXACTLY match event page
+    sortBy: 'eventDate',
+    sortOrder: 'desc',
     showFilter: false,
     showSearch: false,
     searchQuery: '',
@@ -68,11 +72,29 @@ Page({
     
     const params = {
       page: this.data.currentPage,
-      limit: this.data.pageSize
+      limit: this.data.pageSize,
+      sortBy: this.data.sortBy,
+      sortOrder: this.data.sortOrder,
+      ...this.data.filters
     };
     
-    console.log('🏠 首页发送的请求参数:', params);
-    return API.getEvents(params)
+    // Override any server-side default filters explicitly
+    const cleanParams = {
+      page: this.data.currentPage,
+      limit: this.data.pageSize,
+      sortBy: this.data.sortBy,
+      sortOrder: this.data.sortOrder,
+      eventType: '',
+      region: '',
+      status: '',
+      feeRange: '',
+      timeRange: '',
+      participantRange: '',
+      registrationStatus: ''
+    };
+    
+    console.log('🏠 首页发送的请求参数:', cleanParams);
+    return API.getEvents(cleanParams)
       .then(res => {
         console.log('🏠 首页获取到的赛事数据:', res);
         
@@ -112,12 +134,23 @@ Page({
       loading: true
     });
     
-    const params = {
+    // Override any server-side default filters explicitly  
+    const cleanParams = {
       page: this.data.currentPage,
-      limit: this.data.pageSize
+      limit: this.data.pageSize,
+      sortBy: this.data.sortBy,
+      sortOrder: this.data.sortOrder,
+      eventType: '',
+      region: '',
+      status: '',
+      feeRange: '',
+      timeRange: '',
+      participantRange: '',
+      registrationStatus: ''
     };
     
-    API.getEvents(params)
+    console.log('🏠 首页loadMoreEvents发送的请求参数:', cleanParams);
+    API.getEvents(cleanParams)
       .then(res => {
         console.log('🏠 首页loadMoreEvents获取到的赛事数据:', res);
         

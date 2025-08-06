@@ -429,9 +429,10 @@ const request = (url, method = 'GET', data = {}, showLoading = true) => {
       }
     }
 
-    console.log(`发起API请求 ${method} ${requestConfig.url}`, {
+    console.log(`🌐 发起API请求 ${method} ${requestConfig.url}`, {
       headers: requestConfig.header,
-      data: cleanData
+      data: cleanData,
+      queryParams: requestConfig.url.includes('?') ? requestConfig.url.split('?')[1] : 'none'
     });
 
     // 发起请求
