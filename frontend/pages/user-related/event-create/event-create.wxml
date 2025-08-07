@@ -1,12 +1,12 @@
 <view class="create-container">
   <view class="form-section">
     <view class="section-title">基本信息</view>
-    
+
     <view class="form-item">
       <view class="form-label">赛事名称 *</view>
-      <input 
-        class="form-input" 
-        placeholder="请输入赛事名称" 
+      <input
+        class="form-input"
+        placeholder="请输入赛事名称"
         value="{{eventData.name}}"
         bindinput="inputName"
       />
@@ -15,8 +15,8 @@
     <view class="form-item">
       <view class="form-label">赛事类型 *</view>
       <view class="type-options">
-        <view 
-          wx:for="{{eventTypes}}" 
+        <view
+          wx:for="{{eventTypes}}"
           wx:key="id"
           class="type-option {{eventData.eventType === item.id ? 'active' : ''}}"
           bindtap="selectEventType"
@@ -29,9 +29,9 @@
 
     <view class="form-item">
       <view class="form-label">场地 *</view>
-      <input 
-        class="form-input" 
-        placeholder="请输入场地名称" 
+      <input
+        class="form-input"
+        placeholder="请输入场地名称"
         value="{{eventData.venue}}"
         bindinput="inputVenue"
       />
@@ -39,9 +39,9 @@
 
     <view class="form-item">
       <view class="form-label">球场</view>
-      <input 
-        class="form-input" 
-        placeholder="请输入球场编号" 
+      <input
+        class="form-input"
+        placeholder="请输入球场编号"
         value="{{eventData.court}}"
         bindinput="inputCourt"
       />
@@ -49,9 +49,9 @@
 
     <view class="form-item">
       <view class="form-label">地区</view>
-      <input 
-        class="form-input" 
-        placeholder="请输入地区" 
+      <input
+        class="form-input"
+        placeholder="请输入地区"
         value="{{eventData.region}}"
         bindinput="inputRegion"
       />
@@ -60,7 +60,7 @@
 
   <view class="form-section">
     <view class="section-title">时间安排</view>
-    
+
     <view class="form-item">
       <view class="form-label">比赛日期 *</view>
       <picker mode="date" bindchange="selectEventDate">
@@ -82,30 +82,30 @@
 
   <view class="form-section">
     <view class="section-title">赛事说明</view>
-    
+
     <view class="form-item">
-      <textarea 
-        class="form-textarea" 
-        placeholder="请输入赛事说明（可选）" 
+      <textarea
+        class="form-textarea"
+        placeholder="请输入赛事说明（可选）"
         value="{{eventData.description}}"
         bindinput="inputDescription"
         maxlength="500"
-      />
-      <view class="textarea-count">{{eventData.description.length}}/500</view>
+      ></textarea>
+      <view class="textarea-count">{{eventData.description.length || 0}}/500</view>
     </view>
   </view>
 
   <view class="form-section">
     <view class="section-title">发布设置</view>
-    
+
     <view class="form-item">
       <view class="switch-item">
         <view class="switch-label">公开赛事</view>
-        <switch 
-          checked="{{eventData.isPublic}}" 
+        <switch
+          checked="{{eventData.isPublic}}"
           bindchange="togglePublic"
           color="#0A4A39"
-        />
+        ></switch>
       </view>
       <view class="switch-desc">公开赛事所有用户都可以看到和报名</view>
     </view>
@@ -113,12 +113,12 @@
 
   <view class="form-actions">
     <button class="btn-cancel" bindtap="cancel">取消</button>
-    <button 
-      class="btn-submit {{submitting ? 'disabled' : ''}}" 
+    <button
+      class="btn-submit {{submitting ? 'disabled' : ''}}"
       bindtap="createEvent"
       disabled="{{submitting}}"
     >
       {{submitting ? '创建中...' : '创建赛事'}}
     </button>
   </view>
-</view> 
+</view>

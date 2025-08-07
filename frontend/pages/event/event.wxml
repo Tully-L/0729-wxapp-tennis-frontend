@@ -41,91 +41,155 @@
         <!-- Filter Panel (Hidden by default) -->
         <view class="filter-panel {{showFilter ? 'show' : ''}}">
           <view class="filter-section">
-      <view class="filter-section-title">赛事类型</view>
-      <view class="filter-options">
-        <view 
-          wx:for="{{eventTypes}}" 
-          wx:key="id" 
-          class="filter-option {{filters.eventType === item.id ? 'active' : ''}}"
-          bindtap="applyFilter"
-          data-field="eventType"
-          data-value="{{item.id}}"
-        >
-          {{item.name}}
-        </view>
-      </view>
-    </view>
-
-    <view class="filter-section">
-      <view class="filter-section-title">赛事状态</view>
-      <view class="filter-options">
-        <view 
-          wx:for="{{statusOptions}}" 
-          wx:key="id" 
-          class="filter-option {{filters.status === item.id ? 'active' : ''}}"
-          bindtap="applyFilter"
-          data-field="status"
-          data-value="{{item.id}}"
-        >
-          {{item.name}}
-        </view>
-      </view>
-    </view>
-    
-    <view class="filter-section">
-      <view class="filter-section-title">地区</view>
-      <input 
-        class="filter-input" 
-        placeholder="按地区搜索" 
-        value="{{filters.region}}"
-        bindinput="inputRegion"
-      />
-    </view>
-    
-    <view class="filter-section">
-      <view class="filter-section-title">日期范围</view>
-      <view class="date-range">
-        <picker mode="date" bindchange="startDateChange">
-          <view class="date-picker {{filters.dateRange && filters.dateRange.start ? '' : 'placeholder'}}">
-            {{filters.dateRange && filters.dateRange.start || '开始日期'}}
+            <view class="filter-section-title">赛事类型</view>
+            <view class="filter-options">
+              <view 
+                wx:for="{{eventTypes}}" 
+                wx:key="id" 
+                class="filter-option {{filters.eventType === item.id ? 'active' : ''}}"
+                bindtap="applyFilter"
+                data-field="eventType"
+                data-value="{{item.id}}"
+              >
+                {{item.name}}
+              </view>
+            </view>
           </view>
-        </picker>
-        <view class="date-separator">至</view>
-        <picker mode="date" bindchange="endDateChange">
-          <view class="date-picker {{filters.dateRange && filters.dateRange.end ? '' : 'placeholder'}}">
-            {{filters.dateRange && filters.dateRange.end || '结束日期'}}
-          </view>
-        </picker>
-      </view>
-    </view>
 
-    <view class="filter-section">
-      <view class="filter-section-title">排序方式</view>
-      <view class="sort-options">
-        <view 
-          class="sort-option {{sortBy === 'eventDate' ? 'active' : ''}}"
-          bindtap="changeSortBy"
-          data-sort="eventDate"
-        >
-          按日期 {{sortBy === 'eventDate' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}}
-        </view>
-        <view 
-          class="sort-option {{sortBy === 'createdAt' ? 'active' : ''}}"
-          bindtap="changeSortBy"
-          data-sort="createdAt"
-        >
-          按创建时间 {{sortBy === 'createdAt' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}}
-        </view>
-        <view 
-          class="sort-option {{sortBy === 'currentParticipants' ? 'active' : ''}}"
-          bindtap="changeSortBy"
-          data-sort="currentParticipants"
-        >
-          按参与人数 {{sortBy === 'currentParticipants' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}}
-        </view>
-      </view>
-    </view>
-    
+          <view class="filter-section">
+            <view class="filter-section-title">赛事状态</view>
+            <view class="filter-options">
+              <view 
+                wx:for="{{statusOptions}}" 
+                wx:key="id" 
+                class="filter-option {{filters.status === item.id ? 'active' : ''}}"
+                bindtap="applyFilter"
+                data-field="status"
+                data-value="{{item.id}}"
+              >
+                {{item.name}}
+              </view>
+            </view>
+          </view>
+
+          <view class="filter-section">
+            <view class="filter-section-title">费用范围</view>
+            <view class="filter-options">
+              <view 
+                wx:for="{{feeRangeOptions}}" 
+                wx:key="id" 
+                class="filter-option {{filters.feeRange === item.id ? 'active' : ''}}"
+                bindtap="applyFilter"
+                data-field="feeRange"
+                data-value="{{item.id}}"
+              >
+                {{item.name}}
+              </view>
+            </view>
+          </view>
+
+          <view class="filter-section">
+            <view class="filter-section-title">时间范围</view>
+            <view class="filter-options">
+              <view 
+                wx:for="{{timeRangeOptions}}" 
+                wx:key="id" 
+                class="filter-option {{filters.timeRange === item.id ? 'active' : ''}}"
+                bindtap="applyFilter"
+                data-field="timeRange"
+                data-value="{{item.id}}"
+              >
+                {{item.name}}
+              </view>
+            </view>
+          </view>
+          
+          <view class="filter-section">
+            <view class="filter-section-title">参赛人数</view>
+            <view class="filter-options">
+              <view 
+                wx:for="{{participantRangeOptions}}" 
+                wx:key="id" 
+                class="filter-option {{filters.participantRange === item.id ? 'active' : ''}}"
+                bindtap="applyFilter"
+                data-field="participantRange"
+                data-value="{{item.id}}"
+              >
+                {{item.name}}
+              </view>
+            </view>
+          </view>
+
+          <view class="filter-section">
+            <view class="filter-section-title">报名状态</view>
+            <view class="filter-options">
+              <view 
+                wx:for="{{registrationStatusOptions}}" 
+                wx:key="id" 
+                class="filter-option {{filters.registrationStatus === item.id ? 'active' : ''}}"
+                bindtap="applyFilter"
+                data-field="registrationStatus"
+                data-value="{{item.id}}"
+              >
+                {{item.name}}
+              </view>
+            </view>
+          </view>
+          
+          <view class="filter-section">
+            <view class="filter-section-title">地区</view>
+            <input 
+              class="filter-input" 
+              placeholder="按地区搜索" 
+              value="{{filters.region}}"
+              bindinput="inputRegion"
+            />
+          </view>
+          
+          <view class="filter-section">
+            <view class="filter-section-title">自定义日期</view>
+            <view class="date-range">
+              <picker mode="date" bindchange="startDateChange">
+                <view class="date-picker {{filters.dateRange && filters.dateRange.start ? '' : 'placeholder'}}">
+                  {{filters.dateRange && filters.dateRange.start || '开始日期'}}
+                </view>
+              </picker>
+              <view class="date-separator">至</view>
+              <picker mode="date" bindchange="endDateChange">
+                <view class="date-picker {{filters.dateRange && filters.dateRange.end ? '' : 'placeholder'}}">
+                  {{filters.dateRange && filters.dateRange.end || '结束日期'}}
+                </view>
+              </picker>
+            </view>
+          </view>
+
+          <view class="filter-section">
+            <view class="filter-section-title">排序方式</view>
+            <view class="sort-options">
+              <view 
+                class="sort-option {{sortBy === 'eventDate' ? 'active' : ''}}"
+                bindtap="changeSortBy"
+                data-sort="eventDate"
+              >
+                按日期 {{sortBy === 'eventDate' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}}
+              </view>
+              <view 
+                class="sort-option {{sortBy === 'createdAt' ? 'active' : ''}}"
+                bindtap="changeSortBy"
+                data-sort="createdAt"
+              >
+                按创建时间 {{sortBy === 'createdAt' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}}
+              </view>
+              <view 
+                class="sort-option {{sortBy === 'currentParticipants' ? 'active' : ''}}"
+                bindtap="changeSortBy"
+                data-sort="currentParticipants"
+              >
+                按参与人数 {{sortBy === 'currentParticipants' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}}
+              </view>
+            </view>
+          </view>
+          
           <view class="filter-actions">
             <button class="btn-reset" bindtap="resetFilter">重置</button>
             <button class="btn-apply" bindtap="toggleFilter">应用</button>
@@ -174,7 +238,7 @@
           </view>
 
           <view class="event-info">
-            <view class="event-type">{{item.category || item.ext_info.eventType || item.eventType}}</view>
+            <view class="event-type">{{item.eventTypeText || item.category || item.ext_info.eventType || item.eventType}}</view>
             <view class="event-status status-{{item.status}}">
               {{item.status === 'draft' ? '草稿' :
                 item.status === 'published' ? '报名中' :
@@ -266,18 +330,21 @@
       </view>
       
       <!-- Search Tab Content -->
-      <view wx:elif="{{activeTab === 'search'}}" class="tab-panel search-panel">
+      <view wx:elif="{{activeTab === 'search'}}" class="tab-panel search-panel" bindtap="hideSearchOnOutsideClick">
         <view class="search-content">
           <view class="search-header">
             <input 
               class="search-input-main" 
               placeholder="搜索赛事..." 
-              value="{{tabData.search.query}}"
-              bindinput="onSearchTabInput"
+              value="{{searchQuery}}"
+              bindinput="onSearchInput"
               bindconfirm="performSearch"
+              bindfocus="onSearchFocus"
+              bindblur="onSearchBlur"
               focus="{{activeTab === 'search'}}"
+              catchtap="preventHideSearch"
             />
-            <button class="search-btn-main" bindtap="performSearch">搜索</button>
+            <button class="search-btn-main" bindtap="performSearch" catchtap="preventHideSearch">搜索</button>
           </view>
           
           <!-- Search Results -->
@@ -299,7 +366,7 @@
               <view class="event-content">
                 <view class="event-title">{{item.name}}</view>
                 <view class="event-info">
-                  <view class="event-type">{{item.eventType}}</view>
+                  <view class="event-type">{{item.eventTypeText || item.category || item.eventType}}</view>
                   <view class="event-status status-{{item.status}}">
                     {{item.status === 'registration' ? '报名中' : 
                       item.status === 'upcoming' ? '即将开始' :
@@ -398,6 +465,16 @@
                 bindinput="inputRegion"
               />
             </view>
+
+            <view class="form-item">
+              <view class="form-label">详细地址</view>
+              <input 
+                class="form-input" 
+                placeholder="请输入详细地址" 
+                value="{{eventData.address}}"
+                bindinput="inputAddress"
+              />
+            </view>
           </view>
 
           <view class="form-section">
@@ -410,15 +487,73 @@
                   {{eventData.eventDate || '请选择比赛日期'}}
                 </view>
               </picker>
+              <view class="form-hint">选择比赛日期后将自动设置报名截止日期</view>
             </view>
 
             <view class="form-item">
-              <view class="form-label">报名截止 *</view>
+              <view class="form-label">比赛时间 *</view>
+              <picker mode="time" bindchange="selectEventTime">
+                <view class="picker-input">
+                  {{eventData.eventTime || '09:00'}}
+                </view>
+              </picker>
+            </view>
+
+            <view class="form-item">
+              <view class="form-label">报名截止日期 *</view>
               <picker mode="date" bindchange="selectDeadline">
                 <view class="picker-input {{eventData.registrationDeadline ? '' : 'placeholder'}}">
                   {{eventData.registrationDeadline || '请选择报名截止日期'}}
                 </view>
               </picker>
+            </view>
+
+            <view class="form-item">
+              <view class="form-label">报名截止时间 *</view>
+              <picker mode="time" bindchange="selectDeadlineTime">
+                <view class="picker-input">
+                  {{eventData.registrationDeadlineTime || '18:00'}}
+                </view>
+              </picker>
+            </view>
+          </view>
+
+          <view class="form-section">
+            <view class="section-title">费用与人数</view>
+            
+            <view class="form-item">
+              <view class="switch-item">
+                <view class="switch-label">免费赛事</view>
+                <switch 
+                  checked="{{eventData.isFree}}" 
+                  bindchange="toggleFree"
+                  color="#0A4A39"
+                />
+              </view>
+            </view>
+
+            <view class="form-item" wx:if="{{!eventData.isFree}}">
+              <view class="form-label">报名费用 (元) *</view>
+              <input
+                class="form-input"
+                placeholder="请输入报名费用（0-10000元）"
+                value="{{eventData.registrationFee}}"
+                bindinput="inputRegistrationFee"
+                type="number"
+              />
+              <view class="form-hint">费用将用于场地租赁、奖品采购等赛事开支</view>
+            </view>
+
+            <view class="form-item">
+              <view class="form-label">最大参赛人数 *</view>
+              <input
+                class="form-input"
+                placeholder="请输入最大参赛人数（建议2-50人）"
+                value="{{eventData.maxParticipants}}"
+                bindinput="inputMaxParticipants"
+                type="number"
+              />
+              <view class="form-hint">建议根据场地大小和赛事类型设置合理的参赛人数</view>
             </view>
           </view>
 
@@ -426,14 +561,75 @@
             <view class="section-title">赛事说明</view>
             
             <view class="form-item">
+              <view class="form-label">赛事介绍</view>
               <textarea 
                 class="form-textarea" 
-                placeholder="请输入赛事说明（可选）" 
+                placeholder="请输入赛事介绍（可选）" 
                 value="{{eventData.description}}"
                 bindinput="inputDescription"
                 maxlength="500"
               />
               <view class="textarea-count">{{eventData.description.length || 0}}/500</view>
+            </view>
+
+            <view class="form-item">
+              <view class="form-label">参赛规则</view>
+              <textarea 
+                class="form-textarea" 
+                placeholder="请输入参赛规则说明（可选）" 
+                value="{{eventData.rules}}"
+                bindinput="inputRules"
+                maxlength="300"
+              />
+              <view class="textarea-count">{{eventData.rules.length || 0}}/300</view>
+            </view>
+
+            <view class="form-item">
+              <view class="form-label">奖项设置</view>
+              <textarea 
+                class="form-textarea" 
+                placeholder="请输入奖项设置（可选）" 
+                value="{{eventData.prizes}}"
+                bindinput="inputPrizes"
+                maxlength="200"
+              />
+              <view class="textarea-count">{{eventData.prizes.length || 0}}/200</view>
+            </view>
+          </view>
+
+          <view class="form-section">
+            <view class="section-title">主办方信息</view>
+            
+            <view class="form-item">
+              <view class="form-label">组织者姓名 *</view>
+              <input 
+                class="form-input" 
+                placeholder="请输入组织者姓名" 
+                value="{{eventData.organizerName}}"
+                bindinput="inputOrganizerName"
+              />
+            </view>
+
+            <view class="form-item">
+              <view class="form-label">联系电话 *</view>
+              <input
+                class="form-input"
+                placeholder="请输入11位手机号码"
+                value="{{eventData.organizerPhone}}"
+                bindinput="inputOrganizerPhone"
+                type="number"
+              />
+              <view class="form-hint">参赛者可通过此电话联系您了解赛事详情</view>
+            </view>
+
+            <view class="form-item">
+              <view class="form-label">联系邮箱</view>
+              <input 
+                class="form-input" 
+                placeholder="请输入联系邮箱（可选）" 
+                value="{{eventData.organizerEmail}}"
+                bindinput="inputOrganizerEmail"
+              />
             </view>
           </view>
 
@@ -513,7 +709,7 @@
               <view class="event-content">
                 <view class="event-title">{{item.title || item.name}}</view>
                 <view class="event-info">
-                  <view class="event-type">{{item.category || item.eventType}}</view>
+                  <view class="event-type">{{item.eventTypeText || item.category || item.eventType}}</view>
                   <view class="event-status status-{{item.status}}">
                     {{item.status === 'registration' ? '报名中' : 
                       item.status === 'upcoming' ? '即将开始' :
@@ -593,7 +789,7 @@
               <view class="event-content">
                 <view class="event-title">{{item.name}}</view>
                 <view class="event-info">
-                  <view class="event-type">{{item.eventType}}</view>
+                  <view class="event-type">{{item.eventTypeText || item.eventType}}</view>
                   <view class="event-status status-{{item.status}}">
                     {{item.status === 'registration' ? '报名中' : 
                       item.status === 'upcoming' ? '即将开始' :

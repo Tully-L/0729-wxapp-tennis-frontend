@@ -165,6 +165,14 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.search-btn-main:active {
+  background: #083A2F;
+  transform: scale(0.98);
 }
 
 .search-results {
@@ -817,15 +825,37 @@
 
 /* Events List */
 .events-list {
-  padding: 20rpx;
+  padding: 10rpx 20rpx;
 }
 
 .event-card {
   background-color: var(--card-background);
-  border-radius: 8rpx;
+  border-radius: 12rpx;
   margin-bottom: 30rpx;
   overflow: hidden;
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  width: calc(100% - 40rpx);
+  margin-left: 20rpx;
+  margin-right: 20rpx;
+  max-width: 750rpx;
+  min-width: 300rpx;
+}
+
+/* 响应式设计 - 针对不同屏幕尺寸 */
+@media screen and (max-width: 375px) {
+  .event-card {
+    width: calc(100% - 30rpx);
+    margin-left: 15rpx;
+    margin-right: 15rpx;
+  }
+}
+
+@media screen and (min-width: 414px) {
+  .event-card {
+    width: calc(100% - 50rpx);
+    margin-left: 25rpx;
+    margin-right: 25rpx;
+  }
 }
 
 .event-cover {
@@ -851,7 +881,7 @@
 }
 
 .event-content {
-  padding: 20rpx;
+  padding: 25rpx;
 }
 
 .event-header {
@@ -874,7 +904,9 @@
 .event-info {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 20rpx;
+  gap: 10rpx;
 }
 
 .event-type {
@@ -886,22 +918,58 @@
   font-size: 24rpx;
   padding: 6rpx 12rpx;
   border-radius: 4rpx;
-  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: unset;
+  flex-shrink: 0;
+  word-break: keep-all;
+  min-width: fit-content;
+  display: inline-block;
 }
 
-.status-completed {
+.status-completed, .status-published {
   background-color: var(--primary-color);
   color: var(--text-on-primary);
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow: visible;
+  min-width: fit-content;
 }
 
 .status-ongoing {
   background-color: #FF9500;
   color: #FFFFFF;
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow: visible;
+  min-width: fit-content;
 }
 
-.status-registration {
+.status-registration, .status-draft {
   background-color: #34C759;
   color: #FFFFFF;
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow: visible;
+  min-width: fit-content;
+}
+
+.status-ended {
+  background-color: #666;
+  color: #FFFFFF;
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow: visible;
+  min-width: fit-content;
+}
+
+.status-canceled {
+  background-color: #FF3B30;
+  color: #FFFFFF;
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow: visible;
+  min-width: fit-content;
 }
 
 .event-details {
@@ -1022,6 +1090,13 @@
 
 .create-panel .form-item {
   margin-bottom: 20px;
+}
+
+.create-panel .form-hint {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+  line-height: 1.4;
 }
 
 .create-panel .form-label {
@@ -1164,4 +1239,44 @@
 .create-panel .btn-submit.disabled {
   background: #ccc;
   color: #666;
+}
+
+/* Responsive design for different screen sizes */
+@media screen and (max-width: 320px) {
+  .events-list {
+    padding: 5rpx 10rpx;
+  }
+  .event-card {
+    width: calc(100% - 10rpx);
+    margin-left: 5rpx;
+    margin-right: 5rpx;
+  }
+  .event-content {
+    padding: 15rpx;
+  }
+}
+
+@media screen and (min-width: 375px) {
+  .events-list {
+    padding: 15rpx 25rpx;
+  }
+  .event-card {
+    width: calc(100% - 30rpx);
+    margin-left: 15rpx;
+    margin-right: 15rpx;
+  }
+  .event-content {
+    padding: 30rpx;
+  }
+}
+
+@media screen and (min-width: 414px) {
+  .events-list {
+    padding: 20rpx 30rpx;
+  }
+  .event-card {
+    width: calc(100% - 40rpx);
+    margin-left: 20rpx;
+    margin-right: 20rpx;
+  }
 }

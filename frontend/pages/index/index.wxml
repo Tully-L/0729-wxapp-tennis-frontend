@@ -39,6 +39,8 @@
     <view class="close-icon" bindtap="closeNotice"></view> <!-- 关闭按钮色块 -->
   </view>
 
+
+
   <!-- 赛事列表标题区域 -->
   <view class="event-list-header">
     <view class="title-icon"></view> <!-- 标题图标色块 -->

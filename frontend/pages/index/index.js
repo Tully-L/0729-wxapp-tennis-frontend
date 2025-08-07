@@ -16,6 +16,7 @@ Page({
     // Match data
     matches: [],
     liveMatches: [],
+    events: [],  // 首页赛事数据
     pageSize: 10,
     currentPage: 1,
     hasMore: true,
@@ -148,16 +149,17 @@ Page({
   // Load matches based on current tab and filters
   loadMatches: function() {
     if (this.data.loading) return Promise.resolve();
-    
+
     this.setData({ loading: true });
-    
+
+    // 首页显示最新的赛事数据，不按状态筛选
     const params = {
-      page: this.data.currentPage,
-      limit: this.data.pageSize,  // 修改为后端期望的参数名
-      status: this.data.statusMap[this.data.activeTab],
-      ...this.data.filters
+      page: 1,
+      limit: 10,  // 首页只显示前10个最新赛事
+      sortBy: 'start_time',
+      sortOrder: 'asc'
     };
-    
+
     return API.getEvents(params)
       .then(res => {
         console.log('获取到的赛事数据:', res);
@@ -175,11 +177,16 @@ Page({
           }
         }
 
-        // 将后端返回的赛事数组转换为按日期分组的格式
-        const matchGroups = this.groupMatchesByDate(events);
+        // 为每个赛事添加中文类型显示
+        events = events.map(event => {
+          return {
+            ...event,
+            eventTypeText: this.getEventTypeText(event.ext_info?.eventType || event.eventType || event.category)
+          };
+        });
 
         this.setData({
-          matches: matchGroups,
+          events: events,
           hasMore: res.pagination ? (res.pagination.page < res.pagination.pages) : false,
           loading: false
         });
@@ -189,7 +196,20 @@ Page({
         this.setData({ loading: false });
       });
   },
-  
+
+  // 获取赛事类型中文显示
+  getEventTypeText: function(eventType) {
+    const typeMap = {
+      'mens_singles': '男子单打',
+      'womens_singles': '女子单打',
+      'mens_doubles': '男子双打',
+      'womens_doubles': '女子双打',
+      'mixed_doubles': '混合双打',
+      'tennis': '网球'
+    };
+    return typeMap[eventType] || eventType || '网球';
+  },
+
   // Load more matches (pagination)
   loadMoreMatches: function() {
     if (this.data.loading) return;
@@ -745,10 +765,16 @@ Page({
   // 赛事卡片点击事件
   goToEventDetail(e) {
     const id = e.currentTarget.dataset.id;
-    wx.showToast({
-      title: `查看赛事详情 ${id}`,
-      icon: 'none'
-    });
+    if (id) {
+      wx.navigateTo({
+        url: `/pages/event/detail?id=${id}`
+      });
+    } else {
+      wx.showToast({
+        title: '赛事信息不完整',
+        icon: 'none'
+      });
+    }
   },
 
   // 筛选事件

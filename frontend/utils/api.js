@@ -291,13 +291,13 @@ const request = (url, method = 'GET', data = {}, showLoading = true) => {
     // 获取用户token
     const token = wx.getStorageSync('token');
     
-    // 检查是否为mock token，如果是则直接使用fallback
-    if (token && token.startsWith('mock_token_')) {
-      console.log('检测到mock token，直接使用本地模拟数据');
-      // 直接调用fallback，不在这里处理loading
-      handleMockFallback(url, method, cleanRequestData(data), resolve, reject, showLoading);
-      return;
-    }
+    // 强制使用真实API - 不使用mock token检查
+    // 注释掉mock token检查，强制调用真实API
+    // if (token && token.startsWith('mock_token_')) {
+    //   console.log('检测到mock token，直接使用本地模拟数据');
+    //   handleMockFallback(url, method, cleanRequestData(data), resolve, reject, showLoading);
+    //   return;
+    // }
     
     // 清理和验证数据
     const cleanData = cleanRequestData(data);
@@ -332,31 +332,13 @@ const request = (url, method = 'GET', data = {}, showLoading = true) => {
           });
           
           if (res.statusCode >= 200 && res.statusCode < 300) {
-            // 验证响应格式
-            if (validateResponseFormat(res)) {
-              resolve(res.data);
-            } else {
-              console.warn('API返回格式异常，使用本地模拟数据');
-              handleMockFallback(url, method, cleanData, resolve, reject);
-            }
-          } else if (res.statusCode === 401) {
-            // Token过期或无效
-            console.warn('Token无效，清除本地认证信息');
-            clearAuthInfo();
-            handleMockFallback(url, method, cleanData, resolve, reject);
-          } else if (res.statusCode >= 500) {
-            // 服务器错误
-            console.error('服务器错误:', res.statusCode);
-            handleMockFallback(url, method, cleanData, resolve, reject);
+            // 强制使用真实API响应
+            console.log('🌐 强制使用真实API响应，不验证格式');
+            resolve(res.data);
           } else {
-            // 对于400、403、404错误，直接使用fallback，不记录错误日志
-            if (res.statusCode === 400 || res.statusCode === 403 || res.statusCode === 404) {
-              console.log('API endpoint not available, using fallback data for:', url);
-              handleMockFallback(url, method, cleanData, resolve, reject);
-            } else {
-              console.error('API请求失败:', res);
-              reject(new Error(res.data?.message || `请求失败 (${res.statusCode})`));
-            }
+            // 强制使用真实API响应，不管状态码
+            console.log('🌐 收到状态码', res.statusCode, '强制使用响应数据');
+            resolve(res.data);
           }
         } catch (error) {
           if (showLoading) {
@@ -369,7 +351,7 @@ const request = (url, method = 'GET', data = {}, showLoading = true) => {
             });
           }
           console.error('响应处理错误:', error);
-          handleMockFallback(url, method, cleanData, resolve, reject);
+          reject(error);
         }
       },
       fail: (err) => {
@@ -385,19 +367,7 @@ const request = (url, method = 'GET', data = {}, showLoading = true) => {
           }
           
           console.error('网络请求失败:', err);
-          
-          // 根据错误类型提供不同的处理
-          if (err.errMsg) {
-            if (err.errMsg.includes('timeout')) {
-              console.log('请求超时，使用本地模拟数据');
-            } else if (err.errMsg.includes('fail')) {
-              console.log('网络连接失败，使用本地模拟数据');
-            } else {
-              console.log('其他网络错误，使用本地模拟数据');
-            }
-          }
-          
-          handleMockFallback(url, method, cleanData, resolve, reject);
+          reject(err);
         } catch (error) {
           if (showLoading) {
             wx.nextTick(() => {
@@ -769,7 +739,10 @@ const handleMockFallback = (url, method, data, resolve, reject, needHideLoading 
         const events = getStoredEvents();
         resolve({
           success: true,
-          data: events
+          data: {
+            events: events,
+            filters: {}
+          }
         });
       } else if (url === '/events' && method === 'POST') {
         // 创建新赛事

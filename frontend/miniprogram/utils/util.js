@@ -126,6 +126,29 @@ const generateRandomId = (length = 8) => {
   return result;
 };
 
+/**
+ * Format event time for display
+ * @param {String} timeString - ISO time string
+ * @return {String} Formatted time display
+ */
+const formatEventTime = (timeString) => {
+  if (!timeString) return '';
+  
+  try {
+    const date = new Date(timeString);
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hour = date.getHours();
+    const minute = date.getMinutes();
+    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    const weekday = weekdays[date.getDay()];
+    
+    return `${month}月${day}日(${weekday})${formatNumber(hour)}:${formatNumber(minute)}`;
+  } catch (e) {
+    return timeString;
+  }
+};
+
 module.exports = {
   formatDate,
   formatNumber,
@@ -135,5 +158,6 @@ module.exports = {
   calculateWinRate,
   deepClone,
   isEmpty,
-  generateRandomId
+  generateRandomId,
+  formatEventTime
 }; 

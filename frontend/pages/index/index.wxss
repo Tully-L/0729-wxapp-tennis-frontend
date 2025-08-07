@@ -159,7 +159,7 @@ page {
 .event-cards {
   display: flex;
   flex-direction: column;
-  margin: 0 20rpx 120rpx; /* 底部留空避免被tabbar遮挡 */
+  margin: 0 15rpx 120rpx; /* 底部留空避免被tabbar遮挡 */
 }
 .event-card {
   display: flex;
@@ -169,6 +169,34 @@ page {
   border-radius: 15rpx;
   padding: 20rpx;
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  width: calc(100% - 30rpx);
+  margin-left: 15rpx;
+  margin-right: 15rpx;
+  max-width: 750rpx;
+  min-width: 300rpx;
+}
+
+/* 响应式设计 - 针对不同屏幕尺寸 */
+@media screen and (max-width: 375px) {
+  .event-cards {
+    margin: 0 10rpx 120rpx;
+  }
+  .event-card {
+    width: calc(100% - 20rpx);
+    margin-left: 10rpx;
+    margin-right: 10rpx;
+  }
+}
+
+@media screen and (min-width: 414px) {
+  .event-cards {
+    margin: 0 20rpx 120rpx;
+  }
+  .event-card {
+    width: calc(100% - 40rpx);
+    margin-left: 20rpx;
+    margin-right: 20rpx;
+  }
 }
 .card-img {
   width: 180rpx;
@@ -214,6 +242,10 @@ page {
   background-color: #0A4A39;
   padding: 4rpx 12rpx;
   border-radius: 6rpx;
+  white-space: nowrap;
+  word-break: keep-all;
+  min-width: fit-content;
+  display: inline-block;
   margin-right: 12rpx;
 }
 .time {

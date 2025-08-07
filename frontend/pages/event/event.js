@@ -151,6 +151,19 @@ Page({
     sortOrder: 'desc'
   },
 
+  // 获取赛事类型中文显示
+  getEventTypeText: function(eventType) {
+    const typeMap = {
+      'mens_singles': '男子单打',
+      'womens_singles': '女子单打',
+      'mens_doubles': '男子双打',
+      'womens_doubles': '女子双打',
+      'mixed_doubles': '混合双打',
+      'tennis': '网球'
+    };
+    return typeMap[eventType] || eventType || '网球';
+  },
+
   onLoad: function () {
     this.checkAndUpdateLoginStatus();
 
@@ -714,9 +727,22 @@ Page({
   },
 
   selectEventDate: function (e) {
+    const selectedDate = e.detail.value;
     this.setData({
-      'eventData.eventDate': e.detail.value
+      'eventData.eventDate': selectedDate
     });
+
+    // 自动设置报名截止日期为比赛日期前一天
+    if (selectedDate && !this.data.eventData.registrationDeadline) {
+      const eventDate = new Date(selectedDate);
+      const deadlineDate = new Date(eventDate);
+      deadlineDate.setDate(deadlineDate.getDate() - 1);
+
+      const deadlineDateStr = deadlineDate.toISOString().split('T')[0];
+      this.setData({
+        'eventData.registrationDeadline': deadlineDateStr
+      });
+    }
   },
 
   selectEventTime: function (e) {
@@ -746,14 +772,24 @@ Page({
   },
 
   inputRegistrationFee: function (e) {
+    let value = parseFloat(e.detail.value) || 0;
+    // 限制报名费用在合理范围内
+    if (value < 0) value = 0;
+    if (value > 10000) value = 10000;
+
     this.setData({
-      'eventData.registrationFee': parseFloat(e.detail.value) || 0
+      'eventData.registrationFee': value
     });
   },
 
   inputMaxParticipants: function (e) {
+    let value = parseInt(e.detail.value) || 20;
+    // 限制最大参赛人数在合理范围内
+    if (value < 2) value = 2;
+    if (value > 200) value = 200;
+
     this.setData({
-      'eventData.maxParticipants': parseInt(e.detail.value) || 20
+      'eventData.maxParticipants': value
     });
   },
 
@@ -879,6 +915,34 @@ Page({
         icon: 'none'
       });
       return false;
+    }
+
+    // 验证日期逻辑 - 报名截止日期不能晚于比赛日期
+    if (eventData.registrationDeadline && eventData.eventDate) {
+      const deadlineDate = new Date(eventData.registrationDeadline + ' ' + eventData.registrationDeadlineTime);
+      const eventDate = new Date(eventData.eventDate + ' ' + eventData.eventTime);
+
+      if (deadlineDate >= eventDate) {
+        wx.showToast({
+          title: '报名截止时间必须早于比赛时间',
+          icon: 'none'
+        });
+        return false;
+      }
+    }
+
+    // 验证比赛日期不能是过去的日期
+    if (eventData.eventDate) {
+      const eventDate = new Date(eventData.eventDate + ' ' + eventData.eventTime);
+      const now = new Date();
+
+      if (eventDate <= now) {
+        wx.showToast({
+          title: '比赛时间不能是过去的时间',
+          icon: 'none'
+        });
+        return false;
+      }
     }
 
     return true;
