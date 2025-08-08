@@ -24,6 +24,52 @@ const userSchema = new mongoose.Schema({
     default: 'active',
     index: true
   },
+  // Admin-specific fields
+  role: {
+    type: String,
+    enum: ['user', 'admin', 'super_admin'],
+    default: 'user',
+    index: true
+  },
+  email: {
+    type: String,
+    sparse: true, // Allow null values but ensure uniqueness when present
+    lowercase: true,
+    trim: true,
+    validate: {
+      validator: function(email) {
+        // Only validate email format if it's provided (for admin accounts)
+        if (!email) return true;
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      },
+      message: 'Please provide a valid email address'
+    }
+  },
+  password: {
+    type: String,
+    select: false, // Don't include password in queries by default
+    validate: {
+      validator: function(password) {
+        // Only require password for admin accounts
+        if (this.role !== 'user' && !password) return false;
+        if (password && password.length < 6) return false;
+        return true;
+      },
+      message: 'Password must be at least 6 characters long'
+    }
+  },
+  last_login: {
+    type: Date,
+    default: null
+  },
+  login_attempts: {
+    type: Number,
+    default: 0
+  },
+  account_locked_until: {
+    type: Date,
+    default: null
+  },
   ext_info: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
@@ -49,6 +95,23 @@ const userSchema = new mongoose.Schema({
 userSchema.pre('save', function(next) {
   this.updated_at = new Date();
   next();
+});
+
+// Hash password before saving (for admin accounts)
+userSchema.pre('save', async function(next) {
+  // Only hash password if it's modified and exists
+  if (!this.isModified('password') || !this.password) {
+    return next();
+  }
+  
+  try {
+    // Hash password with cost of 12
+    const salt = await bcrypt.genSalt(12);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 // 获取用户等级
@@ -198,6 +261,197 @@ userSchema.statics.getOverallStats = async function() {
     totalUsers,
     newUsersThisMonth,
     levelDistribution
+  };
+};
+
+// Admin-specific methods
+
+// Compare password for admin login
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  if (!this.password) return false;
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Check if account is locked
+userSchema.methods.isAccountLocked = function() {
+  return !!(this.account_locked_until && this.account_locked_until > Date.now());
+};
+
+// Increment login attempts
+userSchema.methods.incrementLoginAttempts = function() {
+  // If we have a previous lock that has expired, restart at 1
+  if (this.account_locked_until && this.account_locked_until < Date.now()) {
+    return this.updateOne({
+      $unset: { account_locked_until: 1 },
+      $set: { login_attempts: 1 }
+    });
+  }
+  
+  const updates = { $inc: { login_attempts: 1 } };
+  
+  // Lock account after 5 failed attempts for 2 hours
+  if (this.login_attempts + 1 >= 5 && !this.isAccountLocked()) {
+    updates.$set = { account_locked_until: Date.now() + 2 * 60 * 60 * 1000 }; // 2 hours
+  }
+  
+  return this.updateOne(updates);
+};
+
+// Reset login attempts on successful login
+userSchema.methods.resetLoginAttempts = function() {
+  return this.updateOne({
+    $unset: { login_attempts: 1, account_locked_until: 1 },
+    $set: { last_login: new Date() }
+  });
+};
+
+// Check if user is admin
+userSchema.methods.isAdmin = function() {
+  return ['admin', 'super_admin'].includes(this.role);
+};
+
+// Check if user is super admin
+userSchema.methods.isSuperAdmin = function() {
+  return this.role === 'super_admin';
+};
+
+// Get admin profile (safe for admin responses)
+userSchema.methods.getAdminProfile = function() {
+  return {
+    id: this._id,
+    nickname: this.nickname,
+    email: this.email,
+    role: this.role,
+    avatar: this.avatar,
+    status: this.status,
+    last_login: this.last_login,
+    created_at: this.created_at,
+    updated_at: this.updated_at
+  };
+};
+
+// Static method: Get users with pagination for admin
+userSchema.statics.getUsersWithPagination = async function(options = {}) {
+  const {
+    page = 1,
+    limit = 10,
+    search = '',
+    status = '',
+    role = '',
+    sortBy = 'created_at',
+    sortOrder = 'desc'
+  } = options;
+
+  const query = { is_deleted: false };
+
+  // Add search filter
+  if (search) {
+    const searchRegex = new RegExp(search, 'i');
+    query.$or = [
+      { nickname: searchRegex },
+      { email: searchRegex },
+      { 'ext_info.region': searchRegex }
+    ];
+  }
+
+  // Add status filter
+  if (status) {
+    query.status = status;
+  }
+
+  // Add role filter
+  if (role) {
+    query.role = role;
+  }
+
+  const skip = (page - 1) * limit;
+  const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
+
+  const [users, total] = await Promise.all([
+    this.find(query)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .select('-password'),
+    this.countDocuments(query)
+  ]);
+
+  return {
+    users,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit)
+    }
+  };
+};
+
+// Static method: Get user statistics for admin dashboard
+userSchema.statics.getUserStatistics = async function() {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+
+  const [
+    totalUsers,
+    activeUsers,
+    bannedUsers,
+    newUsersThisMonth,
+    newUsersThisWeek,
+    adminUsers,
+    usersByLevel
+  ] = await Promise.all([
+    this.countDocuments({ is_deleted: false }),
+    this.countDocuments({ status: 'active', is_deleted: false }),
+    this.countDocuments({ status: 'banned', is_deleted: false }),
+    this.countDocuments({ 
+      is_deleted: false, 
+      created_at: { $gte: startOfMonth } 
+    }),
+    this.countDocuments({ 
+      is_deleted: false, 
+      created_at: { $gte: startOfWeek } 
+    }),
+    this.countDocuments({ 
+      role: { $in: ['admin', 'super_admin'] }, 
+      is_deleted: false 
+    }),
+    this.aggregate([
+      { $match: { is_deleted: false } },
+      {
+        $addFields: {
+          level: {
+            $switch: {
+              branches: [
+                { case: { $gte: ['$total_points', 1000] }, then: 'Professional' },
+                { case: { $gte: ['$total_points', 500] }, then: 'Advanced' },
+                { case: { $gte: ['$total_points', 200] }, then: 'Intermediate' },
+                { case: { $gte: ['$total_points', 50] }, then: 'Beginner' }
+              ],
+              default: 'Rookie'
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id: '$level',
+          count: { $sum: 1 }
+        }
+      }
+    ])
+  ]);
+
+  return {
+    totalUsers,
+    activeUsers,
+    bannedUsers,
+    newUsersThisMonth,
+    newUsersThisWeek,
+    adminUsers,
+    usersByLevel,
+    activeRate: totalUsers > 0 ? ((activeUsers / totalUsers) * 100).toFixed(1) : 0
   };
 };
 

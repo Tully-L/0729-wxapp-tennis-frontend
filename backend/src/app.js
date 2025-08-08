@@ -13,6 +13,8 @@ const Event = require('./models/Event');
 
 // 导入路由
 const authRoutes = require('./routes/auth');
+const adminAuthRoutes = require('./routes/adminAuth');
+const adminUsersRoutes = require('./routes/adminUsers');
 const eventRoutes = require('./routes/events');
 
 const app = express();
@@ -46,6 +48,8 @@ app.use(ensureUtf8Encoding);
 
 // 路由
 app.use('/api/auth', authRoutes);
+app.use('/api/auth/admin', adminAuthRoutes);
+app.use('/api/admin/users', adminUsersRoutes);
 app.use('/api/events', eventRoutes);
 
 // 临时管理员端点 - 创建测试数据
