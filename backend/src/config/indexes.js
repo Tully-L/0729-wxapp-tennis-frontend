@@ -10,7 +10,7 @@ const createIndexes = async () => {
     console.log('🔍 Creating database indexes...');
 
     // User 索引
-    await User.collection.createIndex({ openid: 1 }, { unique: true });
+    await User.collection.createIndex({ openid: 1 }, { unique: true, sparse: true });
     await User.collection.createIndex({ unionid: 1 }, { unique: true, sparse: true });
     await User.collection.createIndex({ email: 1 }, { sparse: true });
     await User.collection.createIndex({ phone: 1 }, { sparse: true });
