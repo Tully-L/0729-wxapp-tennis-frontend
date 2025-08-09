@@ -2,13 +2,13 @@
   <div class="user-list">
     <div class="page-header">
       <div class="header-left">
-        <h1 class="page-title">User Management</h1>
-        <p class="page-description">Manage all registered users</p>
+        <h1 class="page-title">用户管理</h1>
+        <p class="page-description">管理所有注册用户</p>
       </div>
       <div class="header-right">
         <el-button type="primary" @click="showCreateUser">
           <el-icon><Plus /></el-icon>
-          Add User
+          添加用户
         </el-button>
       </div>
     </div>
@@ -19,7 +19,7 @@
         <div class="search-row">
           <el-input
             v-model="searchQuery"
-            placeholder="Search by nickname, email..."
+            placeholder="按昵称、邮箱搜索..."
             clearable
             @input="handleSearch"
             class="search-input"
@@ -31,27 +31,27 @@
           
           <el-select
             v-model="statusFilter"
-            placeholder="Status"
+            placeholder="状态"
             clearable
             @change="handleFilter"
             class="filter-select"
           >
-            <el-option label="All Status" value="" />
-            <el-option label="Active" value="active" />
-            <el-option label="Banned" value="banned" />
+            <el-option label="全部状态" value="" />
+            <el-option label="活跃" value="active" />
+            <el-option label="已封禁" value="banned" />
           </el-select>
           
           <el-select
             v-model="roleFilter"
-            placeholder="Role"
+            placeholder="角色"
             clearable
             @change="handleFilter"
             class="filter-select"
           >
-            <el-option label="All Roles" value="" />
-            <el-option label="User" value="user" />
-            <el-option label="Admin" value="admin" />
-            <el-option label="Super Admin" value="super_admin" />
+            <el-option label="全部角色" value="" />
+            <el-option label="用户" value="user" />
+            <el-option label="管理员" value="admin" />
+            <el-option label="超级管理员" value="super_admin" />
           </el-select>
           
           <el-button @click="resetFilters">
@@ -66,7 +66,7 @@
     <div class="admin-card">
       <div class="table-header">
         <div class="table-title">
-          <span>Users ({{ pagination.total }})</span>
+          <span>用户 ({{ pagination.total }})</span>
         </div>
         <div class="table-actions">
           <el-button 
@@ -75,15 +75,15 @@
             :disabled="selectedUsers.length === 0"
           >
             <el-icon><Operation /></el-icon>
-            Batch Actions ({{ selectedUsers.length }})
+            批量操作 ({{ selectedUsers.length }})
           </el-button>
           <el-button size="small" @click="exportUsers">
             <el-icon><Download /></el-icon>
-            Export
+            导出
           </el-button>
           <el-button size="small" @click="refreshUsers">
             <el-icon><Refresh /></el-icon>
-            Refresh
+            刷新
           </el-button>
         </div>
       </div>
@@ -97,7 +97,7 @@
       >
         <el-table-column type="selection" width="55" />
         
-        <el-table-column prop="avatar" label="Avatar" width="80">
+        <el-table-column prop="avatar" label="头像" width="80">
           <template #default="{ row }">
             <el-avatar :size="40" :src="row.avatar">
               <el-icon><User /></el-icon>
@@ -105,16 +105,16 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="nickname" label="Nickname" min-width="120">
+        <el-table-column prop="nickname" label="昵称" min-width="120">
           <template #default="{ row }">
             <div class="user-info">
-              <div class="user-name">{{ row.nickname || 'N/A' }}</div>
-              <div class="user-email">{{ row.email || 'No email' }}</div>
+              <div class="user-name">{{ row.nickname || '无' }}</div>
+              <div class="user-email">{{ row.email || '无邮箱' }}</div>
             </div>
           </template>
         </el-table-column>
         
-        <el-table-column prop="role" label="Role" width="100">
+        <el-table-column prop="role" label="角色" width="100">
           <template #default="{ row }">
             <el-tag
               :type="getRoleTagType(row.role)"
@@ -125,7 +125,7 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="status" label="Status" width="100">
+        <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
             <el-tag
               :type="getStatusTagType(row.status)"
@@ -136,51 +136,51 @@
           </template>
         </el-table-column>
         
-        <el-table-column prop="total_points" label="Points" width="100" sortable />
+        <el-table-column prop="total_points" label="积分" width="100" sortable />
         
-        <el-table-column prop="created_at" label="Registered" width="120">
+        <el-table-column prop="created_at" label="注册时间" width="120">
           <template #default="{ row }">
             {{ formatDate(row.created_at) }}
           </template>
         </el-table-column>
         
-        <el-table-column prop="last_login" label="Last Login" width="120">
+        <el-table-column prop="last_login" label="最后登录" width="120">
           <template #default="{ row }">
-            {{ row.last_login ? formatDate(row.last_login) : 'Never' }}
+            {{ row.last_login ? formatDate(row.last_login) : '从未' }}
           </template>
         </el-table-column>
         
-        <el-table-column label="Actions" width="200" fixed="right">
+        <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <el-button
               type="primary"
               size="small"
               @click="viewUser(row)"
             >
-              View
+              查看
             </el-button>
             <el-button
               size="small"
               @click="editUser(row)"
             >
-              Edit
+              编辑
             </el-button>
             <el-dropdown @command="(command) => handleUserAction(command, row)">
               <el-button size="small">
-                More<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                更多<el-icon class="el-icon--right"><ArrowDown /></el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item
                     :command="`status-${row.status === 'active' ? 'banned' : 'active'}`"
                   >
-                    {{ row.status === 'active' ? 'Ban User' : 'Activate User' }}
+                    {{ row.status === 'active' ? '封禁用户' : '激活用户' }}
                   </el-dropdown-item>
                   <el-dropdown-item command="reset-password">
-                    Reset Password
+                    重置密码
                   </el-dropdown-item>
                   <el-dropdown-item command="delete" divided>
-                    Delete User
+                    删除用户
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -327,18 +327,18 @@ const handleUserAction = async (command, user) => {
     case 'status':
       try {
         await ElMessageBox.confirm(
-          `Are you sure you want to ${value} this user?`,
-          'Confirm Action',
+          `确定要${value === 'active' ? '激活' : '封禁'}此用户吗？`,
+          '确认操作',
           {
-            confirmButtonText: 'Confirm',
-            cancelButtonText: 'Cancel',
+            confirmButtonText: '确认',
+            cancelButtonText: '取消',
             type: 'warning'
           }
         )
         
         const response = await updateUserStatus(user._id || user.id, value)
         if (response.success) {
-          ElMessage.success(`User ${value === 'active' ? 'activated' : 'banned'} successfully`)
+          ElMessage.success(`用户${value === 'active' ? '激活' : '封禁'}成功`)
           loadUsers()
         } else {
           throw new Error(response.error?.message || 'Failed to update user status')
@@ -359,18 +359,18 @@ const handleUserAction = async (command, user) => {
     case 'delete':
       try {
         await ElMessageBox.confirm(
-          'This will permanently delete the user. Continue?',
-          'Warning',
+          '这将永久删除该用户。是否继续？',
+          '警告',
           {
-            confirmButtonText: 'Delete',
-            cancelButtonText: 'Cancel',
+            confirmButtonText: '删除',
+            cancelButtonText: '取消',
             type: 'error'
           }
         )
         
         const response = await deleteUser(user._id || user.id)
         if (response.success) {
-          ElMessage.success('User deleted successfully')
+          ElMessage.success('用户删除成功')
           loadUsers()
         } else {
           throw new Error(response.error?.message || 'Failed to delete user')
@@ -396,11 +396,11 @@ const getRoleTagType = (role) => {
 
 const getRoleLabel = (role) => {
   const labels = {
-    'super_admin': 'Super Admin',
-    'admin': 'Admin',
-    'user': 'User'
+    'super_admin': '超级管理员',
+    'admin': '管理员',
+    'user': '用户'
   }
-  return labels[role] || 'User'
+  return labels[role] || '用户'
 }
 
 const getStatusTagType = (status) => {
@@ -413,10 +413,10 @@ const getStatusTagType = (status) => {
 
 const getStatusLabel = (status) => {
   const labels = {
-    'active': 'Active',
-    'banned': 'Banned'
+    'active': '活跃',
+    'banned': '已封禁'
   }
-  return labels[status] || 'Unknown'
+  return labels[status] || '未知'
 }
 
 const formatDate = (date) => {

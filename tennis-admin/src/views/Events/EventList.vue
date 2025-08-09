@@ -2,13 +2,13 @@
   <div class="event-list">
     <div class="page-header">
       <div class="header-left">
-        <h1 class="page-title">Event Management</h1>
-        <p class="page-description">Manage all tennis events</p>
+        <h1 class="page-title">赛事管理</h1>
+        <p class="page-description">管理所有网球赛事</p>
       </div>
       <div class="header-right">
         <el-button type="primary" @click="showCreateEvent">
           <el-icon><Plus /></el-icon>
-          Create Event
+          创建赛事
         </el-button>
       </div>
     </div>
@@ -19,7 +19,7 @@
         <div class="search-row">
           <el-input
             v-model="searchQuery"
-            placeholder="Search by title, location..."
+            placeholder="按标题、地点搜索..."
             clearable
             @input="handleSearch"
             class="search-input"
@@ -31,46 +31,46 @@
           
           <el-select
             v-model="statusFilter"
-            placeholder="Status"
+            placeholder="状态"
             clearable
             @change="handleFilter"
             class="filter-select"
           >
-            <el-option label="All Status" value="" />
-            <el-option label="Draft" value="draft" />
-            <el-option label="Published" value="published" />
-            <el-option label="Ongoing" value="ongoing" />
-            <el-option label="Ended" value="ended" />
-            <el-option label="Canceled" value="canceled" />
+            <el-option label="全部状态" value="" />
+            <el-option label="草稿" value="draft" />
+            <el-option label="已发布" value="published" />
+            <el-option label="进行中" value="ongoing" />
+            <el-option label="已结束" value="ended" />
+            <el-option label="已取消" value="canceled" />
           </el-select>
           
           <el-select
             v-model="categoryFilter"
-            placeholder="Category"
+            placeholder="分类"
             clearable
             @change="handleFilter"
             class="filter-select"
           >
-            <el-option label="All Categories" value="" />
-            <el-option label="Tournament" value="tournament" />
-            <el-option label="Training" value="training" />
-            <el-option label="Social" value="social" />
-            <el-option label="Competition" value="competition" />
+            <el-option label="全部分类" value="" />
+            <el-option label="锦标赛" value="tournament" />
+            <el-option label="训练" value="training" />
+            <el-option label="社交" value="social" />
+            <el-option label="比赛" value="competition" />
           </el-select>
           
           <el-date-picker
             v-model="dateRange"
             type="daterange"
-            range-separator="To"
-            start-placeholder="Start date"
-            end-placeholder="End date"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
             @change="handleFilter"
             class="date-picker"
           />
           
           <el-button @click="resetFilters">
             <el-icon><Refresh /></el-icon>
-            Reset
+            重置
           </el-button>
         </div>
       </div>
@@ -80,18 +80,18 @@
     <div class="events-grid">
       <div v-if="loading" class="loading-container">
         <el-icon class="is-loading"><Loading /></el-icon>
-        <span>Loading events...</span>
+        <span>正在加载赛事...</span>
       </div>
       
       <div v-else-if="events.length === 0" class="empty-state">
         <el-icon class="empty-state-icon"><Calendar /></el-icon>
-        <div class="empty-state-text">No events found</div>
+        <div class="empty-state-text">未找到赛事</div>
         <div class="empty-state-description">
-          {{ searchQuery || statusFilter || categoryFilter ? 'Try adjusting your filters' : 'Create your first event to get started' }}
+          {{ searchQuery || statusFilter || categoryFilter ? '尝试调整筛选条件' : '创建您的第一个赛事开始使用' }}
         </div>
         <el-button v-if="!searchQuery && !statusFilter && !categoryFilter" type="primary" @click="showCreateEvent">
           <el-icon><Plus /></el-icon>
-          Create Event
+          创建赛事
         </el-button>
       </div>
       
@@ -109,12 +109,12 @@
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="view">View Details</el-dropdown-item>
-                  <el-dropdown-item command="edit">Edit Event</el-dropdown-item>
-                  <el-dropdown-item command="participants">View Participants</el-dropdown-item>
-                  <el-dropdown-item command="analytics">View Analytics</el-dropdown-item>
-                  <el-dropdown-item divided command="duplicate">Duplicate</el-dropdown-item>
-                  <el-dropdown-item command="delete">Delete</el-dropdown-item>
+                  <el-dropdown-item command="view">查看详情</el-dropdown-item>
+                  <el-dropdown-item command="edit">编辑赛事</el-dropdown-item>
+                  <el-dropdown-item command="participants">查看参与者</el-dropdown-item>
+                  <el-dropdown-item command="analytics">查看分析</el-dropdown-item>
+                  <el-dropdown-item divided command="duplicate">复制</el-dropdown-item>
+                  <el-dropdown-item command="delete">删除</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -139,16 +139,16 @@
           </div>
           
           <div class="event-description">
-            {{ event.description || 'No description available' }}
+            {{ event.description || '暂无描述' }}
           </div>
           
           <div class="event-stats">
             <div class="stat-item">
-              <span class="stat-label">Participants</span>
+              <span class="stat-label">参与者</span>
               <span class="stat-value">{{ event.participant_count || 0 }}/{{ event.max_participants || '∞' }}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">Registration</span>
+              <span class="stat-label">报名数</span>
               <span class="stat-value">{{ event.registration_count || 0 }}</span>
             </div>
           </div>
@@ -163,16 +163,16 @@
               :color="getProgressColor(event)"
             />
             <span class="progress-text">
-              {{ getParticipationPercentage(event) }}% filled
+              {{ getParticipationPercentage(event) }}% 已满
             </span>
           </div>
           
           <div class="event-buttons">
             <el-button size="small" @click="viewEvent(event)">
-              View
+              查看
             </el-button>
             <el-button size="small" type="primary" @click="editEvent(event)">
-              Edit
+              编辑
             </el-button>
           </div>
         </div>
@@ -216,6 +216,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus, Search, Edit, Delete, View, More, Calendar, Location, User, Tag, MoreFilled, Refresh, Loading } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import { getEventList, deleteEvent, duplicateEvent } from '@/api/events'
 import { useTable } from '@/composables/useTable'
@@ -364,23 +365,23 @@ const getStatusTagType = (status) => {
 
 const getStatusLabel = (status) => {
   const labels = {
-    'draft': 'Draft',
-    'published': 'Published',
-    'ongoing': 'Ongoing',
-    'ended': 'Ended',
-    'canceled': 'Canceled'
+    'draft': '草稿',
+    'published': '已发布',
+    'ongoing': '进行中',
+    'ended': '已结束',
+    'canceled': '已取消'
   }
-  return labels[status] || 'Unknown'
+  return labels[status] || '未知'
 }
 
 const getCategoryLabel = (category) => {
   const labels = {
-    'tournament': 'Tournament',
-    'training': 'Training',
-    'social': 'Social',
-    'competition': 'Competition'
+    'tournament': '锦标赛',
+    'training': '训练',
+    'social': '社交',
+    'competition': '比赛'
   }
-  return labels[category] || 'Other'
+  return labels[category] || '其他'
 }
 
 const formatEventDate = (startTime, endTime) => {
