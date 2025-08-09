@@ -15,6 +15,7 @@ const Event = require('./models/Event');
 const authRoutes = require('./routes/auth');
 const adminAuthRoutes = require('./routes/adminAuth');
 const adminUsersRoutes = require('./routes/adminUsers');
+const adminEventsRoutes = require('./routes/adminEvents');
 const adminStatsRoutes = require('./routes/adminStats');
 const eventRoutes = require('./routes/events');
 
@@ -51,6 +52,7 @@ app.use(ensureUtf8Encoding);
 app.use('/api/auth', authRoutes);
 app.use('/api/auth/admin', adminAuthRoutes);
 app.use('/api/admin/users', adminUsersRoutes);
+app.use('/api/admin/events', adminEventsRoutes);
 app.use('/api/admin/stats', adminStatsRoutes);
 app.use('/api/events', eventRoutes);
 
