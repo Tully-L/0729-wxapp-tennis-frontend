@@ -86,14 +86,12 @@ router.get('/', adminAuth, auditLog('view_events'), async (req, res) => {
     res.json({
       success: true,
       message: 'Events retrieved successfully',
-      data: {
-        events: eventsWithStats,
-        pagination: {
-          page: pageNum,
-          limit: limitNum,
-          total,
-          pages: Math.ceil(total / limitNum)
-        }
+      data: eventsWithStats,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum)
       }
     });
 

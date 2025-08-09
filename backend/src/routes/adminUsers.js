@@ -39,10 +39,8 @@ router.get('/', adminAuth, auditLog('GET_USERS'), async (req, res) => {
     res.json({
       success: true,
       message: 'Users retrieved successfully',
-      data: {
-        users: result.users,
-        pagination: result.pagination
-      }
+      data: result.users,
+      pagination: result.pagination
     });
 
   } catch (error) {
