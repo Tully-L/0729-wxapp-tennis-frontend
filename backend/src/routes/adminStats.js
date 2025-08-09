@@ -7,93 +7,48 @@ const router = express.Router();
 
 /**
  * @route   GET /api/admin/stats/overview
- * @desc    Get system-wide statistics for dashboard
+ * @desc    Get system overview statistics
  * @access  Private (Admin)
  */
-router.get('/overview', adminAuth, auditLog('view_overview_stats'), async (req, res) => {
+router.get('/overview', adminAuth, auditLog('GET_OVERVIEW_STATS'), async (req, res) => {
   try {
-    // Get basic counts
-    const [
-      totalUsers,
-      activeUsers,
-      totalEvents,
-      activeEvents,
-      publishedEvents,
-      ongoingEvents
-    ] = await Promise.all([
-      User.countDocuments({ is_deleted: false }),
-      User.countDocuments({ status: 'active', is_deleted: false }),
-      Event.countDocuments({ is_deleted: false }),
-      Event.countDocuments({ status: { $in: ['published', 'ongoing'] }, is_deleted: false }),
-      Event.countDocuments({ status: 'published', is_deleted: false }),
-      Event.countDocuments({ status: 'ongoing', is_deleted: false })
-    ]);
-
+    // Get user statistics
+    const totalUsers = await User.countDocuments({ is_deleted: { $ne: true } });
+    const activeUsers = await User.countDocuments({ 
+      status: 'active', 
+      is_deleted: { $ne: true } 
+    });
+    
+    // Get event statistics
+    const totalEvents = await Event.countDocuments();
+    const activeEvents = await Event.countDocuments({ 
+      status: { $in: ['published', 'ongoing'] } 
+    });
+    
     // Get monthly statistics
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-
-    const [
-      newUsersThisMonth,
-      newUsersLastMonth,
-      newEventsThisMonth,
-      newEventsLastMonth
-    ] = await Promise.all([
-      User.countDocuments({
-        is_deleted: false,
-        created_at: { $gte: startOfMonth }
-      }),
-      User.countDocuments({
-        is_deleted: false,
-        created_at: { $gte: startOfLastMonth, $lt: startOfMonth }
-      }),
-      Event.countDocuments({
-        is_deleted: false,
-        created_at: { $gte: startOfMonth }
-      }),
-      Event.countDocuments({
-        is_deleted: false,
-        created_at: { $gte: startOfLastMonth, $lt: startOfMonth }
-      })
-    ]);
-
-    // Calculate growth rates
-    const userGrowthRate = newUsersLastMonth > 0 
-      ? Math.round(((newUsersThisMonth - newUsersLastMonth) / newUsersLastMonth) * 100)
-      : newUsersThisMonth > 0 ? 100 : 0;
-
-    const eventGrowthRate = newEventsLastMonth > 0
-      ? Math.round(((newEventsThisMonth - newEventsLastMonth) / newEventsLastMonth) * 100)
-      : newEventsThisMonth > 0 ? 100 : 0;
-
-    const overview = {
-      users: {
-        total: totalUsers,
-        active: activeUsers,
-        newThisMonth: newUsersThisMonth,
-        growthRate: userGrowthRate,
-        activeRate: totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 0
-      },
-      events: {
-        total: totalEvents,
-        active: activeEvents,
-        published: publishedEvents,
-        ongoing: ongoingEvents,
-        newThisMonth: newEventsThisMonth,
-        growthRate: eventGrowthRate
-      },
-      system: {
-        uptime: Math.floor(process.uptime()),
-        timestamp: new Date(),
-        version: '1.0.0'
-      }
-    };
+    const currentMonth = new Date();
+    currentMonth.setDate(1);
+    currentMonth.setHours(0, 0, 0, 0);
+    
+    const newUsersThisMonth = await User.countDocuments({
+      created_at: { $gte: currentMonth },
+      is_deleted: { $ne: true }
+    });
+    
+    const eventsThisMonth = await Event.countDocuments({
+      created_at: { $gte: currentMonth }
+    });
 
     res.json({
       success: true,
-      message: 'Overview statistics retrieved successfully',
-      data: overview
+      data: {
+        totalUsers,
+        activeUsers,
+        totalEvents,
+        activeEvents,
+        newUsersThisMonth,
+        eventsThisMonth
+      }
     });
 
   } catch (error) {
@@ -102,7 +57,7 @@ router.get('/overview', adminAuth, auditLog('view_overview_stats'), async (req, 
       success: false,
       error: {
         code: 'STATS_ERROR',
-        message: 'Failed to retrieve overview statistics.'
+        message: 'Failed to get overview statistics'
       }
     });
   }
@@ -110,87 +65,42 @@ router.get('/overview', adminAuth, auditLog('view_overview_stats'), async (req, 
 
 /**
  * @route   GET /api/admin/stats/users
- * @desc    Get user statistics with growth trends
+ * @desc    Get user statistics
  * @access  Private (Admin)
  */
-router.get('/users', adminAuth, auditLog('view_user_stats'), async (req, res) => {
+router.get('/users', adminAuth, auditLog('GET_USER_STATS'), async (req, res) => {
   try {
     const { period = 'month' } = req.query;
-
-    // Get detailed user statistics
-    const userStats = await User.getUserStatistics();
-
-    // Get user growth data for charts
-    const now = new Date();
-    let startDate;
-    let groupBy;
-
+    
+    // Calculate date range based on period
+    let startDate = new Date();
     switch (period) {
       case 'week':
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        groupBy = { $dayOfYear: '$created_at' };
+        startDate.setDate(startDate.getDate() - 7);
         break;
       case 'year':
-        startDate = new Date(now.getFullYear(), 0, 1);
-        groupBy = { $month: '$created_at' };
+        startDate.setFullYear(startDate.getFullYear() - 1);
         break;
       default: // month
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        groupBy = { $dayOfMonth: '$created_at' };
+        startDate.setMonth(startDate.getMonth() - 1);
     }
-
-    const userGrowthData = await User.aggregate([
-      {
-        $match: {
-          is_deleted: false,
-          created_at: { $gte: startDate }
-        }
-      },
-      {
-        $group: {
-          _id: groupBy,
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $sort: { _id: 1 }
-      }
-    ]);
-
-    // Get user level distribution
-    const levelDistribution = await User.aggregate([
-      { $match: { is_deleted: false } },
-      {
-        $addFields: {
-          level: {
-            $switch: {
-              branches: [
-                { case: { $gte: ['$total_points', 1000] }, then: 'Professional' },
-                { case: { $gte: ['$total_points', 500] }, then: 'Advanced' },
-                { case: { $gte: ['$total_points', 200] }, then: 'Intermediate' },
-                { case: { $gte: ['$total_points', 50] }, then: 'Beginner' }
-              ],
-              default: 'Rookie'
-            }
-          }
-        }
-      },
-      {
-        $group: {
-          _id: '$level',
-          count: { $sum: 1 }
-        }
-      }
-    ]);
+    
+    // User growth data (simplified)
+    const userGrowth = [];
+    const usersByLevel = [
+      { level: 'Beginner', count: await User.countDocuments({ 'ext_info.level': 'beginner' }) },
+      { level: 'Intermediate', count: await User.countDocuments({ 'ext_info.level': 'intermediate' }) },
+      { level: 'Advanced', count: await User.countDocuments({ 'ext_info.level': 'advanced' }) }
+    ];
+    
+    const activeUsersTrend = [];
 
     res.json({
       success: true,
-      message: 'User statistics retrieved successfully',
       data: {
-        overview: userStats,
-        growth: userGrowthData,
-        levelDistribution: levelDistribution,
-        period: period
+        userGrowth,
+        usersByLevel,
+        activeUsersTrend
       }
     });
 
@@ -200,7 +110,7 @@ router.get('/users', adminAuth, auditLog('view_user_stats'), async (req, res) =>
       success: false,
       error: {
         code: 'USER_STATS_ERROR',
-        message: 'Failed to retrieve user statistics.'
+        message: 'Failed to get user statistics'
       }
     });
   }
@@ -208,88 +118,33 @@ router.get('/users', adminAuth, auditLog('view_user_stats'), async (req, res) =>
 
 /**
  * @route   GET /api/admin/stats/events
- * @desc    Get event statistics and trends
+ * @desc    Get event statistics
  * @access  Private (Admin)
  */
-router.get('/events', adminAuth, auditLog('view_event_stats'), async (req, res) => {
+router.get('/events', adminAuth, auditLog('GET_EVENT_STATS'), async (req, res) => {
   try {
     const { period = 'month' } = req.query;
-
-    // Get event statistics by status
-    const eventsByStatus = await Event.aggregate([
-      { $match: { is_deleted: false } },
-      {
-        $group: {
-          _id: '$status',
-          count: { $sum: 1 }
-        }
-      }
-    ]);
-
-    // Get events by category
+    
+    // Events by category
     const eventsByCategory = await Event.aggregate([
-      { $match: { is_deleted: false } },
-      {
-        $group: {
-          _id: '$category',
-          count: { $sum: 1 }
-        }
-      }
+      { $group: { _id: '$category', count: { $sum: 1 } } },
+      { $project: { category: '$_id', count: 1, _id: 0 } }
     ]);
-
-    // Get event creation trends
-    const now = new Date();
-    let startDate;
-    let groupBy;
-
-    switch (period) {
-      case 'week':
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        groupBy = { $dayOfYear: '$created_at' };
-        break;
-      case 'year':
-        startDate = new Date(now.getFullYear(), 0, 1);
-        groupBy = { $month: '$created_at' };
-        break;
-      default: // month
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        groupBy = { $dayOfMonth: '$created_at' };
-    }
-
-    const eventCreationTrends = await Event.aggregate([
-      {
-        $match: {
-          is_deleted: false,
-          created_at: { $gte: startDate }
-        }
-      },
-      {
-        $group: {
-          _id: groupBy,
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $sort: { _id: 1 }
-      }
+    
+    // Events by status
+    const eventsByStatus = await Event.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+      { $project: { status: '$_id', count: 1, _id: 0 } }
     ]);
-
-    // Get upcoming events count
-    const upcomingEvents = await Event.countDocuments({
-      is_deleted: false,
-      status: 'published',
-      start_time: { $gt: new Date() }
-    });
+    
+    const participationTrends = [];
 
     res.json({
       success: true,
-      message: 'Event statistics retrieved successfully',
       data: {
-        byStatus: eventsByStatus,
-        byCategory: eventsByCategory,
-        creationTrends: eventCreationTrends,
-        upcomingEvents: upcomingEvents,
-        period: period
+        eventsByCategory,
+        eventsByStatus,
+        participationTrends
       }
     });
 
@@ -299,7 +154,7 @@ router.get('/events', adminAuth, auditLog('view_event_stats'), async (req, res) 
       success: false,
       error: {
         code: 'EVENT_STATS_ERROR',
-        message: 'Failed to retrieve event statistics.'
+        message: 'Failed to get event statistics'
       }
     });
   }
@@ -307,62 +162,69 @@ router.get('/events', adminAuth, auditLog('view_event_stats'), async (req, res) 
 
 /**
  * @route   GET /api/admin/stats/activity
- * @desc    Get recent system activity
+ * @desc    Get recent activity
  * @access  Private (Admin)
  */
-router.get('/activity', adminAuth, auditLog('view_activity_stats'), async (req, res) => {
+router.get('/activity', adminAuth, auditLog('GET_RECENT_ACTIVITY'), async (req, res) => {
   try {
-    const { limit = 20 } = req.query;
-
+    const { limit = 10 } = req.query;
+    
     // Get recent users (last 7 days)
     const recentUsers = await User.find({
-      is_deleted: false,
-      created_at: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
+      created_at: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+      is_deleted: { $ne: true }
     })
     .sort({ created_at: -1 })
-    .limit(parseInt(limit))
-    .select('nickname email created_at status role');
-
+    .limit(5)
+    .select('nickname created_at');
+    
     // Get recent events (last 7 days)
     const recentEvents = await Event.find({
-      is_deleted: false,
       created_at: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
     })
     .sort({ created_at: -1 })
-    .limit(parseInt(limit))
-    .select('title category status created_at start_time');
-
-    // Get active users (logged in last 24 hours)
-    const activeUsers = await User.find({
-      is_deleted: false,
-      last_login: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
-    })
-    .sort({ last_login: -1 })
-    .limit(parseInt(limit))
-    .select('nickname email last_login role');
+    .limit(5)
+    .select('title created_at');
+    
+    // Combine and format activities
+    const activities = [];
+    
+    recentUsers.forEach(user => {
+      activities.push({
+        id: `user_${user._id}`,
+        title: '新用户注册',
+        description: `用户 "${user.nickname}" 加入了平台`,
+        timestamp: user.created_at,
+        type: 'user'
+      });
+    });
+    
+    recentEvents.forEach(event => {
+      activities.push({
+        id: `event_${event._id}`,
+        title: '赛事创建',
+        description: `新赛事 "${event.title}" 已创建`,
+        timestamp: event.created_at,
+        type: 'event'
+      });
+    });
+    
+    // Sort by timestamp and limit
+    activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    const limitedActivities = activities.slice(0, parseInt(limit));
 
     res.json({
       success: true,
-      message: 'Activity statistics retrieved successfully',
-      data: {
-        recentUsers: recentUsers,
-        recentEvents: recentEvents,
-        activeUsers: activeUsers,
-        summary: {
-          newUsersLast7Days: recentUsers.length,
-          newEventsLast7Days: recentEvents.length,
-          activeUsersLast24Hours: activeUsers.length
-        }
-      }
+      data: limitedActivities
     });
 
   } catch (error) {
-    console.error('Get activity stats error:', error);
+    console.error('Get recent activity error:', error);
     res.status(500).json({
       success: false,
       error: {
-        code: 'ACTIVITY_STATS_ERROR',
-        message: 'Failed to retrieve activity statistics.'
+        code: 'ACTIVITY_ERROR',
+        message: 'Failed to get recent activity'
       }
     });
   }
