@@ -133,7 +133,7 @@
               <span>{{ event.location || 'TBD' }}</span>
             </div>
             <div class="meta-item">
-              <el-icon><Tag /></el-icon>
+              <el-icon><PriceTag /></el-icon>
               <span>{{ getCategoryLabel(event.category) }}</span>
             </div>
           </div>
@@ -216,7 +216,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Search, Edit, Delete, View, More, Calendar, Location, User, Tag, MoreFilled, Refresh, Loading } from '@element-plus/icons-vue'
+import { Plus, Search, Edit, Delete, View, More, Calendar, Location, User, PriceTag, MoreFilled, Refresh, Loading } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import { getEventList, deleteEvent, duplicateEvent } from '@/api/events'
 import { useTable } from '@/composables/useTable'
